@@ -1,0 +1,103 @@
+<?php
+
+namespace App\Helpers\{{modelName}};
+
+use App\Helpers\Venturo;
+use App\Models\{{modelName}}Model;
+use Throwable;
+
+class {{modelName}}Helper extends Venturo
+{
+    {{constUpload}}
+    private ${{varName}}Model;
+
+    public function __construct()
+    {
+        $this->{{varName}}Model = new {{modelName}}Model();
+    }
+
+    public function getAll(array $filter, int $itemPerPage = 0, string $sort = ''): array
+    {
+        ${{varName}} = $this->{{varName}}Model->getAll($filter, $itemPerPage, $sort);
+
+        return [
+            'status' => true,
+            'data' => ${{varName}}
+        ];
+    }
+
+    public function getById(string $id): array
+    {
+        ${{varName}} = $this->{{varName}}Model->getById($id);
+
+        if (empty(${{varName}})) {
+            return [
+                'status' => false,
+                'data' => null
+            ];
+        }
+
+        return [
+            'status' => true,
+            'data' => ${{varName}}
+        ];
+    }
+
+    public function create(array $payload): array
+    {
+        try {
+            $this->beginTransaction();
+            {{initiateUploadCreate}}
+            ${{varName}} = $this->{{varName}}Model->store($payload);
+
+            $this->commitTransaction();
+            return [
+                'status' => true,
+                'data' => ${{varName}}
+            ];
+        } catch (Throwable $th) {
+            $this->rollbackTransaction();
+            return [
+                'status' => false,
+                'error' => $th->getMessage()
+            ];
+        }
+    }
+
+    public function update(array $payload, string $id): array
+    {
+        try {
+            $this->beginTransaction();
+            {{initiateUploadUpdate}}
+            $this->{{varName}}Model->edit($payload, $id);
+            ${{varName}} = $this->getById($id);
+
+            $this->commitTransaction();
+            return [
+                'status' => true,
+                'data' => ${{varName}}['data']
+            ];
+        } catch (Throwable $th) {
+            $this->rollbackTransaction();
+            return [
+                'status' => false,
+                'error' => $th->getMessage()
+            ];
+        }
+    }
+
+    public function delete(string $id): bool
+    {
+        try {
+            $this->beginTransaction();
+            $this->{{varName}}Model->drop($id);
+
+            $this->commitTransaction();
+            return true;
+        } catch (Throwable $th) {
+            $this->rollbackTransaction();
+            return false;
+        }
+    }
+    {{uploadFunction}}
+}

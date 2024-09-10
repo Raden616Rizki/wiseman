@@ -6,7 +6,7 @@ use App\Helpers\User\UserHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateRequest;
 use App\Http\Requests\User\UpdateRequest;
-use App\Http\Resources\User\UserCollection;
+use App\Http\Resources\User\UserCollections;
 use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 
@@ -34,7 +34,7 @@ class UserController extends Controller
         $perPage = $request->per_page ?? 5;
 
         $users = $this->user->getAll($filter, $perPage, $request->sort ?? '');
-        return response()->success(new UserCollection($users['data']));
+        return response()->success(new UserCollections($users['data']));
     }
 
     /**

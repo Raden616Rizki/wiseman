@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Helpers\{{modelName}}\{{modelName}}Helper;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\{{modelName}}Request;
+use App\Http\Resources\BaseCollection;
+use App\Http\Resources\{{modelName}}Resource;
+use Illuminate\Http\Request;
+
+class {{modelName}}Controller extends Controller
+{
+    private ${{lowerName}};
+
+    public function __construct()
+    {
+        $this->{{lowerName}} = new {{modelName}}Helper();
+    }
+
+    public function index(Request $request)
+    {
+        {{filters}}
+        ${{lowerName}} = $this->{{lowerName}}->getAll($filter, $request->per_page ?? 25, $request->sort ?? '');
+        return response()->success(new BaseCollection({{modelName}}Resource::collection(${{lowerName}}['data']), ${{lowerName}}['data']));
+    }
+
+    public function show($id)
+    {
+        ${{lowerName}} = $this->{{lowerName}}->getById($id);
+
+        if (!${{lowerName}}['status']) {
+            return response()->failed(['Mohon maaf data tidak ditemukan'], 404);
+        }
+
+        return response()->success(new {{modelName}}Resource(${{lowerName}}['data']));
+    }
+
+    public function store({{modelName}}Request $request)
+    {
+        if (isset($request->validator) && $request->validator->fails()) {
+            return response()->failed($request->validator->errors());
+        }
+
+        $payload = $request->only([{{payload}}]);
+        ${{lowerName}} = $this->{{lowerName}}->create($payload);
+
+        if (!${{lowerName}}['status']) {
+            return response()->failed(${{lowerName}}['error']);
+        }
+
+        return response()->success(new {{modelName}}Resource(${{lowerName}}['data']), "Data berhasil ditambahkan");
+    }
+
+    public function update({{modelName}}Request $request, $id)
+    {
+        if (isset($request->validator) && $request->validator->fails()) {
+            return response()->failed($request->validator->errors());
+        }
+
+        $payload = $request->only([{{payload}}]);
+        ${{lowerName}} = $this->{{lowerName}}->update($payload, $id ?? '');
+
+        if (!${{lowerName}}['status']) {
+            return response()->failed(${{lowerName}}['error']);
+        }
+
+        return response()->success(new {{modelName}}Resource(${{lowerName}}['data']), "Data berhasil diganti");
+    }
+
+    public function destroy($id)
+    {
+        ${{lowerName}} = $this->{{lowerName}}->delete($id);
+
+        if (!${{lowerName}}) {
+            return response()->failed(['Mohon maaf data tidak ditemukan']);
+        }
+
+        return response()->success(${{lowerName}}, 'Data berhasil dihapus');
+    }
+}
