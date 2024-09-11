@@ -1,36 +1,36 @@
 <?php
 
-namespace App\Helpers\User;
+namespace App\Helpers\Activity;
 
 use App\Helpers\Venturo;
-use App\Models\UserModel;
+use App\Models\ActivityModel;
 use Throwable;
 
-class UserHelper extends Venturo
+class ActivityHelper extends Venturo
 {
-
-    private $userModel;
+    
+    private $activityModel;
 
     public function __construct()
     {
-        $this->userModel = new UserModel();
+        $this->activityModel = new ActivityModel();
     }
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = ''): array
     {
-        $user = $this->userModel->getAll($filter, $itemPerPage, $sort);
+        $activity = $this->activityModel->getAll($filter, $itemPerPage, $sort);
 
         return [
             'status' => true,
-            'data' => $user
+            'data' => $activity
         ];
     }
 
     public function getById(string $id): array
     {
-        $user = $this->userModel->getById($id);
+        $activity = $this->activityModel->getById($id);
 
-        if (empty($user)) {
+        if (empty($activity)) {
             return [
                 'status' => false,
                 'data' => null
@@ -39,7 +39,7 @@ class UserHelper extends Venturo
 
         return [
             'status' => true,
-            'data' => $user
+            'data' => $activity
         ];
     }
 
@@ -47,13 +47,13 @@ class UserHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-
-            $user = $this->userModel->store($payload);
+            
+            $activity = $this->activityModel->store($payload);
 
             $this->commitTransaction();
             return [
                 'status' => true,
-                'data' => $user
+                'data' => $activity
             ];
         } catch (Throwable $th) {
             $this->rollbackTransaction();
@@ -68,14 +68,14 @@ class UserHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-
-            $this->userModel->edit($payload, $id);
-            $user = $this->getById($id);
+            
+            $this->activityModel->edit($payload, $id);
+            $activity = $this->getById($id);
 
             $this->commitTransaction();
             return [
                 'status' => true,
-                'data' => $user['data']
+                'data' => $activity['data']
             ];
         } catch (Throwable $th) {
             $this->rollbackTransaction();
@@ -90,7 +90,7 @@ class UserHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            $this->userModel->drop($id);
+            $this->activityModel->drop($id);
 
             $this->commitTransaction();
             return true;
@@ -99,4 +99,5 @@ class UserHelper extends Venturo
             return false;
         }
     }
+    
 }

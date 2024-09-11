@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\VotingController;
+use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\GroupUserController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
@@ -19,6 +22,24 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
+	Route::get('/votings', [VotingController::class, 'index']);
+	Route::get('/votings/{id}', [VotingController::class, 'show']);
+	Route::post('/votings', [VotingController::class, 'store']);
+	Route::put('/votings/{id}', [VotingController::class, 'update']);
+	Route::delete('/votings/{id}', [VotingController::class, 'destroy']);
+
+	Route::get('/activities', [ActivityController::class, 'index']);
+	Route::get('/activities/{id}', [ActivityController::class, 'show']);
+	Route::post('/activities', [ActivityController::class, 'store']);
+	Route::put('/activities/{id}', [ActivityController::class, 'update']);
+	Route::delete('/activities/{id}', [ActivityController::class, 'destroy']);
+
+	Route::get('/group_users', [GroupUserController::class, 'index']);
+	Route::get('/group_users/{id}', [GroupUserController::class, 'show']);
+	Route::post('/group_users', [GroupUserController::class, 'store']);
+	Route::put('/group_users/{id}', [GroupUserController::class, 'update']);
+	Route::delete('/group_users/{id}', [GroupUserController::class, 'destroy']);
+
 	Route::get('/groups', [GroupController::class, 'index']);
 	Route::get('/groups/{id}', [GroupController::class, 'show']);
 	Route::post('/groups', [GroupController::class, 'store']);

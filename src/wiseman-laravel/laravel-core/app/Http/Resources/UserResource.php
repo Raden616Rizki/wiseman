@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 
 use App\Http\Resources\GroupUserResource;
+use App\Http\Resources\ActivityResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
@@ -19,6 +20,7 @@ class UserResource extends JsonResource
 			'phone_number' => $this->phone_number,
 			'photo' => $this->photo,
         	'groupUsers' => GroupUserResource::collection($this->groupUsers),
+			'activities' => ActivityResource::collection($this->activities),
 		];
     }
 }

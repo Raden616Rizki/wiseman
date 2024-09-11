@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class UserModel extends Model implements CrudInterface
+class VotingOptionModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
@@ -17,37 +17,25 @@ class UserModel extends Model implements CrudInterface
     public $timestamps = true;
 
     protected $fillable = [
-        'name', 'email', 'password', 'phone_number', 'photo'
+        'option', 'total', 'voting_id'
     ];
 
-    protected $table = 'm_user';
+    protected $table = 't_voting_options';
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-
-		// if (!empty($filter['m_user_roles_id'])) {
-		// 	$query->where('m_user_roles_id', 'LIKE', '%' . $filter['m_user_roles_id'] . '%');
-		// }
-
-		if (!empty($filter['name'])) {
-			$query->where('name', 'LIKE', '%' . $filter['name'] . '%');
+        
+		if (!empty($filter['option'])) {
+			$query->where('option', 'LIKE', '%' . $filter['option'] . '%');
 		}
 
-		if (!empty($filter['email'])) {
-			$query->where('email', 'LIKE', '%' . $filter['email'] . '%');
+		if (!empty($filter['total'])) {
+			$query->where('total', 'LIKE', '%' . $filter['total'] . '%');
 		}
 
-		if (!empty($filter['password'])) {
-			$query->where('password', 'LIKE', '%' . $filter['password'] . '%');
-		}
-
-		if (!empty($filter['phone_number'])) {
-			$query->where('phone_number', 'LIKE', '%' . $filter['phone_number'] . '%');
-		}
-
-		if (!empty($filter['photo'])) {
-			$query->where('photo', 'LIKE', '%' . $filter['photo'] . '%');
+		if (!empty($filter['voting_id'])) {
+			$query->where('voting_id', 'LIKE', '%' . $filter['voting_id'] . '%');
 		}
 
         $sort = $sort ?: 'id DESC';
@@ -82,15 +70,10 @@ class UserModel extends Model implements CrudInterface
     {
         return $this->find($id)->delete();
     }
-
-
-	public function groupUsers()
+    
+	public function voting()
 	{
-		return $this->hasMany(GroupUserModel::class, 'user_id', 'id');
+		return $this->belongsTo(VotingModel::class, 'voting_id', 'id');
 	}
 
-	public function activities()
-	{
-		return $this->hasMany(ActivityModel::class, 'user_id', 'id');
-	}
 }

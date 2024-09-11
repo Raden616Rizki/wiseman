@@ -72,4 +72,9 @@ class GroupModel extends Model implements CrudInterface
 	{
 		return $this->hasMany(GroupUserModel::class, 'group_id', 'id');
 	}
+
+	public function activities()
+	{
+		return $this->hasMany(ActivityModel::class, 'group_id', 'id');
+	}
 }

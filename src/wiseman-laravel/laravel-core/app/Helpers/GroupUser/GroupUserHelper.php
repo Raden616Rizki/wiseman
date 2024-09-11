@@ -1,36 +1,36 @@
 <?php
 
-namespace App\Helpers\User;
+namespace App\Helpers\GroupUser;
 
 use App\Helpers\Venturo;
-use App\Models\UserModel;
+use App\Models\GroupUserModel;
 use Throwable;
 
-class UserHelper extends Venturo
+class GroupUserHelper extends Venturo
 {
-
-    private $userModel;
+    
+    private $groupUserModel;
 
     public function __construct()
     {
-        $this->userModel = new UserModel();
+        $this->groupUserModel = new GroupUserModel();
     }
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = ''): array
     {
-        $user = $this->userModel->getAll($filter, $itemPerPage, $sort);
+        $groupUser = $this->groupUserModel->getAll($filter, $itemPerPage, $sort);
 
         return [
             'status' => true,
-            'data' => $user
+            'data' => $groupUser
         ];
     }
 
     public function getById(string $id): array
     {
-        $user = $this->userModel->getById($id);
+        $groupUser = $this->groupUserModel->getById($id);
 
-        if (empty($user)) {
+        if (empty($groupUser)) {
             return [
                 'status' => false,
                 'data' => null
@@ -39,7 +39,7 @@ class UserHelper extends Venturo
 
         return [
             'status' => true,
-            'data' => $user
+            'data' => $groupUser
         ];
     }
 
@@ -47,13 +47,13 @@ class UserHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-
-            $user = $this->userModel->store($payload);
+            
+            $groupUser = $this->groupUserModel->store($payload);
 
             $this->commitTransaction();
             return [
                 'status' => true,
-                'data' => $user
+                'data' => $groupUser
             ];
         } catch (Throwable $th) {
             $this->rollbackTransaction();
@@ -68,14 +68,14 @@ class UserHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-
-            $this->userModel->edit($payload, $id);
-            $user = $this->getById($id);
+            
+            $this->groupUserModel->edit($payload, $id);
+            $groupUser = $this->getById($id);
 
             $this->commitTransaction();
             return [
                 'status' => true,
-                'data' => $user['data']
+                'data' => $groupUser['data']
             ];
         } catch (Throwable $th) {
             $this->rollbackTransaction();
@@ -90,7 +90,7 @@ class UserHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            $this->userModel->drop($id);
+            $this->groupUserModel->drop($id);
 
             $this->commitTransaction();
             return true;
@@ -99,4 +99,5 @@ class UserHelper extends Venturo
             return false;
         }
     }
+    
 }

@@ -53,9 +53,6 @@ class UserRequest extends FormRequest
             'password' => 'required|min:6',
             'phone_number' => 'numeric',
             // 'm_user_roles_id' => 'nullable',
-			'groupUsers.*.group_id' => 'required',
-			'groupUsers.*.user_id' => 'required',
-			'groupUsers.*.is_admin' => 'required',
         ];
     }
 
@@ -67,9 +64,6 @@ class UserRequest extends FormRequest
             'email' => 'nullable|email|unique:m_user,email,'. $this->id,
             'phone_number' => 'numeric',
             // 'm_user_roles_id' => 'nullable',
-			'groupUsers.*.group_id' => 'required',
-			'groupUsers.*.user_id' => 'required',
-			'groupUsers.*.is_admin' => 'required',
         ];
     }
 

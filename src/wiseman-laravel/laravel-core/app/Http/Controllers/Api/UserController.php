@@ -50,7 +50,7 @@ class UserController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        // $payload = $request->only(['m_user_roles_id', 'name', 'email', 'password', 'phone_number', 'photo', 'groupUsers']);
+        // $payload = $request->only(['m_user_roles_id', 'name', 'email', 'password', 'phone_number', 'photo']);
         $payload = $request->only(['name', 'email', 'password', 'phone_number', 'photo']);
         $user = $this->user->create($payload);
 
@@ -68,7 +68,7 @@ class UserController extends Controller
         }
 
         // $payload = $request->only(['m_user_roles_id', 'name', 'email', 'password', 'phone_number', 'photo']);
-        $payload = $request->only(['name', 'email', 'password', 'phone_number', 'photo', 'groupUsers', 'groupUsers_deleted']);
+        $payload = $request->only(['name', 'email', 'password', 'phone_number', 'photo']);
         $user = $this->user->update($payload, $id ?? '');
 
         if (!$user['status']) {
