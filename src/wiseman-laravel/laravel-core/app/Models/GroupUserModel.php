@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class UserModel extends Model implements CrudInterface
+class GroupUserModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
@@ -17,37 +17,25 @@ class UserModel extends Model implements CrudInterface
     public $timestamps = true;
 
     protected $fillable = [
-        'name', 'email', 'password', 'phone_number', 'photo'
+        'group_id', 'user_id', 'is_admin'
     ];
 
-    protected $table = 'm_user';
+    protected $table = 't_group_users';
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-
-		// if (!empty($filter['m_user_roles_id'])) {
-		// 	$query->where('m_user_roles_id', 'LIKE', '%' . $filter['m_user_roles_id'] . '%');
-		// }
-
-		if (!empty($filter['name'])) {
-			$query->where('name', 'LIKE', '%' . $filter['name'] . '%');
+        
+		if (!empty($filter['group_id'])) {
+			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
 
-		if (!empty($filter['email'])) {
-			$query->where('email', 'LIKE', '%' . $filter['email'] . '%');
+		if (!empty($filter['user_id'])) {
+			$query->where('user_id', 'LIKE', '%' . $filter['user_id'] . '%');
 		}
 
-		if (!empty($filter['password'])) {
-			$query->where('password', 'LIKE', '%' . $filter['password'] . '%');
-		}
-
-		if (!empty($filter['phone_number'])) {
-			$query->where('phone_number', 'LIKE', '%' . $filter['phone_number'] . '%');
-		}
-
-		if (!empty($filter['photo'])) {
-			$query->where('photo', 'LIKE', '%' . $filter['photo'] . '%');
+		if (!empty($filter['is_admin'])) {
+			$query->where('is_admin', 'LIKE', '%' . $filter['is_admin'] . '%');
 		}
 
         $sort = $sort ?: 'id DESC';
@@ -82,10 +70,15 @@ class UserModel extends Model implements CrudInterface
     {
         return $this->find($id)->delete();
     }
-
-
-	public function groupUsers()
+    
+	public function group()
 	{
-		return $this->hasMany(GroupUserModel::class, 'user_id', 'id');
+		return $this->belongsTo(GroupModel::class, 'group_id', 'id');
 	}
+
+	public function user()
+	{
+		return $this->belongsTo(UserModel::class, 'user_id', 'id');
+	}
+
 }

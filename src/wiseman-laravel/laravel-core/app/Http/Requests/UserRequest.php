@@ -36,7 +36,7 @@ class UserRequest extends FormRequest
     public function rules(): array
     {
         if ($this->isMethod('post')) {
-        dd("post");
+        // dd("post");
 
             return $this->createRules();
         }
@@ -52,18 +52,24 @@ class UserRequest extends FormRequest
             'email' => 'required|email|unique:m_user',
             'password' => 'required|min:6',
             'phone_number' => 'numeric',
-            'm_user_roles_id' => 'required',
+            // 'm_user_roles_id' => 'nullable',
+			'groupUsers.*.group_id' => 'required',
+			'groupUsers.*.user_id' => 'required',
+			'groupUsers.*.is_admin' => 'required',
         ];
     }
 
     private function updateRules(): array
     {
         return [
-            'name' => 'required|max:100',
+            'name' => 'nullable|max:100',
             'photo' => 'nullable|file|image',
-            'email' => 'required|email|unique:m_user,email,'. $this->id,
+            'email' => 'nullable|email|unique:m_user,email,'. $this->id,
             'phone_number' => 'numeric',
-            'm_user_roles_id' => 'required',
+            // 'm_user_roles_id' => 'nullable',
+			'groupUsers.*.group_id' => 'required',
+			'groupUsers.*.user_id' => 'required',
+			'groupUsers.*.is_admin' => 'required',
         ];
     }
 
