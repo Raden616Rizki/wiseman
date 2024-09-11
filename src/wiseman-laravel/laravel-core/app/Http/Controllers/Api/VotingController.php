@@ -23,6 +23,7 @@ class VotingController extends Controller
         $filter = [
 			'description' => $request->description ?? '',
 			'limit_time' => $request->limit_time ?? '',
+			'group_id' => $request->group_id ?? '',
 		];
 
         $voting = $this->voting->getAll($filter, $request->per_page ?? 25, $request->sort ?? '');
@@ -46,7 +47,7 @@ class VotingController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['description', 'limit_time', 'votingOptions']);
+        $payload = $request->only(['description', 'limit_time', 'group_id', 'voting_options']);
         $voting = $this->voting->create($payload);
 
         if (!$voting['status']) {
@@ -62,7 +63,7 @@ class VotingController extends Controller
             return response()->failed($request->validator->errors());
         }
 
-        $payload = $request->only(['description', 'limit_time', 'votingOptions', 'votingOptions_deleted']);
+        $payload = $request->only(['description', 'limit_time', 'group_id', 'voting_options', 'voting_options_deleted']);
         $voting = $this->voting->update($payload, $id ?? '');
 
         if (!$voting['status']) {

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('t_voting_options', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('option');
+            $table->string('option', 255);
 			$table->integer('total')->default('0');
 			$table->uuid('voting_id');
             $table->timestamps();

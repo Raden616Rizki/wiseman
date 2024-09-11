@@ -9,7 +9,7 @@ use Throwable;
 
 class VotingHelper extends Venturo
 {
-    
+
     private $votingModel;
 	private $votingOptionModel;
 
@@ -50,7 +50,7 @@ class VotingHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            
+
             $voting = $this->votingModel->store($payload);
 			$this->insertUpdateVotingOption($payload['voting_options'] ?? [], $voting->id);
 
@@ -72,7 +72,7 @@ class VotingHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            
+
             $this->votingModel->edit($payload, $id);
 			$this->insertUpdateVotingOption($payload['voting_options'] ?? [], $id);
 			$this->deleteVotingOption($payload['voting_options_deleted'] ?? []);
@@ -105,7 +105,7 @@ class VotingHelper extends Venturo
             return false;
         }
     }
-    
+
 
 	private function deleteVotingOption(array $voting_options): void
 	{

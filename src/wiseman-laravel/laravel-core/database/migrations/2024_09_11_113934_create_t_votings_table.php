@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('m_votings', function (Blueprint $table) {
+        Schema::create('t_votings', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('description', 255);
 			$table->dateTime('limit_time');
+			$table->uuid('group_id');
             $table->timestamps();
             $table->softDeletes();
             $table->uuid('created_by')->nullable();
@@ -22,6 +23,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('m_votings');
+        Schema::dropIfExists('t_votings');
     }
 };

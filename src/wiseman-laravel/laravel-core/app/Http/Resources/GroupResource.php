@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 
 use App\Http\Resources\GroupUserResource;
 use App\Http\Resources\ActivityResource;
+use App\Http\Resources\VotingResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class GroupResource extends JsonResource
@@ -17,6 +18,7 @@ class GroupResource extends JsonResource
 			'description' => $this->description,
         	'groupUsers' => GroupUserResource::collection($this->groupUsers),
 			'activities' => ActivityResource::collection($this->activities),
+			'votings' => VotingResource::collection($this->votings),
 		];
     }
 }

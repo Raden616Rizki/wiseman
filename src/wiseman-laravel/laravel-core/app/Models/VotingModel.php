@@ -17,10 +17,10 @@ class VotingModel extends Model implements CrudInterface
     public $timestamps = true;
 
     protected $fillable = [
-        'description', 'limit_time'
+        'description', 'limit_time', 'group_id'
     ];
 
-    protected $table = 'm_votings';
+    protected $table = 't_votings';
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
@@ -32,6 +32,10 @@ class VotingModel extends Model implements CrudInterface
 
 		if (!empty($filter['limit_time'])) {
 			$query->where('limit_time', 'LIKE', '%' . $filter['limit_time'] . '%');
+		}
+
+		if (!empty($filter['group_id'])) {
+			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
 
         $sort = $sort ?: 'id DESC';
@@ -67,6 +71,11 @@ class VotingModel extends Model implements CrudInterface
         return $this->find($id)->delete();
     }
     
+	public function group()
+	{
+		return $this->belongsTo(GroupModel::class, 'group_id', 'id');
+	}
+
 
 	public function votingOptions()
 	{

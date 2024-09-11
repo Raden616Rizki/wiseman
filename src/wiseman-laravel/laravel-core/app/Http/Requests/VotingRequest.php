@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 
 class VotingRequest extends FormRequest
 {
-    
+
     public $validator;
     public function failedValidation(Validator $validator)
     {
@@ -29,9 +29,9 @@ class VotingRequest extends FormRequest
         return [
             'description' => 'required',
 			'limit_time' => 'required',
-			'votingOptions.*.option' => 'required',
-			'votingOptions.*.total' => 'required',
-			'votingOptions.*.voting_id' => 'required',
+			'group_id' => 'required',
+			'voting_options.*.option' => 'required',
+			'voting_options.*.total' => 'required',
         ];
     }
 
@@ -40,11 +40,11 @@ class VotingRequest extends FormRequest
         return [
             'description' => 'required',
 			'limit_time' => 'required',
-			'votingOptions.*.option' => 'required',
-			'votingOptions.*.total' => 'required',
-			'votingOptions.*.voting_id' => 'required',
+			'group_id' => 'required',
+			'voting_options.*.option' => 'required',
+			'voting_options.*.total' => 'required',
         ];
     }
 
-    
+
 }

@@ -77,4 +77,9 @@ class GroupModel extends Model implements CrudInterface
 	{
 		return $this->hasMany(ActivityModel::class, 'group_id', 'id');
 	}
+
+	public function votings()
+	{
+		return $this->hasMany(VotingModel::class, 'group_id', 'id');
+	}
 }
