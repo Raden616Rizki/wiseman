@@ -4,11 +4,14 @@ namespace App\Helpers\Activity;
 
 use App\Helpers\Venturo;
 use App\Models\ActivityModel;
+use Google\Client as GoogleClient;
+use Google\Service\Calendar as GoogleCalendar;
+use App\Models\User;
 use Throwable;
 
 class ActivityHelper extends Venturo
 {
-    
+
     private $activityModel;
 
     public function __construct()
@@ -47,8 +50,16 @@ class ActivityHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            
+
             $activity = $this->activityModel->store($payload);
+
+            $user = User::find($payload["user_id"]);
+
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+            $this->createGoogleCalendarEvent($user->email, $payload);
 
             $this->commitTransaction();
             return [
@@ -68,7 +79,7 @@ class ActivityHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            
+
             $this->activityModel->edit($payload, $id);
             $activity = $this->getById($id);
 
@@ -99,5 +110,25 @@ class ActivityHelper extends Venturo
             return false;
         }
     }
-    
+
+    private function createGoogleCalendarEvent($userEmail, $payload)
+    {
+        $client = new GoogleClient();
+        $client->setApplicationName('Wiseman');
+        $client->setScopes(GoogleCalendar::CALENDAR);
+        $client->setAuthConfig(storage_path('app/credentials.json'));
+        $client->setAccessType('offline');
+
+        $service = new GoogleCalendar($client);
+
+        $event = new GoogleCalendar\Event([
+            'summary' => $payload['description'],
+            'start' => ['dateTime' => $payload['start_time'], 'Indonesia/Jakarta' => 'UTC'],
+            'end' => ['dateTime' => $payload['end_time'], 'Indonesia/Jakarta' => 'UTC'],
+            'attendees' => [['email' => $userEmail]],
+        ]);
+
+        $calendarId = 'primary';
+        $service->events->insert($calendarId, $event);
+    }
 }
