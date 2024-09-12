@@ -1,36 +1,36 @@
 <?php
 
-namespace App\Helpers\Activity;
+namespace App\Helpers\Archive;
 
 use App\Helpers\Venturo;
-use App\Models\ActivityModel;
+use App\Models\ArchiveModel;
 use Throwable;
 
-class ActivityHelper extends Venturo
+class ArchiveHelper extends Venturo
 {
-
-    private $activityModel;
+    const FILES_DIRECTORY = 'files';
+    private $archiveModel;
 
     public function __construct()
     {
-        $this->activityModel = new ActivityModel();
+        $this->archiveModel = new ArchiveModel();
     }
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = ''): array
     {
-        $activity = $this->activityModel->getAll($filter, $itemPerPage, $sort);
+        $archive = $this->archiveModel->getAll($filter, $itemPerPage, $sort);
 
         return [
             'status' => true,
-            'data' => $activity
+            'data' => $archive
         ];
     }
 
     public function getById(string $id): array
     {
-        $activity = $this->activityModel->getById($id);
+        $archive = $this->archiveModel->getById($id);
 
-        if (empty($activity)) {
+        if (empty($archive)) {
             return [
                 'status' => false,
                 'data' => null
@@ -39,7 +39,7 @@ class ActivityHelper extends Venturo
 
         return [
             'status' => true,
-            'data' => $activity
+            'data' => $archive
         ];
     }
 
@@ -48,12 +48,13 @@ class ActivityHelper extends Venturo
         try {
             $this->beginTransaction();
 
-            $activity = $this->activityModel->store($payload);
+			$payload = $this->uploadGetPayload($payload);
+            $archive = $this->archiveModel->store($payload);
 
             $this->commitTransaction();
             return [
                 'status' => true,
-                'data' => $activity
+                'data' => $archive
             ];
         } catch (Throwable $th) {
             $this->rollbackTransaction();
@@ -69,13 +70,14 @@ class ActivityHelper extends Venturo
         try {
             $this->beginTransaction();
 
-            $this->activityModel->edit($payload, $id);
-            $activity = $this->getById($id);
+			$payload = $this->uploadGetPayload($payload);
+            $this->archiveModel->edit($payload, $id);
+            $archive = $this->getById($id);
 
             $this->commitTransaction();
             return [
                 'status' => true,
-                'data' => $activity['data']
+                'data' => $archive['data']
             ];
         } catch (Throwable $th) {
             $this->rollbackTransaction();
@@ -90,7 +92,7 @@ class ActivityHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            $this->activityModel->drop($id);
+            $this->archiveModel->drop($id);
 
             $this->commitTransaction();
             return true;
@@ -99,4 +101,17 @@ class ActivityHelper extends Venturo
             return false;
         }
     }
+
+	private function uploadGetPayload(array $payload): array
+	{
+		if (!empty($payload['file'])) {
+			$fileName = $this->generateFileName($payload['file'], 'FILE' . '_' . date('Ymdhis'));
+			$_FILES = $payload['file']->storeAs(self::FILES_DIRECTORY, $fileName, 'public');
+			$payload['file'] = $_FILES;
+		} else {
+			unset($payload['file']);
+		}
+
+		return $payload;
+	}
 }

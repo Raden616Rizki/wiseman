@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ArchiveController;
 use App\Http\Controllers\Api\VotingController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\GroupUserController;
@@ -22,6 +23,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
+
+	Route::get('/archives', [ArchiveController::class, 'index']);
+	Route::get('/archives/{id}', [ArchiveController::class, 'show']);
+	Route::post('/archives', [ArchiveController::class, 'store']);
+	Route::put('/archives/{id}', [ArchiveController::class, 'update']);
+	Route::delete('/archives/{id}', [ArchiveController::class, 'destroy']);
+
+
 	Route::get('/votings', [VotingController::class, 'index']);
 	Route::get('/votings/{id}', [VotingController::class, 'show']);
 	Route::post('/votings', [VotingController::class, 'store']);

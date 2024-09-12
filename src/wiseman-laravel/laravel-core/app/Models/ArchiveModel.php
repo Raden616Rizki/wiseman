@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class GroupModel extends Model implements CrudInterface
+class ArchiveModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
@@ -17,10 +17,10 @@ class GroupModel extends Model implements CrudInterface
     public $timestamps = true;
 
     protected $fillable = [
-        'name', 'description'
+        'name', 'file', 'parent_id', 'group_id'
     ];
 
-    protected $table = 'm_groups';
+    protected $table = 't_archives';
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
@@ -30,8 +30,16 @@ class GroupModel extends Model implements CrudInterface
 			$query->where('name', 'LIKE', '%' . $filter['name'] . '%');
 		}
 
-		if (!empty($filter['description'])) {
-			$query->where('description', 'LIKE', '%' . $filter['description'] . '%');
+		if (!empty($filter['file'])) {
+			$query->where('file', 'LIKE', '%' . $filter['file'] . '%');
+		}
+
+		if (!empty($filter['parent_id'])) {
+			$query->where('parent_id', 'LIKE', '%' . $filter['parent_id'] . '%');
+		}
+
+		if (!empty($filter['group_id'])) {
+			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
 
         $sort = $sort ?: 'id DESC';
@@ -67,24 +75,9 @@ class GroupModel extends Model implements CrudInterface
         return $this->find($id)->delete();
     }
     
-
-	public function groupUsers()
+	public function group()
 	{
-		return $this->hasMany(GroupUserModel::class, 'group_id', 'id');
+		return $this->belongsTo(GroupModel::class, 'group_id', 'id');
 	}
 
-	public function activities()
-	{
-		return $this->hasMany(ActivityModel::class, 'group_id', 'id');
-	}
-
-	public function votings()
-	{
-		return $this->hasMany(VotingModel::class, 'group_id', 'id');
-	}
-
-	public function archives()
-	{
-		return $this->hasMany(ArchiveModel::class, 'group_id', 'id');
-	}
 }
