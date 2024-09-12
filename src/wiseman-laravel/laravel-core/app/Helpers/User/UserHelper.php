@@ -8,7 +8,7 @@ use Throwable;
 
 class UserHelper extends Venturo
 {
-
+    const USER_FILES_DIRECTORY = 'users';
     private $userModel;
 
     public function __construct()
@@ -48,6 +48,7 @@ class UserHelper extends Venturo
         try {
             $this->beginTransaction();
 
+			$payload = $this->uploadGetPayload($payload);
             $user = $this->userModel->store($payload);
 
             $this->commitTransaction();
@@ -68,7 +69,8 @@ class UserHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-
+            
+			$payload = $this->uploadGetPayload($payload);
             $this->userModel->edit($payload, $id);
             $user = $this->getById($id);
 
@@ -99,4 +101,17 @@ class UserHelper extends Venturo
             return false;
         }
     }
+
+    private function uploadGetPayload(array $payload): array
+	{
+		if (!empty($payload['photo'])) {
+			$fileName = $this->generateFileName($payload['photo'], 'USER' . '_' . date('Ymdhis'));
+			$user = $payload['photo']->storeAs(self::USER_FILES_DIRECTORY, $fileName, 'public');
+			$payload['photo'] = $user;
+		} else {
+			unset($payload['photo']);
+		}
+
+		return $payload;
+	}
 }

@@ -106,8 +106,8 @@ class ArchiveHelper extends Venturo
 	{
 		if (!empty($payload['file'])) {
 			$fileName = $this->generateFileName($payload['file'], 'FILE' . '_' . date('Ymdhis'));
-			$_FILES = $payload['file']->storeAs(self::FILES_DIRECTORY, $fileName, 'public');
-			$payload['file'] = $_FILES;
+			$files = $payload['file']->storeAs(self::FILES_DIRECTORY, $fileName, 'public');
+			$payload['file'] = $files;
 		} else {
 			unset($payload['file']);
 		}

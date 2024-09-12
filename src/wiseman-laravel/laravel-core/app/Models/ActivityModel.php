@@ -17,7 +17,7 @@ class ActivityModel extends Model implements CrudInterface
     public $timestamps = true;
 
     protected $fillable = [
-        'group_id', 'user_id', 'description', 'start_time', 'end_time', 'is_priority', 'is_finished'
+        'group_id', 'user_id', 'description', 'start_time', 'end_time', 'is_priority', 'is_finished', 'google_calendar_event_id',
     ];
 
     protected $table = 't_activities';
@@ -25,7 +25,7 @@ class ActivityModel extends Model implements CrudInterface
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-        
+
 		if (!empty($filter['group_id'])) {
 			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
@@ -86,7 +86,7 @@ class ActivityModel extends Model implements CrudInterface
     {
         return $this->find($id)->delete();
     }
-    
+
 	public function group()
 	{
 		return $this->belongsTo(GroupModel::class, 'group_id', 'id');
