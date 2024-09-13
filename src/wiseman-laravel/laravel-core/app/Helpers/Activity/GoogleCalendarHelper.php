@@ -14,10 +14,12 @@ class GoogleCalendarHelper
     public function __construct()
     {
         $this->client = new GoogleClient();
-        $this->client->setAuthConfig([
-            'client_id' => env('GOOGLE_CLIENT_ID'),
-            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        ]);
+        // $this->client->setAuthConfig([
+        //     'client_id' => env('GOOGLE_CLIENT_ID'),
+        //     'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        // ]);
+        $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
+        $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
         $this->client->setScopes(GoogleCalendar::CALENDAR);
         $this->client->setAccessType('offline');
         $this->calendarService = new GoogleCalendar($this->client);
