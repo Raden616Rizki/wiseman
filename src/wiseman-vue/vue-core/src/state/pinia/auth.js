@@ -34,6 +34,7 @@ export const useAuthStore = defineStore('auth', {
     },
     async register(credential) {
       try {
+        await axios.post(`${this.apiUrl}/v1/users`, credential);
         const res = await axios.post(`${this.apiUrl}/v1/auth/login`, credential);
         this.response = {
           status: res.status,

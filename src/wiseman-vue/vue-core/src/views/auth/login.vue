@@ -19,7 +19,13 @@
                 </BFormInput>
               </BFormGroup>
               <div class="mt-4 d-grid">
-                <BButton type="submit" @click="login" variant="primary" class="submit-button">Login</BButton>
+                <BButton type="submit" @click="login" variant="primary" class="submit-button" :disabled="!isFormValid">Login</BButton>
+              </div>
+              <div class="mt-3 text-center">
+                <p>
+                  Don't have an account?
+                  <router-link to="/register">Register</router-link>
+                </p>
               </div>
             </BForm>
           </BCardBody>
@@ -49,16 +55,21 @@ const formModel = reactive({
   password: "",
 });
 
+const isFormValid = computed(() => {
+  return formModel.email && formModel.password;
+});
+
 const statusCode = computed(() => authStore.response.status);
 // const errorList = computed(() => authStore.response?.list || {});
-const errorMessage = computed(() => authStore.response?.message || "");
+// const errorMessage = computed(() => authStore.response?.message || "");
 const login = async () => {
   startProgress();
   try {
     await authStore.login(formModel);
     if (statusCode.value != 200) {
       failProgress()
-      showErrorToast("Login failed", errorMessage.value);
+      // showErrorToast("Login failed", errorMessage.value);
+      showErrorToast("Login failed", "Email or password is incorrect");
     } else {
       finishProgress();
       showSuccessToast("User Logged in !");
@@ -67,7 +78,8 @@ const login = async () => {
   } catch (error) {
     console.error(error);
     failProgress()
-    showErrorToast("Login failed", errorMessage.value);
+    // showErrorToast("Login failed", errorMessage.value);
+    showErrorToast("Login failed", "Something went wrong!");
   }
 };
 </script>

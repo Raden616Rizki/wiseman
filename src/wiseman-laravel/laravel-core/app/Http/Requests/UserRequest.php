@@ -51,7 +51,7 @@ class UserRequest extends FormRequest
             'photo' => 'nullable|file|image',
             'email' => 'required|email|unique:m_user',
             'password' => 'required|min:6',
-            'phone_number' => 'numeric',
+            'phone_number' => 'nullable|numeric',
             // 'm_user_roles_id' => 'nullable',
         ];
     }
