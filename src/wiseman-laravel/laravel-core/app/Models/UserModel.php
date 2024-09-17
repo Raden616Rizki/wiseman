@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use App\Repository\CrudInterface;
 use App\Http\Traits\Uuid;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Repository\CrudInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class UserModel extends Model implements CrudInterface
+class UserModel extends Authenticatable implements CrudInterface, JWTSubject
 {
     use HasFactory;
     use Uuid;
@@ -21,6 +23,22 @@ class UserModel extends Model implements CrudInterface
     ];
 
     protected $table = 'm_user';
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [
+            'user' => [
+                'id' => $this->id,
+                'email' => $this->email,
+                'updated_security' => $this->updated_security
+            ]
+        ];
+    }
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {

@@ -75,6 +75,9 @@ class ActivityController extends Controller
             'responseStatus' => 'needsAction',
         ]);
 
+        $eventId = Event::get();
+        dd($eventId);
+
         $this->event->save();
 
         $activity = $this->activity->create($payload);

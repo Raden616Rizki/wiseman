@@ -32,6 +32,23 @@ export const useAuthStore = defineStore('auth', {
         };
       }
     },
+    async register(credential) {
+      try {
+        const res = await axios.post(`${this.apiUrl}/v1/auth/login`, credential);
+        this.response = {
+          status: res.status,
+          message: res.data.message
+        };
+        this.saveToken(res.data.data.access_token)
+        this.saveUser(res.data.data.user)
+      } catch (error) {
+        this.response = {
+          status: error.response?.status,
+          message: error.message,
+          error: error.response.data.errors,
+        };
+      }
+    },
     async logout() {
       await this.removeToken();
       this.userLogin = {};
