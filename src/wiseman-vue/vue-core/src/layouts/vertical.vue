@@ -1,10 +1,7 @@
 <script>
 import router from "@/router";
 
-import NavBar from "@/components/nav-bar";
 import SideBar from "@/components/side-bar";
-import RightBar from "@/components/right-bar";
-import Footer from "@/components/footer";
 
 import { useLayoutStore } from "@/state/pinia";
 const layoutStore = useLayoutStore();
@@ -13,7 +10,7 @@ const layoutStore = useLayoutStore();
  * Vertical layout
  */
 export default {
-  components: { NavBar, SideBar, RightBar, Footer },
+  components: { SideBar },
   data() {
     return {
       type: layoutStore.leftSidebarType,
@@ -99,7 +96,6 @@ export default {
       </div>
     </div>
     <div id="layout-wrapper">
-      <NavBar />
       <SideBar
         :is-condensed="isMenuCondensed"
         :type="leftSidebarType"
@@ -117,9 +113,7 @@ export default {
             <slot />
           </BContainer>
         </div>
-        <Footer />
       </div>
-      <RightBar />
     </div>
   </div>
 </template>

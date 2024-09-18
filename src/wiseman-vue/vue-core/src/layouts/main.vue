@@ -10,29 +10,24 @@ export default {
     Vertical,
     Horizontal
   },
-  data() {
-    return {};
+  setup() {
+    layoutStore.changeLayoutType('vertical');
+    layoutStore.changeLeftSidebarType('palette-1');
+
+    return {
+      layoutType: layoutStore.layoutType,
+      leftSidebarType: layoutStore.leftSidebarType,
+    };
   },
-  computed: {
-    layoutType() {
-      return layoutStore.layoutType;
-    }
-  },
-  methods: {},
-  mounted() {
-    // document.querySelector("html").setAttribute('dir', 'rtl');
-  }
 };
 </script>
 
 <template>
   <div>
     <Vertical v-if="layoutType === 'vertical'" :layout="layoutType">
-      <slot />
     </Vertical>
 
     <Horizontal v-if="layoutType === 'horizontal'" :layout="layoutType">
-      <slot />
     </Horizontal>
   </div>
 </template>

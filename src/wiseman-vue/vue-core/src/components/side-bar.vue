@@ -3,6 +3,10 @@ import simplebar from "simplebar-vue";
 
 import SideNav from "./side-nav";
 
+import { useAuthStore } from "@/state/pinia";
+
+import { useRouter } from "vue-router";
+
 /**
  * Sidebar component
  */
@@ -26,6 +30,14 @@ export default {
       required: true
     }
   },
+  setup() {
+    const authStore = useAuthStore();
+    const user = authStore.getUser();
+    const router = useRouter();
+    const groups = user.detailGroups;
+
+    return { user: user, router: router, groups: groups };
+  },
   data() {
     return {
       settings: {
@@ -45,6 +57,9 @@ export default {
                 currentPosition + 300;
         }
       }, 300);
+    },
+    logout() {
+      this.router.push('/logout');
     }
   },
   watch: {
@@ -90,7 +105,7 @@ export default {
               document.body.removeAttribute("data-sidebar-size");
               break;
             default:
-              document.body.setAttribute("data-sidebar", "dark");
+              // document.body.setAttribute("data-sidebar", "dark");
               break;
           }
         }
@@ -146,9 +161,36 @@ export default {
 
 <template>
   <!-- ========== Left Sidebar Start ========== -->
-  <div class="vertical-menu">
+  <div class="vertical-menu sidebar-bg ws-sidebar">
     <simplebar v-if="!isCondensed" :settings="settings" class="h-100" ref="currentMenu" id="my-element">
-      <SideNav />
+      <div class="d-flex ms-2 align-items-center mt-3">
+        <img :src="user.photo_url" alt="User Photo" class="user-photo" />
+        <h6 class="font-4 ms-2 mb-0">{{ user.name }}</h6>
+      </div>
+      <hr>
+      <router-link to="/">
+        <div class="p-2 palette-3 mb-3 ws-menu ws-main-menu shadow-sm">
+          <h6 class="font-4 ms-2 mb-0">My Activities</h6>
+        </div>
+      </router-link>
+      <div class="p-2 mb-3 palette-3 d-flex justify-content-between ws-menu ws-main-menu shadow-sm">
+        <h6 class="font-4 ms-2 mb-0">Group</h6>
+        <i class="bx bx-search" style="color: #EEEEEE; font-size: medium"></i>
+      </div>
+      <div v-for="group in groups" :key="group.id"
+        class="p-2 list-group-item d-flex justify-content-between align-items-center ws-menu ws-main-menu">
+        <h6 class="font-4 ms-2 mb-0">{{ group.name }}</h6>
+        <i class="bx bx-dots-vertical-rounded" style="color: #EEEEEE; font-size: medium"></i>
+      </div>
+      <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu">
+        <i class="bx bx-plus" style="color: #EEEEEE;"></i>
+        <h6 class="font-4 ms-2 mb-0">Create</h6>
+      </div>
+      <hr>
+      <div class="ms-2 noti-icon d-flex align-items-center mt-4 ws-menu" @click="logout">
+        <i class="bx bx-log-out-circle" style="color: #EEEEEE;"></i>
+        <h6 class="font-4 ms-2 mb-0">Logout</h6>
+      </div>
     </simplebar>
 
     <simplebar v-else class="h-100">
@@ -157,3 +199,41 @@ export default {
   </div>
   <!-- Left Sidebar End -->
 </template>
+
+<style>
+.ws-main-menu {
+  width: 90%;
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 32px;
+}
+
+.ws-menu {
+  cursor: pointer;
+}
+
+.font-4 {
+  font-weight: bold;
+  color: #EEEEEE
+}
+
+.sidebar-bg {
+  background-color: #303841;
+}
+
+.palette-3 {
+  background-color: #00ADB5;
+}
+
+.user-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+  background-color: #EEEEEE;
+}
+
+.ws-sidebar {
+  top: 0px;
+}
+</style>

@@ -1,5 +1,10 @@
 // src/stores/authStore.js
-import { defineStore } from 'pinia';
+import {
+  defineStore
+} from 'pinia';
+import {
+  useGroupStore
+} from './group';
 import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', {
@@ -23,10 +28,10 @@ export const useAuthStore = defineStore('auth', {
           message: res.data.message
         };
         this.saveToken(res.data.data.access_token)
-        this.saveUser(res.data.data.user)
+        await this.saveUser(res.data.data.user)
       } catch (error) {
         this.response = {
-          status: error.response?.status,
+          status: error.response ?.status,
           message: error.message,
           error: error.response.data.errors,
         };
@@ -41,10 +46,10 @@ export const useAuthStore = defineStore('auth', {
           message: res.data.message
         };
         this.saveToken(res.data.data.access_token)
-        this.saveUser(res.data.data.user)
+        await this.saveUser(res.data.data.user)
       } catch (error) {
         this.response = {
-          status: error.response?.status,
+          status: error.response ?.status,
           message: error.message,
           error: error.response.data.errors,
         };
@@ -72,13 +77,31 @@ export const useAuthStore = defineStore('auth', {
       return localStorage.getItem('token') || '';
     },
     async saveUser(user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      try {
+        const detailGroups = await this.getGroupData(user.groupUsers);
+
+        user.detailGroups = detailGroups;
+        console.log(user);
+        localStorage.setItem('user', JSON.stringify(user));
+      } catch (error) {
+        console.log(error);
+      }
     },
     async removeUser() {
       localStorage.removeItem('user');
     },
     getUser() {
       return JSON.parse(localStorage.getItem('user') || '');
+    },
+    async getGroupData(groups) {
+      const groupStore = useGroupStore();
+      var detailGroups = [];
+
+      for (let i = 0; i < groups.length; i++) {
+        const group = await groupStore.getGroupById(groups[i].group_id);
+        detailGroups.push(group);
+      }
+      return detailGroups;
     }
   }
 });

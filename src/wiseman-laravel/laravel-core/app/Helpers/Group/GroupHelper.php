@@ -8,7 +8,7 @@ use Throwable;
 
 class GroupHelper extends Venturo
 {
-    
+
     private $groupModel;
 
     public function __construct()
@@ -47,7 +47,7 @@ class GroupHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            
+
             $group = $this->groupModel->store($payload);
 
             $this->commitTransaction();
@@ -68,7 +68,7 @@ class GroupHelper extends Venturo
     {
         try {
             $this->beginTransaction();
-            
+
             $this->groupModel->edit($payload, $id);
             $group = $this->getById($id);
 
@@ -99,5 +99,5 @@ class GroupHelper extends Venturo
             return false;
         }
     }
-    
+
 }
