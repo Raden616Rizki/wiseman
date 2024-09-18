@@ -88,7 +88,7 @@ export const useUserStore = defineStore('user', {
         },
         async updateUser(users) {
             try {
-                await axios.put(`${this.apiUrl}/v1/users`, users);
+                await axios.put(`${this.apiUrl}/v1/users/${users.id}`, users);
                 this.response = {
                     status: '200',
                 };
