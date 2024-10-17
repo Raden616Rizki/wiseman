@@ -3,11 +3,11 @@ import {
 } from "pinia";
 import axios from 'axios';
 
-export const useUserStore = defineStore('user', {
+export const useGroupUserStore = defineStore('groupUser', {
     state: () => ({
         apiUrl: process.env.VUE_APP_APIURL,
-        users: [],
-        user: null,
+        groupUsers: [],
+        groupUser: null,
         response: {
             status: null,
             message: null,
@@ -24,18 +24,34 @@ export const useUserStore = defineStore('user', {
         searchQuery: '',
     }),
     actions: {
-        openForm(newAction, user) {
+        openForm(newAction, groupUser) {
             this.modalAction.action = newAction
-            this.user = user
+            this.groupUser = groupUser
         },
-        async getUsers() {
+        async getGroupUsers() {
             try {
-                const url = `${this.apiUrl}/v1/users?page=${this.current}&perPage=${this.perPage}&name=${this.searchQuery}`;
+                const url = `${this.apiUrl}/v1/group_users?page=${this.current}&perPage=${this.perPage}&name=${this.searchQuery}`;
                 const res = await axios.get(url);
 
-                const usersDataList = res.data.data.list
-                this.users = usersDataList
+                const groupUsersDataList = res.data.data.list
+                this.groupUsers = groupUsersDataList
                 this.totalData = res.data.data.meta.total
+            } catch (error) {
+                this.response = {
+                    status: error.response ?.status,
+                    message: error.message,
+                };
+            } 
+        },
+        async getGroupUserById(id) {
+            try {
+                const url = `${this.apiUrl}/v1/group_users/${id}`;
+                const res = await axios.get(url);
+
+                const groupUser = res.data.data
+                this.groupUser = groupUser;
+                
+                return groupUser;
             } catch (error) {
                 this.response = {
                     status: error.response ?.status,
@@ -45,16 +61,16 @@ export const useUserStore = defineStore('user', {
         },
         async changePage(newPage) {
             this.current = newPage;
-            await this.getUsers(); 
+            await this.getGroups(); 
         },
-        async searchUsers(query) {
+        async searchGroups(query) {
             this.searchQuery = query;
             this.current = 1; 
-            await this.getUsers(); 
+            await this.getGroups(); 
         },
-        async addUsers(users) {
+        async addGroupUsers(groupUsers) {
             try {
-                const res = await axios.post(`${this.apiUrl}/v1/users`, users);
+                const res = await axios.post(`${this.apiUrl}/v1/group_users`, groupUsers);
                 this.response = {
                     status: res.status,
                     message: res.data.message
@@ -66,13 +82,13 @@ export const useUserStore = defineStore('user', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getUsers();
+                this.getGroups();
             }
         },
-        async deleteUser(id) {
+        async deleteGroupUser(id) {
             this.loading = true;
             try {
-                await axios.delete(`${this.apiUrl}/v1/users/${id}`);
+                await axios.delete(`${this.apiUrl}/v1/group_users/${id}`);
                 this.response = {
                     status: '200',
                 };
@@ -83,12 +99,12 @@ export const useUserStore = defineStore('user', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getUsers();
+                this.getGroups();
             }
         },
-        async updateUser(users) {
+        async updateGroup(groupUser) {
             try {
-                await axios.put(`${this.apiUrl}/v1/users/${users.id}`, users);
+                await axios.put(`${this.apiUrl}/v1/group_users/${groupUser.id}`, groupUser);
                 this.response = {
                     status: '200',
                 };
@@ -105,7 +121,4 @@ export const useUserStore = defineStore('user', {
             return state.modalAction.action;
         },
     },
-
-
-
 })

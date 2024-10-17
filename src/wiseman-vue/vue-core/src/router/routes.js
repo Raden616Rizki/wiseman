@@ -13,6 +13,12 @@ export default [
     component: () => import("../views/user")
   },
   {
+    path: "/group",
+    name: "group",
+    meta: { title: "Search Group", authRequired: true },
+    component: () => import("../views/group")
+  },
+  {
     path: "/login",
     name: "login",
     component: () => import("../views/auth/login"),

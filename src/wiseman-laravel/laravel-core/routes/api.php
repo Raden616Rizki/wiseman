@@ -30,7 +30,6 @@ Route::prefix('v1')->group(function () {
 	Route::put('/archives/{id}', [ArchiveController::class, 'update']);
 	Route::delete('/archives/{id}', [ArchiveController::class, 'destroy']);
 
-
 	Route::get('/votings', [VotingController::class, 'index']);
 	Route::get('/votings/{id}', [VotingController::class, 'show']);
 	Route::post('/votings', [VotingController::class, 'store']);
@@ -60,12 +59,6 @@ Route::prefix('v1')->group(function () {
 	Route::post('/users', [UserController::class, 'store']);
 	Route::put('/users/{id}', [UserController::class, 'update']);
 	Route::delete('/users/{id}', [UserController::class, 'destroy']);
-
-	Route::get('/groups', [GroupController::class, 'index']);
-	Route::get('/groups/{id}', [GroupController::class, 'show']);
-	Route::post('/groups', [GroupController::class, 'store']);
-	Route::put('/groups/{id}', [GroupController::class, 'update']);
-	Route::delete('/groups/{id}', [GroupController::class, 'destroy']);
 
     Route::get('/', [SiteController::class, 'index']);
 

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 
 class GroupUserRequest extends FormRequest
 {
-    
+
     public $validator;
     public function failedValidation(Validator $validator)
     {
@@ -42,5 +42,5 @@ class GroupUserRequest extends FormRequest
         ];
     }
 
-    
+
 }

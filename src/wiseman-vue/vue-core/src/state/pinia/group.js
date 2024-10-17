@@ -20,7 +20,7 @@ export const useGroupStore = defineStore('group', {
         },
         totalData: 0,
         current: 1,
-        perpage: 5,
+        perPage: 5,
         searchQuery: '',
     }),
     actions: {
@@ -30,7 +30,7 @@ export const useGroupStore = defineStore('group', {
         },
         async getGroups() {
             try {
-                const url = `${this.apiUrl}/v1/groups?page=${this.current}&perPage=${this.perpage}&name=${this.searchQuery}`;
+                const url = `${this.apiUrl}/v1/groups?page=${this.current}&perPage=${this.perPage}&name=${this.searchQuery}`;
                 const res = await axios.get(url);
 
                 const groupsDataList = res.data.data.list
@@ -70,11 +70,19 @@ export const useGroupStore = defineStore('group', {
         },
         async addGroups(groups) {
             try {
-                const res = await axios.post(`${this.apiUrl}/v1/groups`, groups);
+                const url = `${this.apiUrl}/v1/groups`
+                const res = await axios.post(url, groups);
+
                 this.response = {
                     status: res.status,
                     message: res.data.message
                 };
+
+                console.log(res);
+
+                const group = res.data.data;
+                
+                return group;
             } catch (error) {
                 this.response = {
                     status: error.response ?.status,
@@ -121,7 +129,4 @@ export const useGroupStore = defineStore('group', {
             return state.modalAction.action;
         },
     },
-
-
-
 })
