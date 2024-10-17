@@ -25,9 +25,11 @@ export default {
 <template>
   <div>
     <Vertical v-if="layoutType === 'vertical'" :layout="layoutType">
+      <slot />
     </Vertical>
 
     <Horizontal v-if="layoutType === 'horizontal'" :layout="layoutType">
+      <slot />
     </Horizontal>
   </div>
 </template>

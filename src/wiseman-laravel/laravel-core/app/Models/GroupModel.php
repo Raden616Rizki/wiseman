@@ -34,7 +34,7 @@ class GroupModel extends Model implements CrudInterface
 			$query->where('description', 'LIKE', '%' . $filter['description'] . '%');
 		}
 
-        $sort = $sort ?: 'id DESC';
+        $sort = $sort ?: 'name ASC';
         $query->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 

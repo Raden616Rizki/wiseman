@@ -145,8 +145,10 @@ export default {
     },
     async getAuthUser() {
       try {
+        const user = await this.userStore.getUserById(this.user.id);
+        await this.authStore.saveUser(user);
         this.user = await this.authStore.getUser();
-        this.group = this.user.value?.detailGroups || [];
+        this.group = this.user.detailGroups || [];
       } catch (error) {
         console.error(error);
       }
@@ -202,9 +204,6 @@ export default {
             const isAdmin = 1;
 
             await this.saveGroupUser(groupId, userId, isAdmin);
-
-            const user = await this.userStore.getUserById(this.user.id)
-            await this.authStore.saveUser(user);
             await this.getAuthUser();
             
             showSuccessToast("Group added successfully!");
@@ -226,8 +225,6 @@ export default {
         await this.groupUserStore.addGroupUsers(formGroupUser);
         if (this.groupUserStatusCode != 200) {
           showErrorToast("Failed to saved group user", this.groupUserErrorMessage);
-        } else {
-          showSuccessToast("Group user saved successfully!");
         }
       } catch (error) {
         console.error(error);
@@ -477,7 +474,7 @@ export default {
         <h6 class="font-4 ms-2 mb-0">Create</h6>
       </div>
       <hr>
-      <div class="ms-2 noti-icon d-flex align-items-center mt-4 ws-menu" @click="logout">
+      <div class="ms-2 noti-icon d-flex align-items-center mt-4 ws-menu mb-4" @click="logout">
         <i class="bx bx-log-out-circle" style="color: #EEEEEE;"></i>
         <h6 class="font-4 ms-2 mb-0">Logout</h6>
       </div>
