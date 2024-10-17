@@ -110,7 +110,7 @@ export const useGroupStore = defineStore('group', {
         },
         async updateGroup(group) {
             try {
-                await axios.put(`${this.apiUrl}/v1/users/${group.id}`, group);
+                await axios.put(`${this.apiUrl}/v1/groups/${group.id}`, group);
                 this.response = {
                     status: '200',
                 };

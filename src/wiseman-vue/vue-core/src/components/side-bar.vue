@@ -175,11 +175,11 @@ export default {
       if (groupId != 'add') {
         this.formGroupTitle = 'Update';
 
-        const group = this.groupStore.getGroupById(groupId)
+        const group = await this.groupStore.getGroupById(groupId)
 
-        this.formUser.id = group.id;
-        this.formUser.name = group.name;
-        this.formUser.description = group.description;
+        this.formGroup.id = group.id;
+        this.formGroup.name = group.name;
+        this.formGroup.description = group.description;
       }
     },
     async saveGroup() {
@@ -467,7 +467,7 @@ export default {
       <div v-for="group in groups" :key="group.id"
         class="p-2 list-group-item d-flex justify-content-between align-items-center ws-menu ws-main-menu">
         <h6 class="font-4-normal ms-2 mb-0">{{ group.name }}</h6>
-        <i class="bx bx-dots-vertical-rounded" style="color: #EEEEEE; font-size: medium"></i>
+        <i class="bx bx-dots-vertical-rounded" style="color: #EEEEEE; font-size: medium" @click="openGroupFormModal(group.id)"></i>
       </div>
       <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu" @click="openGroupFormModal('add')">
         <i class="bx bx-plus" style="color: #EEEEEE;"></i>
