@@ -78,8 +78,6 @@ export const useGroupStore = defineStore('group', {
                     message: res.data.message
                 };
 
-                console.log(res);
-
                 const group = res.data.data;
                 
                 return group;

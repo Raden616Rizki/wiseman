@@ -61,12 +61,12 @@ export const useGroupUserStore = defineStore('groupUser', {
         },
         async changePage(newPage) {
             this.current = newPage;
-            await this.getGroups(); 
+            await this.getGroupUsers(); 
         },
         async searchGroups(query) {
             this.searchQuery = query;
             this.current = 1; 
-            await this.getGroups(); 
+            await this.getGroupUsers(); 
         },
         async addGroupUsers(groupUsers) {
             try {
@@ -82,7 +82,7 @@ export const useGroupUserStore = defineStore('groupUser', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getGroups();
+                this.getGroupUsers();
             }
         },
         async deleteGroupUser(id) {
@@ -99,7 +99,7 @@ export const useGroupUserStore = defineStore('groupUser', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getGroups();
+                this.getGroupUsers();
             }
         },
         async updateGroup(groupUser) {

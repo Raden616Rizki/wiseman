@@ -5,7 +5,7 @@ import { useAuthStore } from "@/state/pinia";
 import { useRouter } from "vue-router";
 import ImageCropper from "@/components/widgets/cropper";
 import { ref, computed, reactive } from "vue";
-import { useUserStore, useGroupStore } from "@/state/pinia";
+import { useUserStore, useGroupStore, useGroupUserStore } from "@/state/pinia";
 import {
   showSuccessToast,
   showErrorToast,
@@ -37,9 +37,9 @@ export default {
   },
   setup() {
     const authStore = useAuthStore();
-    const user = authStore.getUser();
+    const user = computed(() => authStore.getUser());
     const router = useRouter();
-    const groups = user.detailGroups;
+    const groups = computed(() => user.value?.detailGroups || []);
     const imageUrl = ref("");
     const croppedImageUrl = ref("");
     const isFormUserOpen = ref(false);
@@ -73,6 +73,12 @@ export default {
     const groupErrorList = computed(() => groupStore.response?.error || {});
     const groupErrorMessage = computed(() => groupStore.response?.message || "");
 
+    const groupUserStore = useGroupUserStore();
+
+    const groupUserStatusCode = computed(() => groupUserStore.response.status);
+    const groupUserErrorList = computed(() => groupUserStore.response?.error || {});
+    const groupUserErrorMessage = computed(() => groupUserStore.response?.message || "");
+
     return {
       user: user,
       router: router,
@@ -92,7 +98,15 @@ export default {
       groupErrorList: groupErrorList,
       groupErrorMessage: groupErrorMessage,
       formGroupTitle: formGroupTitle,
+      groupUserStore: groupUserStore,
+      groupUserStatusCode: groupUserStatusCode,
+      groupUserErrorList: groupUserErrorList,
+      groupUserErrorMessage: groupUserErrorMessage,
+      authStore: authStore,
     };
+  },
+  mounted() {
+    this.getAuthUser();
   },
   data() {
     return {
@@ -127,6 +141,14 @@ export default {
         this.formUser.photo = this.user.photo_url;
         this.formUser.phone_number = this.user.phone_number;
         this.imageUrl = this.user.photo_url;
+      }
+    },
+    async getAuthUser() {
+      try {
+        this.user = await this.authStore.getUser();
+        this.group = this.user.value?.detailGroups || [];
+      } catch (error) {
+        console.error(error);
       }
     },
     async saveUser() {
@@ -169,12 +191,23 @@ export default {
             showSuccessToast("Group updated successfully!");
           }
         } else {
-          await this.groupStore.addGroups(this.formGroup);
+          const group = await this.groupStore.addGroups(this.formGroup);
           if (this.groupStatusCode != 200) {
-            showErrorToast("Failed to update group", this.groupErrorMessage);
+            showErrorToast("Failed to add group", this.groupErrorMessage);
           } else {
             this.isFormGroupOpen = false;
-            showSuccessToast("Group updated successfully!");
+
+            const groupId = group.id;
+            const userId = this.user.id;
+            const isAdmin = 1;
+
+            await this.saveGroupUser(groupId, userId, isAdmin);
+
+            const user = await this.userStore.getUserById(this.user.id)
+            await this.authStore.saveUser(user);
+            await this.getAuthUser();
+            
+            showSuccessToast("Group added successfully!");
           }
         }
       } catch (error) {
@@ -182,6 +215,25 @@ export default {
         showErrorToast("Failed to add group", this.groupErrorMessage);
       }
     },
+
+    async saveGroupUser(groupId, userId, isAdmin) {
+      try {
+        const formGroupUser = {
+          group_id: groupId,
+          user_id: userId,
+          is_admin: isAdmin
+        }
+        await this.groupUserStore.addGroupUsers(formGroupUser);
+        if (this.groupUserStatusCode != 200) {
+          showErrorToast("Failed to saved group user", this.groupUserErrorMessage);
+        } else {
+          showSuccessToast("Group user saved successfully!");
+        }
+      } catch (error) {
+        console.error(error);
+        showErrorToast("Failed to saved group user", this.groupUserErrorMessage);
+      }
+    }
   },
   watch: {
     $route: {
@@ -283,7 +335,8 @@ export default {
 <template>
   <!-- ========== User Profile Modal ========== -->
   <BModal v-model="isFormUserOpen" id="modal-standard" title="Update Profile" title-class="font-18"
-    ok-title="Update Profile" @ok="saveUser" @hide.prevent @cancel="isFormUserOpen = false" @close="isFormUserOpen = false">
+    ok-title="Update Profile" @ok="saveUser" @hide.prevent @cancel="isFormUserOpen = false"
+    @close="isFormUserOpen = false">
     <BRow>
       <BCol cols="12">
         <ImageCropper :aspectRatio="1 / 1" :uploadText="'Letakkan foto disini atau klik untuk mengunggah'"
@@ -355,10 +408,11 @@ export default {
       </BCol>
     </BRow>
   </BModal>
-  
+
   <!-- ========== Group Modal ========== -->
   <BModal v-model="isFormGroupOpen" id="modal-standard" :title="formGroupTitle + ' Group'" title-class="font-18"
-    :ok-title="formGroupTitle" @ok="saveGroup" @hide.prevent @cancel="isFormGroupOpen = false" @close="isFormGroupOpen = false">
+    :ok-title="formGroupTitle" @ok="saveGroup" @hide.prevent @cancel="isFormGroupOpen = false"
+    @close="isFormGroupOpen = false">
     <BRow>
       <BCol cols="12" class="mt-2">
         <BForm class="form-horizontal" role="form">
@@ -379,7 +433,8 @@ export default {
             <BCol>
               <textarea class="form-control" :class="{
                 'is-invalid': !!(groupErrorList && groupErrorList.description),
-              }" id="form-phone" type="phone" placeholder="Masukkan deskripsi group ..." v-model="formGroup.description" />
+              }" id="form-phone" type="phone" placeholder="Masukkan deskripsi group ..."
+                v-model="formGroup.description" />
 
               <template v-if="!!(groupErrorList && groupErrorList.description)">
                 <div class="invalid-feedback" v-for="(err, index) in groupErrorList.description" :key="index">
@@ -406,10 +461,12 @@ export default {
           <h6 class="font-4 ms-2 mb-0">My Activities</h6>
         </div>
       </router-link>
-      <div class="p-2 mb-2 palette-3 d-flex justify-content-between ws-menu ws-main-menu shadow-sm">
-        <h6 class="font-4 ms-2 mb-0">Group</h6>
-        <i class="bx bx-search" style="color: #EEEEEE; font-size: medium"></i>
-      </div>
+      <router-link to="/group">
+        <div class="p-2 mb-2 palette-3 d-flex justify-content-between ws-menu ws-main-menu shadow-sm">
+          <h6 class="font-4 ms-2 mb-0">Group</h6>
+          <i class="bx bx-search" style="color: #EEEEEE; font-size: medium"></i>
+        </div>
+      </router-link>
       <div v-for="group in groups" :key="group.id"
         class="p-2 list-group-item d-flex justify-content-between align-items-center ws-menu ws-main-menu">
         <h6 class="font-4-normal ms-2 mb-0">{{ group.name }}</h6>

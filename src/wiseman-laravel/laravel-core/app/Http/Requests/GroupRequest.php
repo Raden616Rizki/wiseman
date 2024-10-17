@@ -28,7 +28,7 @@ class GroupRequest extends FormRequest
     {
         return [
             'name' => 'required',
-			'description' => 'nullable',
+			'description' => 'required',
         ];
     }
 

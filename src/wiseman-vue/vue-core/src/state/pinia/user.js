@@ -43,6 +43,22 @@ export const useUserStore = defineStore('user', {
                 };
             } 
         },
+        async getUserById(id) {
+            try {
+                const url = `${this.apiUrl}/v1/users/${id}`;
+                const res = await axios.get(url);
+
+                const user = res.data.data
+                this.user = user;
+                
+                return user;
+            } catch (error) {
+                this.response = {
+                    status: error.response ?.status,
+                    message: error.message,
+                };
+            } 
+        },
         async changePage(newPage) {
             this.current = newPage;
             await this.getUsers(); 

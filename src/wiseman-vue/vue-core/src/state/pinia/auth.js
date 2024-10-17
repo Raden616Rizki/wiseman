@@ -81,7 +81,6 @@ export const useAuthStore = defineStore('auth', {
         const detailGroups = await this.getGroupData(user.groupUsers);
 
         user.detailGroups = detailGroups;
-        console.log(user);
         localStorage.setItem('user', JSON.stringify(user));
       } catch (error) {
         console.log(error);

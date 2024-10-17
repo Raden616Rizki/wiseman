@@ -25,7 +25,7 @@ class GroupModel extends Model implements CrudInterface
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-        
+
 		if (!empty($filter['name'])) {
 			$query->where('name', 'LIKE', '%' . $filter['name'] . '%');
 		}
@@ -48,6 +48,7 @@ class GroupModel extends Model implements CrudInterface
 
     public function store(array $payload)
     {
+
         return $this->create($payload);
     }
 
@@ -66,7 +67,7 @@ class GroupModel extends Model implements CrudInterface
     {
         return $this->find($id)->delete();
     }
-    
+
 
 	public function groupUsers()
 	{
