@@ -51,6 +51,7 @@
     "simplebar-vue": "^2.3.3",
     "sweetalert2": "^11.7.31",
     "swiper": "^10.3.1",
+    "v-dropdown": "^3.0.0",
     "vue": "^3.3.4",
     "vue-chartist": "^3.0.0",
     "vue-cropperjs": "^5.0.0",

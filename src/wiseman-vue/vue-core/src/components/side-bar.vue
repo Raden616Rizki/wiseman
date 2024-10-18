@@ -197,6 +197,12 @@ export default {
         this.formGroup.id = group.id || '0';
         this.formGroup.name = group.name;
         this.formGroup.description = group.description;
+      } else {
+        this.formGroupTitle = 'Create';
+
+        this.formGroup.id = '';
+        this.formGroup.name = '';
+        this.formGroup.description = '';
       }
     },
     async saveGroup() {
@@ -226,7 +232,6 @@ export default {
               const isAdmin = 1;
 
               await this.saveGroupUser(groupId, userId, isAdmin);
-              await this.getAuthUser();
               this.finishProgress();
 
               showSuccessToast("Group added successfully!");
@@ -235,9 +240,11 @@ export default {
         }
       } catch (error) {
         console.error(error);
-        showErrorToast("Failed to add group", this.groupErrorMessage);
+        showErrorToast("Failed to saved group", this.groupErrorMessage);
         this.failProgress();
       }
+
+      await this.getAuthUser();
     },
 
     async saveGroupUser(groupId, userId, isAdmin) {
@@ -515,8 +522,12 @@ export default {
       <div v-for="group in groups" :key="group.id"
         class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu">
         <h6 class="font-4-normal ms-2 mb-0">{{ group.group.name }}</h6>
-        <i class="bx bx-dots-vertical-rounded ws-menu" style="color: #EEEEEE; font-size: medium"
-          @click="leaveGroup(group.groupUserId)"></i>
+        <div class="d-flex justify-content-center align-items-center">
+          <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;"
+            @click="leaveGroup(group.groupUserId)" v-b-tooltip.hover title="Leave group"></i>
+          <i class="bx bx-edit ws-menu" style="color: #EEEEEE;"
+            @click="openGroupFormModal(group.group.id)" v-b-tooltip.hover title="Edit group"></i>
+        </div>
       </div>
       <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu" @click="openGroupFormModal('add')">
         <i class="bx bx-plus" style="color: #EEEEEE;"></i>
