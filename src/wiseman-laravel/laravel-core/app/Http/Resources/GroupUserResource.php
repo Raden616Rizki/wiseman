@@ -14,6 +14,7 @@ class GroupUserResource extends JsonResource
             'group_id' => $this->group_id,
 			'user_id' => $this->user_id,
 			'is_admin' => $this->is_admin,
+            'group' => new GroupResource($this->group),
         ];
     }
 }

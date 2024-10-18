@@ -22,7 +22,7 @@ class UserResource extends JsonResource
 			// 'photo' => $this->photo,
             'photo_url' => !empty($this->photo) ? Storage::disk('public')->url($this->photo) : null,
         	'groupUsers' => GroupUserResource::collection($this->groupUsers),
-			'activities' => ActivityResource::collection($this->activities),
+			// 'activities' => ActivityResource::collection($this->activities),
 		];
     }
 }

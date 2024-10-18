@@ -17,10 +17,10 @@ class GroupResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
 			'description' => $this->description,
-        	'groupUsers' => GroupUserResource::collection($this->groupUsers),
-			'activities' => ActivityResource::collection($this->activities),
-			'votings' => VotingResource::collection($this->votings),
-			'archives' => ArchiveResource::collection($this->archives),
+        	// 'groupUsers' => GroupUserResource::collection($this->groupUsers),
+			// 'activities' => ActivityResource::collection($this->activities),
+			// 'votings' => VotingResource::collection($this->votings),
+			// 'archives' => ArchiveResource::collection($this->archives),
 		];
     }
 }

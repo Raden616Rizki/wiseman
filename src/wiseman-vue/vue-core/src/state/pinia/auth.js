@@ -2,9 +2,9 @@
 import {
   defineStore
 } from 'pinia';
-import {
-  useGroupStore
-} from './group';
+// import {
+//   useGroupStore
+// } from './group';
 import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', {
@@ -76,12 +76,13 @@ export const useAuthStore = defineStore('auth', {
     getToken() {
       return localStorage.getItem('token') || '';
     },
-    async saveUser(user) {
+    async saveUser(userData) {
       try {
-        const detailGroups = await this.getGroupData(user.groupUsers);
+        // const detailGroups = await this.getGroupData(userData.groupUsers);
 
-        user.detailGroups = detailGroups;
-        localStorage.setItem('user', JSON.stringify(user));
+        // userData.detailGroups = detailGroups;
+
+        localStorage.setItem('user', JSON.stringify(userData));
       } catch (error) {
         console.log(error);
       }
@@ -92,15 +93,15 @@ export const useAuthStore = defineStore('auth', {
     getUser() {
       return JSON.parse(localStorage.getItem('user') || '');
     },
-    async getGroupData(groups) {
-      const groupStore = useGroupStore();
-      var detailGroups = [];
+    // async getGroupData(groups) {
+    //   const groupStore = useGroupStore();
+    //   var detailGroups = [];
 
-      for (let i = 0; i < groups.length; i++) {
-        const group = await groupStore.getGroupById(groups[i].group_id);
-        detailGroups.push(group);
-      }
-      return detailGroups;
-    }
+    //   for (let i = 0; i < groups.length; i++) {
+    //     const group = await groupStore.getGroupById(groups[i].group_id);
+    //     detailGroups.push(group);
+    //   }
+    //   return detailGroups;
+    // }
   }
 });

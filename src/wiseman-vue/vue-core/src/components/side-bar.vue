@@ -4,13 +4,15 @@ import SideNav from "./side-nav";
 import { useAuthStore } from "@/state/pinia";
 import { useRouter } from "vue-router";
 import ImageCropper from "@/components/widgets/cropper";
-import { ref, computed, reactive } from "vue";
+import { ref, computed, reactive, onMounted } from "vue";
 import { useUserStore, useGroupStore, useGroupUserStore } from "@/state/pinia";
 import {
   showSuccessToast,
   showErrorToast,
-  // showDeleteConfirmationDialog,
+  showDeleteConfirmationDialog,
 } from "@/helpers/alert.js";
+import { useProgress } from "@/helpers/progress";
+import defaultAvatar from "@/assets/images/users/user-dummy-img.jpg";
 
 /**
  * Sidebar component
@@ -37,14 +39,21 @@ export default {
   },
   setup() {
     const authStore = useAuthStore();
-    const user = computed(() => authStore.getUser());
     const router = useRouter();
-    const groups = computed(() => user.value?.detailGroups || []);
     const imageUrl = ref("");
     const croppedImageUrl = ref("");
     const isFormUserOpen = ref(false);
     const isFormGroupOpen = ref(false);
     const formGroupTitle = ref("Create");
+
+    const user = ref(null);
+    user.value = authStore.getUser();
+    const groups = computed(() => {
+      return user.value?.groupUsers.map(groupUser => ({
+        groupUserId: groupUser.id,
+        group: groupUser.group
+      })) || [];
+    });
 
     const formUser = reactive({
       id: "",
@@ -79,10 +88,28 @@ export default {
     const groupUserErrorList = computed(() => groupUserStore.response?.error || {});
     const groupUserErrorMessage = computed(() => groupUserStore.response?.message || "");
 
+    const { startProgress, finishProgress, failProgress } = useProgress();
+
+    const getAuthUser = async () => {
+      try {
+        const userId = authStore.getUser().id || '0';
+        const fetchedUser = await userStore.getUserById(userId);
+        authStore.saveUser(fetchedUser);
+        user.value = authStore.getUser();
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+
+    onMounted(async () => {
+      await getAuthUser();
+    });
+
     return {
       user: user,
       router: router,
       groups: groups,
+      getAuthUser: getAuthUser,
       formUser: formUser,
       imageUrl: imageUrl,
       croppedImageUrl: croppedImageUrl,
@@ -103,10 +130,10 @@ export default {
       groupUserErrorList: groupUserErrorList,
       groupUserErrorMessage: groupUserErrorMessage,
       authStore: authStore,
+      startProgress: startProgress,
+      finishProgress: finishProgress,
+      failProgress: failProgress
     };
-  },
-  mounted() {
-    this.getAuthUser();
   },
   data() {
     return {
@@ -143,16 +170,6 @@ export default {
         this.imageUrl = this.user.photo_url;
       }
     },
-    async getAuthUser() {
-      try {
-        const user = await this.userStore.getUserById(this.user.id);
-        await this.authStore.saveUser(user);
-        this.user = await this.authStore.getUser();
-        this.group = this.user.detailGroups || [];
-      } catch (error) {
-        console.error(error);
-      }
-    },
     async saveUser() {
       try {
         if (this.formUser.id) {
@@ -177,41 +194,49 @@ export default {
 
         const group = await this.groupStore.getGroupById(groupId)
 
-        this.formGroup.id = group.id;
+        this.formGroup.id = group.id || '0';
         this.formGroup.name = group.name;
         this.formGroup.description = group.description;
       }
     },
     async saveGroup() {
+      this.startProgress();
       try {
         if (this.formGroup.id) {
           await this.groupStore.updateGroup(this.formGroup);
           if (this.groupStatusCode != 200) {
+            this.failProgress();
             showErrorToast("Failed to update group", this.groupErrorMessage);
           } else {
             this.isFormGroupOpen = false;
+            this.finishProgress();
             showSuccessToast("Group updated successfully!");
           }
         } else {
           const group = await this.groupStore.addGroups(this.formGroup);
           if (this.groupStatusCode != 200) {
+            this.failProgress();
             showErrorToast("Failed to add group", this.groupErrorMessage);
           } else {
             this.isFormGroupOpen = false;
 
-            const groupId = group.id;
-            const userId = this.user.id;
-            const isAdmin = 1;
+            if (group) {
+              const groupId = group.id;
+              const userId = this.user.id || '0';
+              const isAdmin = 1;
 
-            await this.saveGroupUser(groupId, userId, isAdmin);
-            await this.getAuthUser();
-            
-            showSuccessToast("Group added successfully!");
+              await this.saveGroupUser(groupId, userId, isAdmin);
+              await this.getAuthUser();
+              this.finishProgress();
+
+              showSuccessToast("Group added successfully!");
+            }
           }
         }
       } catch (error) {
         console.error(error);
         showErrorToast("Failed to add group", this.groupErrorMessage);
+        this.failProgress();
       }
     },
 
@@ -230,7 +255,28 @@ export default {
         console.error(error);
         showErrorToast("Failed to saved group user", this.groupUserErrorMessage);
       }
-    }
+    },
+    async leaveGroup(groupUserId) {
+      const confirmed = await showDeleteConfirmationDialog();
+
+      if (confirmed) {
+        this.startProgress();
+        try {
+          await this.groupUserStore.deleteGroupUser(groupUserId);
+          await this.getAuthUser();
+          this.finishProgress();
+          showSuccessToast("Leave group successfully");
+        } catch (error) {
+          console.error(error);
+          this.failProgress();
+          showSuccessToast("Leave group failed");
+        }
+      }
+    },
+    onImageProfileError(event) {
+      event.target.src = defaultAvatar;
+    },
+
   },
   watch: {
     $route: {
@@ -345,11 +391,11 @@ export default {
       <BCol cols="12" class="mt-4">
         <BForm class="form-horizontal" role="form">
           <BRow class="mb-3">
-            <label class="col-md-2 col-form-label" for="form-name">Name</label>
+            <label class="col-md-2 col-form-label" for="form-name-user">Name</label>
             <BCol md="10">
               <input class="form-control" :class="{
                 'is-invalid': !!(userErrorList && userErrorList.name),
-              }" id="form-name" placeholder="Masukkan Nama" v-model="formUser.name" />
+              }" id="form-name-user" placeholder="Masukkan Nama" v-model="formUser.name" />
               <template v-if="!!(userErrorList && userErrorList.name)">
                 <div class="invalid-feedback" v-for="(err, index) in userErrorList.name" :key="index">
                   <span>{{ err }}</span>
@@ -362,7 +408,8 @@ export default {
             <BCol md="10">
               <input class="form-control" :class="{
                 'is-invalid': !!(userErrorList && userErrorList.email),
-              }" id="form-email" type="email" placeholder="Masukkan email" v-model="formUser.email" />
+              }" id="form-email" type="email" placeholder="Masukkan email" v-model="formUser.email"
+                autocomplete="email" />
 
               <template v-if="!!(userErrorList && userErrorList.email)">
                 <div class="invalid-feedback" v-for="(err, index) in userErrorList.email" :key="index">
@@ -378,7 +425,8 @@ export default {
                 'is-invalid': !!(
                   userErrorList && userErrorList.password
                 ),
-              }" id="form-password" type="password" placeholder="Masukkan password" v-model="formUser.password" />
+              }" id="form-password" type="password" placeholder="Masukkan password" v-model="formUser.password"
+                autocomplete="current-password" />
 
               <template v-if="!!(userErrorList && userErrorList.password)">
                 <div class="invalid-feedback" v-for="(err, index) in userErrorList.password" :key="index">
@@ -414,11 +462,11 @@ export default {
       <BCol cols="12" class="mt-2">
         <BForm class="form-horizontal" role="form">
           <BRow class="mb-3">
-            <label for="form-name">Name</label>
+            <label for="form-name-group">Name</label>
             <BCol>
               <input class="form-control" :class="{
                 'is-invalid': !!(groupErrorList && groupErrorList.name),
-              }" id="form-name" placeholder="Masukkan nama group" v-model="formGroup.name" />
+              }" id="form-name-group" placeholder="Masukkan nama group" v-model="formGroup.name" />
               <template v-if="!!(groupErrorList && groupErrorList.name)">
                 <div class="invalid-feedback" v-for="(err, index) in groupErrorList.name" :key="index">
                   <span>{{ err }}</span>
@@ -430,7 +478,7 @@ export default {
             <BCol>
               <textarea class="form-control" :class="{
                 'is-invalid': !!(groupErrorList && groupErrorList.description),
-              }" id="form-phone" type="phone" placeholder="Masukkan deskripsi group ..."
+              }" id="form-description" type="text" placeholder="Masukkan deskripsi group ..."
                 v-model="formGroup.description" />
 
               <template v-if="!!(groupErrorList && groupErrorList.description)">
@@ -447,34 +495,35 @@ export default {
 
   <!-- ========== Left Sidebar Start ========== -->
   <div class="vertical-menu sidebar-bg ws-sidebar">
-    <simplebar v-if="!isCondensed" :settings="settings" class="h-100 ws-menu" ref="currentMenu" id="my-element">
-      <div class="d-flex ms-2 align-items-center mt-3" @click="openUserFormModal">
-        <img :src="user.photo_url" alt="User Photo" class="user-photo" />
+    <simplebar v-if="!isCondensed" :settings="settings" class="h-100" ref="currentMenu" id="my-element">
+      <div class="d-flex ms-3 align-items-center my-4 ws-menu" @click="openUserFormModal">
+        <img :src="user.photo_url || 'no-image'" alt="User Photo" class="user-photo" @error="onImageProfileError" />
         <h6 class="font-4 ms-2 mb-0">{{ user.name }}</h6>
       </div>
       <hr>
       <router-link to="/">
-        <div class="p-2 palette-3 mb-3 ws-menu ws-main-menu shadow-sm">
+        <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm">
           <h6 class="font-4 ms-2 mb-0">My Activities</h6>
         </div>
       </router-link>
       <router-link to="/group">
-        <div class="p-2 mb-2 palette-3 d-flex justify-content-between ws-menu ws-main-menu shadow-sm">
+        <div class="p-2 mb-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
           <h6 class="font-4 ms-2 mb-0">Group</h6>
-          <i class="bx bx-search" style="color: #EEEEEE; font-size: medium"></i>
+          <i class="bx bx-search ws-menu" style="color: #EEEEEE; font-size: medium"></i>
         </div>
       </router-link>
       <div v-for="group in groups" :key="group.id"
-        class="p-2 list-group-item d-flex justify-content-between align-items-center ws-menu ws-main-menu">
-        <h6 class="font-4-normal ms-2 mb-0">{{ group.name }}</h6>
-        <i class="bx bx-dots-vertical-rounded" style="color: #EEEEEE; font-size: medium" @click="openGroupFormModal(group.id)"></i>
+        class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu">
+        <h6 class="font-4-normal ms-2 mb-0">{{ group.group.name }}</h6>
+        <i class="bx bx-dots-vertical-rounded ws-menu" style="color: #EEEEEE; font-size: medium"
+          @click="leaveGroup(group.groupUserId)"></i>
       </div>
       <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu" @click="openGroupFormModal('add')">
         <i class="bx bx-plus" style="color: #EEEEEE;"></i>
         <h6 class="font-4 ms-2 mb-0">Create</h6>
       </div>
-      <hr>
-      <div class="ms-2 noti-icon d-flex align-items-center mt-4 ws-menu mb-4" @click="logout">
+      <hr class="mt-4">
+      <div class="noti-icon d-flex align-items-center ws-menu my-4 logout-button" @click="logout">
         <i class="bx bx-log-out-circle" style="color: #EEEEEE;"></i>
         <h6 class="font-4 ms-2 mb-0">Logout</h6>
       </div>
@@ -508,6 +557,10 @@ export default {
   color: #EEEEEE
 }
 
+.logout-button {
+  margin-left: 24%;
+}
+
 .sidebar-bg {
   background-color: #303841;
 }
@@ -517,8 +570,8 @@ export default {
 }
 
 .user-photo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 10px;
