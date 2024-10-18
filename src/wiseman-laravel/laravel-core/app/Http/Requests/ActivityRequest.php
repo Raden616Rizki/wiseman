@@ -42,11 +42,12 @@ class ActivityRequest extends FormRequest
         return [
             'group_id' => 'nullable',
 			'user_id' => 'required',
-			'description' => 'required',
-			'start_time' => 'required',
-			'end_time' => 'required',
-			'is_priority' => 'required',
-			'is_finished' => 'required',
+			'description' => 'nullable',
+			'start_time' => 'nullable',
+			'end_time' => 'nullable',
+			'is_priority' => 'nullable',
+			'is_finished' => 'nullable',
+            'google_calendar_event_id' => 'required',
         ];
     }
 
