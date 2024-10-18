@@ -107,7 +107,7 @@ export default {
       <!-- ============================================================== -->
 
       <div class="main-content">
-        <div class="page-content">
+        <div class="page-content" style="margin-top: -70px;">
           <!-- Start Content-->
           <BContainer fluid>
             <slot />
