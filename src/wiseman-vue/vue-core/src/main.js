@@ -1,12 +1,18 @@
-import { createApp } from 'vue'
+import {
+  createApp
+} from 'vue'
 
 import App from './App.vue'
 import router from "./router";
 import VueApexCharts from "vue3-apexcharts";
 import vClickOutside from "click-outside-vue3";
-import { registerScrollSpy } from 'vue3-scroll-spy';
+import {
+  registerScrollSpy
+} from 'vue3-scroll-spy';
 
-import { vMaska } from "maska"
+import {
+  vMaska
+} from "maska"
 
 import BootstrapVueNext from 'bootstrap-vue-next'
 
@@ -21,6 +27,10 @@ import pinia from '@/state/pinia'
 import 'sweetalert2/dist/sweetalert2.min.css';
 import '@vueform/slider/themes/default.css';
 import VueProgressBar from '@aacassandra/vue3-progressbar'
+
+// PrimeVUe
+import PrimeVue from 'primevue/config';
+import Aura from '@primevue/themes/aura';
 
 // Konfigurasi vue-progressbar
 const rootStyles = getComputedStyle(document.documentElement);
@@ -54,11 +64,21 @@ const app = createApp(App)
   // .use(i18n)
   .use(registerScrollSpy)
   .directive("maska", vMaska)
-  
+  .use(PrimeVue, {
+    theme: {
+      preset: Aura,
+      options: {
+        darkModeSelector: false || 'none',
+      }
+    }
+  })
+
 // Tambahkan VueProgressBar ke globalProperties
 app.config.globalProperties.$Progress = app.config.globalProperties.$Progress || {};
 
-import { axiosInterceptors } from '@/core/interceptor/axios-interceptor'; // Impor fungsi setupInterceptors
+import {
+  axiosInterceptors
+} from '@/core/interceptor/axios-interceptor'; // Impor fungsi setupInterceptors
 axiosInterceptors();
 
 

@@ -511,12 +511,12 @@ export default {
       <hr>
       <router-link to="/">
         <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm">
-          <h6 class="font-4 ms-2 mb-0">My Activities</h6>
+          <p class="font-4 ms-2 mb-0 sidebar-title">My Activities</p>
         </div>
       </router-link>
       <router-link to="/group">
         <div class="p-2 mb-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
-          <h6 class="font-4 ms-2 mb-0">Group</h6>
+          <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
           <i class="bx bx-search ws-menu" style="color: #EEEEEE; font-size: medium"></i>
         </div>
       </router-link>
@@ -573,12 +573,16 @@ export default {
   margin-left: 24%;
 }
 
+.palette-3 {
+  background-color: #00ADB5;
+}
+
 .sidebar-bg {
   background-color: #303841;
 }
 
-.palette-3 {
-  background-color: #00ADB5;
+.sidebar-title {
+  font-size: 14px;
 }
 
 .user-photo {

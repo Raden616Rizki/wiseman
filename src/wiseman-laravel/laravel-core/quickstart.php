@@ -103,14 +103,14 @@ $event = new Event(array(
     ]
 ));
 
-$calendarId = '7309f7c600c606c2e58122946e604579f3e452e8dee47876429a175243a0a9f5@group.calendar.google.com';
+$calendarId = "7309f7c600c606c2e58122946e604579f3e452e8dee47876429a175243a0a9f5@group.calendar.google.com";
 $event = $service->events->insert($calendarId, $event, ['conferenceDataVersion' => 1]);
 var_dump($event->hangoutLink);
 
 // Print the next 10 events on the user's calendar.
 try{
 
-    $calendarId = '7309f7c600c606c2e58122946e604579f3e452e8dee47876429a175243a0a9f5@group.calendar.google.com';
+    $calendarId = "7309f7c600c606c2e58122946e604579f3e452e8dee47876429a175243a0a9f5@group.calendar.google.com";
     $optParams = array(
         'maxResults' => 10,
         'orderBy' => 'startTime',
