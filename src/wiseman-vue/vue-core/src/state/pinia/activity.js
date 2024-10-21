@@ -24,6 +24,8 @@ export const useActivityStore = defineStore('activity', {
         searchQuery: '',
         userId: '',
         groupId: '',
+        startTime: '',
+        endTime: '',
     }),
     actions: {
         openForm(newAction, user) {
@@ -32,7 +34,7 @@ export const useActivityStore = defineStore('activity', {
         },
         async getActivities() {
             try {
-                const url = `${this.apiUrl}/v1/activities?page=${this.current}&perPage=${this.perPage}&description=${this.searchQuery}&userId=${this.userId}&groupId=${this.groupId}`;
+                const url = `${this.apiUrl}/v1/activities?page=${this.current}&perPage=${this.perPage}&description=${this.searchQuery}&userId=${this.userId}&groupId=${this.groupId}&startTime=${this.startTime}&endTime=${this.endTime}`;
                 const res = await axios.get(url);
 
                 const activitiesDataList = res.data.data.list

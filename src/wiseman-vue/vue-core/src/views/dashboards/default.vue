@@ -32,17 +32,17 @@
             <i class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer"
               @click="openGroupFormModal('add')"></i>
           </div>
-          <table class="table bg-white align-middle" style="border-radius: 4px;">
+          <table v-for="activity in activities" :key="activity.id" class="table bg-white align-middle" style="border-radius: 4px;">
             <tr>
               <td style="text-align: center; width: 80px;">
                 <div class="d-flex flex-column align-items-center activity-time">
-                  <p class="mb-0">08:40</p>
+                  <p class="mb-0"> {{ activity.start_time.substr(11,5) }} </p>
                   <p class="mb-0">-</p>
-                  <p class="mb-0">09:20</p>
+                  <p class="mb-0"> {{ activity.end_time.substr(11,5) }} </p>
                 </div>
               </td>
               <td style="width: 100%;">
-                <p class="activity-description mb-0">Deskripsi aktivitas</p>
+                <p class="activity-description mb-0"> {{ activity.description }} </p>
               </td>
               <td style="text-align: center; width: 50px;">
                 <input class="form-check-input activity-check" type="checkbox" value="" id="flexCheckChecked">
@@ -145,12 +145,14 @@ const authStore = useAuthStore();
 const user = authStore.getUser();
 const userId = user.id;
 
-activityStore.userId = userId;
-
 const today = new Date().toISOString().slice(0, 10);
 const date = ref(today); 
 const isActivityFormOpen = ref(false);
 const activityFormTitle = ref("Create");
+
+activityStore.userId = userId;
+activityStore.startTime = date;
+activityStore.endTime = date;
 
 const activityForm = reactive({
   id: "",
@@ -232,7 +234,6 @@ const saveActivity = async () => {
 
 onMounted(async () => {
   await getActivities();
-  console.log(activities.value);
 })
 
 </script>
