@@ -30,25 +30,47 @@
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-4 mb-0">Activity</h6>
             <i class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer"
-              @click="openGroupFormModal('add')"></i>
+              @click="openActivityFormModal('add')"></i>
           </div>
-          <table v-for="activity in activities" :key="activity.id" class="table bg-white align-middle" style="border-radius: 4px;">
+          <table v-for="activity in activities" :key="activity.id" class="table align-middle" :style="{
+            borderRadius: '4px',
+            backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+            overflow: 'hidden',
+            borderCollapse: 'separate',
+          }">
             <tr>
               <td style="text-align: center; width: 80px;">
-                <div class="d-flex flex-column align-items-center activity-time">
-                  <p class="mb-0"> {{ activity.start_time.substr(11,5) }} </p>
+                <div class="d-flex flex-column align-items-center activity-time" :style="{
+                  backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                  color: activity.is_priority === 1 ? 'white' : '',
+                }">
+                  <p class="mb-0"> {{ activity.start_time.substr(11, 5) }} </p>
                   <p class="mb-0">-</p>
-                  <p class="mb-0"> {{ activity.end_time.substr(11,5) }} </p>
+                  <p class="mb-0"> {{ activity.end_time.substr(11, 5) }} </p>
                 </div>
               </td>
               <td style="width: 100%;">
-                <p class="activity-description mb-0"> {{ activity.description }} </p>
+                <p class="activity-description mb-0" :style="{
+                  backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                  color: activity.is_priority === 1 ? 'white' : '',
+                }"> {{ activity.description }} </p>
               </td>
               <td style="text-align: center; width: 50px;">
-                <input class="form-check-input activity-check" type="checkbox" value="" id="flexCheckChecked">
+                <input class="form-check-input activity-check me-2" type="checkbox"
+                  :id="'flexCheckChecked-' + activity.id"
+                  @change="finishActivity(activity.id, $event.target.checked ? 1 : 0)"
+                  :checked="activity.is_finished === 1" style="border: 2px solid #303841;">
               </td>
               <td style="text-align: center; width: 40px;">
-                <i class="bx bx-dots-vertical-rounded memo-bold-font mt-1" style="font-size: 16px;"></i>
+                <div class="d-flex justify-content-center align-items-center" :style="{
+                  backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                  color: activity.is_priority === 1 ? 'white' : '',
+                }">
+                  <i class="bx bx-edit mt-1" @click="openActivityFormModal(activity.id)" v-b-tooltip.hover
+                    title="Update activity" style="font-size: 14px; cursor: pointer;"></i>
+                  <i class="bx bx-trash ms-1 mt-1" @click="deleteActivity(activity.id)" v-b-tooltip.hover
+                    title="Delete activity" style="font-size: 14px; cursor: pointer;"></i>
+                </div>
               </td>
             </tr>
           </table>
@@ -105,7 +127,7 @@
                   </div>
                   <BCol md="2 d-flex">
                     <input class="form-check-input activity-check-form" type="checkbox" id="form-priority-activity"
-                      @change="updatePriority" />
+                      @change="updatePriority" :checked="activityForm.is_priority === 1 || false" />
                     <label class="form-check-label mt-1 ms-1" for="form-priority-activity">
                       Prioritas
                     </label>
@@ -129,7 +151,7 @@ import { useProgress } from "@/helpers/progress";
 import {
   showSuccessToast,
   showErrorToast,
-  // showDeleteConfirmationDialog,
+  showDeleteConfirmationDialog,
 } from "@/helpers/alert.js";
 
 const { startProgress, finishProgress, failProgress } = useProgress();
@@ -146,7 +168,7 @@ const user = authStore.getUser();
 const userId = user.id;
 
 const today = new Date().toISOString().slice(0, 10);
-const date = ref(today); 
+const date = ref(today);
 const isActivityFormOpen = ref(false);
 const activityFormTitle = ref("Create");
 
@@ -165,11 +187,31 @@ const activityForm = reactive({
   is_finished: 0,
 });
 
-const openGroupFormModal = async (groupId) => {
+const openActivityFormModal = async (activityId) => {
   isActivityFormOpen.value = true;
-  if (groupId != 'add') {
+  if (activityId != 'add') {
+    const activity = await activityStore.getActivityById(activityId);
+
+    activityForm.id = activity.id;
+    activityForm.group_id = activity.group_id;
+    activityForm.user_id = activity.user_id;
+    activityForm.description = activity.description;
+    activityForm.start_time = activity.start_time.substr(11, 5);
+    activityForm.end_time = activity.end_time.substr(11, 5);
+    activityForm.is_priority = activity.is_priority;
+    activityForm.is_finished = activity.is_finished;
+
     activityFormTitle.value = 'Update';
   } else {
+    activityForm.id = '';
+    activityForm.group_id = '';
+    activityForm.user_id = user.id;
+    activityForm.description = '';
+    activityForm.start_time = '';
+    activityForm.end_time = '';
+    activityForm.is_priority = 0;
+    activityForm.is_finished = 0;
+
     activityFormTitle.value = 'Create';
   }
 }
@@ -203,11 +245,11 @@ const saveActivity = async () => {
       await activityStore.updateActivity(activityForm);
       if (activityStatusCode.value != 200) {
         failProgress();
-        showErrorToast("Failed to update group", activityErrorMessage);
+        showErrorToast("Failed to update activity", activityErrorMessage);
       } else {
         isActivityFormOpen.value = false;
         finishProgress();
-        showSuccessToast("Group updated successfully!");
+        showSuccessToast("Activity updated successfully!");
       }
     } else {
       console.log(date.value);
@@ -215,21 +257,60 @@ const saveActivity = async () => {
       await activityStore.addActivities(activityForm);
       if (activityStatusCode.value != 200) {
         failProgress();
-        showErrorToast("Failed to add group", activityErrorMessage);
+        showErrorToast("Failed to add activity", activityErrorMessage);
       } else {
         isActivityFormOpen.value = false;
 
         finishProgress();
-        showSuccessToast("Group added successfully!");
+        showSuccessToast("Activity added successfully!");
       }
     }
   } catch (error) {
     console.error(error);
-    showErrorToast("Failed to saved group", activityErrorMessage);
+    showErrorToast("Failed to saved activity", activityErrorMessage);
     failProgress();
   }
 
   await getActivities();
+}
+
+const finishActivity = async (activityId, isFinished) => {
+  try {
+    const activity = await activityStore.getActivityById(activityId);
+
+    activityForm.id = activity.id;
+    activityForm.group_id = activity.group_id;
+    activityForm.user_id = activity.user_id;
+    activityForm.description = activity.description;
+    activityForm.start_time = activity.start_time.substr(11, 5);
+    activityForm.end_time = activity.end_time.substr(11, 5);
+    activityForm.is_priority = activity.is_priority;
+    activityForm.is_finished = isFinished;
+
+    await saveActivity();
+  } catch (error) {
+    console.error(error);
+    showErrorToast("Failed to finish activity", activityErrorMessage);
+  }
+}
+
+const deleteActivity = async (activityId) => {
+  const confirmed = await showDeleteConfirmationDialog();
+
+  if (confirmed) {
+    startProgress();
+    try {
+      await activityStore.deleteActivity(activityId);
+      await getActivities();
+
+      finishProgress();
+      showSuccessToast("Delete activity successfully");
+    } catch (error) {
+      console.error(error);
+      failProgress();
+      showSuccessToast("Delete activity failed");
+    }
+  }
 }
 
 onMounted(async () => {

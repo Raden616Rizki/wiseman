@@ -37,7 +37,6 @@ class ActivityController extends Controller
             'is_priority' => $request->isPriority ?? '',
             'is_finished' => $request->isFinished ?? '',
         ];
-        error_log(json_encode($filter));
 
         $activity = $this->activity->getAll($filter, $request->perPage ?? 25, $request->sort ?? '');
         return response()->success(new BaseCollection(ActivityResource::collection($activity['data']), $activity['data']));

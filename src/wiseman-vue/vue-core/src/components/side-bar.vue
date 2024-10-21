@@ -574,7 +574,8 @@ export default {
 }
 
 .palette-3 {
-  background-color: #00ADB5;
+  /* background-color: #00ADB5; */
+  background-color: #067e82;
 }
 
 .sidebar-bg {
