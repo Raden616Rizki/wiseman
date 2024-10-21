@@ -56,7 +56,7 @@
 
         <!-- ========== Activity Modal ========== -->
         <BModal v-model="isActivityFormOpen" id="modal-standard" :title="activityFormTitle + ' Activity'"
-          title-class="font-18" :ok-title="activityFormTitle" @ok="saveGroup" @hide.prevent
+          title-class="font-18" :ok-title="activityFormTitle" @ok="saveActivity" @hide.prevent
           @cancel="isActivityFormOpen = false" @close="isActivityFormOpen = false">
           <BRow>
             <BCol cols="12" class="mt-2">
@@ -64,26 +64,26 @@
                 <BRow class="mb-3">
                   <BCol>
                     <textarea class="form-control" :class="{
-                      'is-invalid': !!(groupErrorList && groupErrorList.description),
-                    }" id="form-description" type="text" placeholder="Masukkan deskripsi aktivitas ..."
-                      v-model="activityForm.description" />
+                      'is-invalid': !!(activityErrorList && activityErrorList.description),
+                    }" id="form-activity-description" type="text" placeholder="Masukkan deskripsi aktivitas ..."
+                      v-model="activityForm.description" required />
 
-                    <template v-if="!!(groupErrorList && groupErrorList.description)">
-                      <div class="invalid-feedback" v-for="(err, index) in groupErrorList.description" :key="index">
+                    <template v-if="!!(activityErrorList && activityErrorList.description)">
+                      <div class="invalid-feedback" v-for="(err, index) in activityErrorList.description" :key="index">
                         <span>{{ err }}</span>
                       </div>
                     </template>
                   </BCol>
                 </BRow>
-                <Brow class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center" >
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
                     <BCol md="5">
                       <input class="form-control" :class="{
-                        'is-invalid': !!(userErrorList && userErrorList.start_time),
-                      }" id="form-start-activity" placeholder="Start time" v-model="activityForm.start_time" type="time" />
-                      <b-form-timepicker id="timepicker-sm" size="sm" locale="en" class="mb-2"></b-form-timepicker>
-                      <template v-if="!!(userErrorList && userErrorList.start_time)">
-                        <div class="invalid-feedback" v-for="(err, index) in userErrorList.start_time" :key="index">
+                        'is-invalid': !!(activityErrorList && activityErrorList.start_time),
+                      }" id="form-start-activity" placeholder="Start time" v-model="activityForm.start_time"
+                        type="time" required />
+                      <template v-if="!!(activityErrorList && activityErrorList.start_time)">
+                        <div class="invalid-feedback" v-for="(err, index) in activityErrorList.start_time" :key="index">
                           <span>{{ err }}</span>
                         </div>
                       </template>
@@ -93,22 +93,24 @@
                     </BCol>
                     <BCol md="5">
                       <input class="form-control" :class="{
-                        'is-invalid': !!(userErrorList && userErrorList.end_time),
-                      }" id="form-end-activity" placeholder="End ime" v-model="activityForm.end_time" type="time" />
-                      <template v-if="!!(userErrorList && userErrorList.end_time)">
-                        <div class="invalid-feedback" v-for="(err, index) in userErrorList.end_time" :key="index">
+                        'is-invalid': !!(activityErrorList && activityErrorList.end_time),
+                      }" id="form-end-activity" placeholder="End ime" v-model="activityForm.end_time" type="time"
+                        required />
+                      <template v-if="!!(activityErrorList && activityErrorList.end_time)">
+                        <div class="invalid-feedback" v-for="(err, index) in activityErrorList.end_time" :key="index">
                           <span>{{ err }}</span>
                         </div>
                       </template>
                     </BCol>
                   </div>
-                  <BCol md="2">
-                    <input class="form-check-input activity-check-form" type="checkbox" value="" id="flexCheckChecked">
-                    <label class="form-check-label mt-1 ms-1" for="flexCheckDefault">
+                  <BCol md="2 d-flex">
+                    <input class="form-check-input activity-check-form" type="checkbox" id="form-priority-activity"
+                      @change="updatePriority" />
+                    <label class="form-check-label mt-1 ms-1" for="form-priority-activity">
                       Prioritas
                     </label>
                   </BCol>
-                </Brow>
+                </div>
               </BForm>
             </BCol>
           </BRow>
@@ -121,22 +123,44 @@
 <script setup>
 import Layout from "../../layouts/main";
 import DatePicker from 'primevue/datepicker';
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
+import { useActivityStore, useAuthStore } from "@/state/pinia";
+import { useProgress } from "@/helpers/progress";
+import {
+  showSuccessToast,
+  showErrorToast,
+  // showDeleteConfirmationDialog,
+} from "@/helpers/alert.js";
 
-const date = ref();
+const { startProgress, finishProgress, failProgress } = useProgress();
+
+const activityStore = useActivityStore();
+const activities = ref([]);
+
+const activityStatusCode = computed(() => activityStore.response.status);
+const activityErrorList = computed(() => activityStore.response?.error || {});
+const activityErrorMessage = computed(() => activityStore.response?.message || "");
+
+const authStore = useAuthStore();
+const user = authStore.getUser();
+const userId = user.id;
+
+activityStore.userId = userId;
+
+const today = new Date().toISOString().slice(0, 10);
+const date = ref(today); 
 const isActivityFormOpen = ref(false);
 const activityFormTitle = ref("Create");
 
 const activityForm = reactive({
   id: "",
   group_id: "",
-  user_id: "",
-  name: "",
+  user_id: user.id,
   description: "",
   start_time: "",
   end_time: "",
-  is_priority: "",
-  is_finished: "",
+  is_priority: 0,
+  is_finished: 0,
 });
 
 const openGroupFormModal = async (groupId) => {
@@ -147,6 +171,69 @@ const openGroupFormModal = async (groupId) => {
     activityFormTitle.value = 'Create';
   }
 }
+
+const updatePriority = (event) => {
+  activityForm.is_priority = event.target.checked ? 1 : 0;
+};
+
+const getFormattedTime = (dateData, timeData) => {
+  return `${dateData} ${timeData}:00`;
+};
+
+const getActivities = async () => {
+  startProgress();
+  await activityStore.getActivities();
+
+  if (activityStore.activities) {
+    activities.value = activityStore.activities;
+    finishProgress()
+  } else {
+    failProgress();
+  }
+}
+
+const saveActivity = async () => {
+  startProgress();
+  try {
+    activityForm.start_time = getFormattedTime(date.value, activityForm.start_time);
+    activityForm.end_time = getFormattedTime(date.value, activityForm.end_time);
+    if (activityForm.id) {
+      await activityStore.updateActivity(activityForm);
+      if (activityStatusCode.value != 200) {
+        failProgress();
+        showErrorToast("Failed to update group", activityErrorMessage);
+      } else {
+        isActivityFormOpen.value = false;
+        finishProgress();
+        showSuccessToast("Group updated successfully!");
+      }
+    } else {
+      console.log(date.value);
+      console.log(activityForm);
+      await activityStore.addActivities(activityForm);
+      if (activityStatusCode.value != 200) {
+        failProgress();
+        showErrorToast("Failed to add group", activityErrorMessage);
+      } else {
+        isActivityFormOpen.value = false;
+
+        finishProgress();
+        showSuccessToast("Group added successfully!");
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    showErrorToast("Failed to saved group", activityErrorMessage);
+    failProgress();
+  }
+
+  await getActivities();
+}
+
+onMounted(async () => {
+  await getActivities();
+  console.log(activities.value);
+})
 
 </script>
 

@@ -3,11 +3,11 @@ import {
 } from "pinia";
 import axios from 'axios';
 
-export const useUserStore = defineStore('user', {
+export const useActivityStore = defineStore('activity', {
     state: () => ({
         apiUrl: process.env.VUE_APP_APIURL,
-        users: [],
-        user: null,
+        activities: [],
+        activity: null,
         response: {
             status: null,
             message: null,
@@ -22,19 +22,21 @@ export const useUserStore = defineStore('user', {
         current: 1,
         perPage: 5,
         searchQuery: '',
+        userId: '',
+        groupId: '',
     }),
     actions: {
         openForm(newAction, user) {
             this.modalAction.action = newAction
             this.user = user
         },
-        async getUsers() {
+        async getActivities() {
             try {
-                const url = `${this.apiUrl}/v1/users?page=${this.current}&perPage=${this.perPage}&name=${this.searchQuery}`;
+                const url = `${this.apiUrl}/v1/activities?page=${this.current}&perPage=${this.perPage}&description=${this.searchQuery}&userId=${this.userId}&groupId=${this.groupId}`;
                 const res = await axios.get(url);
 
-                const usersDataList = res.data.data.list
-                this.users = usersDataList
+                const activitiesDataList = res.data.data.list
+                this.activities = activitiesDataList
                 this.totalData = res.data.data.meta.total
             } catch (error) {
                 this.response = {
@@ -43,15 +45,15 @@ export const useUserStore = defineStore('user', {
                 };
             } 
         },
-        async getUserById(id) {
+        async getActivityById(id) {
             try {
-                const url = `${this.apiUrl}/v1/users/${id}`;
+                const url = `${this.apiUrl}/v1/activities/${id}`;
                 const res = await axios.get(url);
 
-                const user = res.data.data
-                this.user = user;
+                const activity = res.data.data
+                this.activity = activity;
                 
-                return user;
+                return activity;
             } catch (error) {
                 this.response = {
                     status: error.response ?.status,
@@ -61,16 +63,18 @@ export const useUserStore = defineStore('user', {
         },
         async changePage(newPage) {
             this.current = newPage;
-            await this.getUsers(); 
+            await this.getActivities(); 
         },
         async searchUsers(query) {
             this.searchQuery = query;
             this.current = 1; 
-            await this.getUsers(); 
+            await this.getActivities(); 
         },
-        async addUsers(users) {
+        async addActivities(activities) {
             try {
-                const res = await axios.post(`${this.apiUrl}/v1/users`, users);
+                const url = `${this.apiUrl}/v1/activities`;
+                const res = await axios.post(url, activities);
+
                 this.response = {
                     status: res.status,
                     message: res.data.message
@@ -82,13 +86,13 @@ export const useUserStore = defineStore('user', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getUsers();
+                this.getActivities();
             }
         },
-        async deleteUser(id) {
+        async deleteActivity(id) {
             this.loading = true;
             try {
-                await axios.delete(`${this.apiUrl}/v1/users/${id}`);
+                await axios.delete(`${this.apiUrl}/v1/activities/${id}`);
                 this.response = {
                     status: '200',
                 };
@@ -99,12 +103,14 @@ export const useUserStore = defineStore('user', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getUsers();
+                this.getActivities();
             }
         },
-        async updateUser(users) {
+        async updateActivity(activities) {
             try {
-                await axios.put(`${this.apiUrl}/v1/users/${users.id}`, users);
+                const url = `${this.apiUrl}/v1/activities/${activities.id}`;
+                await axios.put(url, activities);
+                
                 this.response = {
                     status: '200',
                 };

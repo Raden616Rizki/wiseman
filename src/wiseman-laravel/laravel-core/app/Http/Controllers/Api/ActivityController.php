@@ -29,16 +29,16 @@ class ActivityController extends Controller
     public function index(Request $request)
     {
         $filter = [
-            'group_id' => $request->group_id ?? '',
-            'user_id' => $request->user_id ?? '',
+            'group_id' => $request->groupId ?? '',
+            'user_id' => $request->userId ?? '',
             'description' => $request->description ?? '',
-            'start_time' => $request->start_time ?? '',
-            'end_time' => $request->end_time ?? '',
-            'is_priority' => $request->is_priority ?? '',
-            'is_finished' => $request->is_finished ?? '',
+            'start_time' => $request->startTime ?? '',
+            'end_time' => $request->endTime ?? '',
+            'is_priority' => $request->isPriority ?? '',
+            'is_finished' => $request->isFinished ?? '',
         ];
 
-        $activity = $this->activity->getAll($filter, $request->per_page ?? 25, $request->sort ?? '');
+        $activity = $this->activity->getAll($filter, $request->perPage ?? 25, $request->sort ?? '');
         return response()->success(new BaseCollection(ActivityResource::collection($activity['data']), $activity['data']));
     }
 
@@ -61,24 +61,24 @@ class ActivityController extends Controller
 
         $payload = $request->only(['group_id', 'user_id', 'description', 'start_time', 'end_time', 'is_priority', 'is_finished']);
 
-        $user = UserModel::find($payload['user_id']);
+        // $user = UserModel::find($payload['user_id']);
 
-        $this->event->name = $payload['description'];
-        $this->event->description = ($payload['is_priority'] == 1 ? "Aktivitas Diprioritaskan" : "Bukan Aktivitas Prioritas") .
-            ($payload['is_finished'] == 1 ? " - Sudah Selesai" : " - Belum Selesai");
-        $this->event->startDateTime = Carbon::parse($payload['start_time']);
-        $this->event->endDateTime = Carbon::parse($payload['end_time']);
-        $this->event->addAttendee([
-            'email' => $user->email,
-            'name' => $user->name,
-            'comment' => 'Aktivitas Baru',
-            'responseStatus' => 'needsAction',
-        ]);
+        // $this->event->name = $payload['description'];
+        // $this->event->description = ($payload['is_priority'] == 1 ? "Aktivitas Diprioritaskan" : "Bukan Aktivitas Prioritas") .
+        //     ($payload['is_finished'] == 1 ? " - Sudah Selesai" : " - Belum Selesai");
+        // $this->event->startDateTime = Carbon::parse($payload['start_time']);
+        // $this->event->endDateTime = Carbon::parse($payload['end_time']);
+        // $this->event->addAttendee([
+        //     'email' => $user->email,
+        //     'name' => $user->name,
+        //     'comment' => 'Aktivitas Baru',
+        //     'responseStatus' => 'needsAction',
+        // ]);
 
-        $this->event->save();
+        // $this->event->save();
 
-        $eventId = Event::get();
-        dd($eventId);
+        // $eventId = Event::get();
+        // dd($eventId);
 
         $activity = $this->activity->create($payload);
 
@@ -99,23 +99,23 @@ class ActivityController extends Controller
 
         $payload = $request->only(['group_id', 'user_id', 'description', 'start_time', 'end_time', 'is_priority', 'is_finished', 'google_calendar_event_id']);
 
-        $user = UserModel::find($payload['user_id']);
-        $eventId = $payload['google_calendar_event_id'];
-        $event = Event::find($eventId);
-        $event->name = $payload['description'];
-        $event->description = ($payload['is_priority'] == 1 ? "Aktivitas Diprioritaskan" : "Bukan Aktivitas Prioritas") .
-            ($payload['is_finished'] == 1 ? " - Sudah Selesai" : " - Belum Selesai");
-        $event->startDateTime = Carbon::parse($payload['start_time']);
-        $event->endDateTime = Carbon::parse($payload['end_time']);
-        $event->addAttendee([
-            'email' => $user->email,
-            'name' => $user->name,
-            'comment' => 'Aktivitas Baru',
-            'responseStatus' => 'needsAction',
-        ]);
+        // $user = UserModel::find($payload['user_id']);
+        // $eventId = $payload['google_calendar_event_id'];
+        // $event = Event::find($eventId);
+        // $event->name = $payload['description'];
+        // $event->description = ($payload['is_priority'] == 1 ? "Aktivitas Diprioritaskan" : "Bukan Aktivitas Prioritas") .
+        //     ($payload['is_finished'] == 1 ? " - Sudah Selesai" : " - Belum Selesai");
+        // $event->startDateTime = Carbon::parse($payload['start_time']);
+        // $event->endDateTime = Carbon::parse($payload['end_time']);
+        // $event->addAttendee([
+        //     'email' => $user->email,
+        //     'name' => $user->name,
+        //     'comment' => 'Aktivitas Baru',
+        //     'responseStatus' => 'needsAction',
+        // ]);
 
-        $event->save();
-        dd($event);
+        // $event->save();
+        // dd($event);
 
         $activity = $this->activity->update($payload, $id ?? '');
 
@@ -128,9 +128,9 @@ class ActivityController extends Controller
 
     public function destroy($id)
     {
-        $event = Event::find($id);
+        // $event = Event::find($id);
 
-        $event->delete();
+        // $event->delete();
 
         $activity = $this->activity->delete($id);
 
