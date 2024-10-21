@@ -47,7 +47,7 @@ class ActivityRequest extends FormRequest
 			'end_time' => 'nullable',
 			'is_priority' => 'nullable',
 			'is_finished' => 'nullable',
-            'google_calendar_event_id' => 'required',
+            'google_calendar_event_id' => 'nullable',
         ];
     }
 
