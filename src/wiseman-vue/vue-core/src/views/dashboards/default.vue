@@ -4,7 +4,7 @@
       <div class="m-3 left-card">
         <div class="card main-bg p-3">
           <h6 class="font-4 mb-3">Calendar</h6>
-          <DatePicker v-model="date" inline class="w-full sm:w-[30rem]" />
+          <DatePicker v-model="date" inline class="w-full sm:w-[30rem]" dateFormat="yy-mm-dd" @update:modelValue="changeDate"/>
         </div>
         <div class="card main-bg p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -167,14 +167,11 @@ const authStore = useAuthStore();
 const user = authStore.getUser();
 const userId = user.id;
 
-const today = new Date().toISOString().slice(0, 10);
-const date = ref(today);
+const date = ref('');
 const isActivityFormOpen = ref(false);
 const activityFormTitle = ref("Create");
 
 activityStore.userId = userId;
-activityStore.startTime = date;
-activityStore.endTime = date;
 
 const activityForm = reactive({
   id: "",
@@ -223,6 +220,24 @@ const updatePriority = (event) => {
 const getFormattedTime = (dateData, timeData) => {
   return `${dateData} ${timeData}:00`;
 };
+
+const getFormattedDate = (dateData) => {
+  const year = dateData.getFullYear();
+  const month = String(dateData.getMonth() + 1).padStart(2, '0');
+  const day = String(dateData.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
+const changeDate = async (dateData) => {
+  const oldFormattedDate = dateData;
+  date.value = getFormattedDate(dateData);
+  activityStore.startTime = date.value;
+  activityStore.endTime = date.value;
+
+  await getActivities();
+  date.value = oldFormattedDate;
+}
 
 const getActivities = async () => {
   startProgress();
@@ -314,6 +329,11 @@ const deleteActivity = async (activityId) => {
 }
 
 onMounted(async () => {
+  const today = new Date().toISOString().slice(0, 10);
+  date.value = today
+  activityStore.startTime = date.value;
+  activityStore.endTime = date.value;
+
   await getActivities();
 })
 
