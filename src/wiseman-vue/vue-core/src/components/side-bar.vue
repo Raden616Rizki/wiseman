@@ -166,7 +166,7 @@ export default {
         this.formUser.name = this.user.name;
         this.formUser.email = this.user.email;
         this.formUser.password = "";
-        this.formUser.photo = this.user.photo_url;
+        // this.formUser.photo = this.user.photo_url;
         this.formUser.phone_number = this.user.phone_number;
         this.imageUrl = this.user.photo_url;
       }
@@ -179,7 +179,8 @@ export default {
             showErrorToast("Failed to add user", this.userErrorMessage);
           } else {
             this.isFormUserOpen = false;
-            // await getUsers();
+            await this.getAuthUser();
+
             showSuccessToast("User Edited successfully!");
           }
         }
@@ -284,7 +285,12 @@ export default {
     onImageProfileError(event) {
       event.target.src = defaultAvatar;
     },
-
+    openGroup(groupId) {
+      this.router.push({ name: 'default', query: { id: groupId } });
+    },
+    clearEditImage() {
+      this.imageUrl = '';
+    }
   },
   watch: {
     $route: {
@@ -389,7 +395,15 @@ export default {
     ok-title="Update Profile" @ok="saveUser" @hide.prevent @cancel="isFormUserOpen = false"
     @close="isFormUserOpen = false">
     <BRow>
-      <BCol cols="12">
+      <BCol v-if="imageUrl" cols="12">
+        <div class="preview d-flex">
+          <div class="delete-button" @click="clearEditImage">
+            <BButton class="btn btn-sm btn-danger"><i class="mdi mdi-delete-outline"></i></BButton>
+          </div>
+          <img :src="imageUrl" alt="Cropped Image" class="mx-auto" />
+        </div>
+      </BCol>
+      <BCol v-else cols="12">
         <ImageCropper :aspectRatio="1 / 1" :uploadText="'Letakkan foto disini atau klik untuk mengunggah'"
           @update:imageUrl="imageUrl = $event" @update:croppedImageUrl="
             croppedImageUrl = $event;
@@ -522,12 +536,12 @@ export default {
       </router-link>
       <div v-for="group in groups" :key="group.id"
         class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu">
-        <h6 class="font-4-normal ms-2 mb-0">{{ group.group.name }}</h6>
+        <h6 class="font-4-normal ms-2 mb-0" @click="openGroup(group.group.id)" role="button">{{ group.group.name }}</h6>
         <div class="d-flex justify-content-center align-items-center">
-          <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;"
-            @click="leaveGroup(group.groupUserId)" v-b-tooltip.hover title="Leave group"></i>
-          <i class="bx bx-edit ws-menu" style="color: #EEEEEE;"
-            @click="openGroupFormModal(group.group.id)" v-b-tooltip.hover title="Edit group"></i>
+          <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
+            v-b-tooltip.hover title="Leave group"></i>
+          <i class="bx bx-edit ws-menu" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
+            v-b-tooltip.hover title="Edit group"></i>
         </div>
       </div>
       <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu" @click="openGroupFormModal('add')">
@@ -549,13 +563,17 @@ export default {
 </template>
 
 <style>
-.ws-main-menu {
-  width: 90%;
-  border-top-right-radius: 32px;
-  border-bottom-right-radius: 32px;
-}
-
-.ws-menu {
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
@@ -578,6 +596,16 @@ export default {
   background-color: #067e82;
 }
 
+.preview {
+  border: 2px dashed var(--bs-border-color) !important;
+  border-radius: 6px;
+  margin-top: 20px;
+}
+
+.preview img {
+  max-width: 100%;
+}
+
 .sidebar-bg {
   background-color: #303841;
 }
@@ -593,6 +621,16 @@ export default {
   object-fit: cover;
   margin-right: 10px;
   background-color: #EEEEEE;
+}
+
+.ws-main-menu {
+  width: 90%;
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 32px;
+}
+
+.ws-menu {
+  cursor: pointer;
 }
 
 .ws-sidebar {

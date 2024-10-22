@@ -6,12 +6,12 @@ export default [
     meta: { title: "Dashboard", authRequired: true },
     component: () => import("../views/dashboards/default")
   },
-  {
-    path: "/user",
-    name: "user",
-    meta: { title: "Master User", authRequired: true },
-    component: () => import("../views/user")
-  },
+  // {
+  //   path: "/user",
+  //   name: "user",
+  //   meta: { title: "Master User", authRequired: true },
+  //   component: () => import("../views/user")
+  // },
   {
     path: "/group",
     name: "group",

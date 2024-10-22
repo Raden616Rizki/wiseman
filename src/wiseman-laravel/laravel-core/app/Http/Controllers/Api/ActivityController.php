@@ -86,8 +86,6 @@ class ActivityController extends Controller
             return response()->failed($activity['error']);
         }
 
-        // $this->integrateWithGoogleCalendar('create', $activity['data']);
-
         return response()->success(new ActivityResource($activity['data']), "Data berhasil ditambahkan");
     }
 

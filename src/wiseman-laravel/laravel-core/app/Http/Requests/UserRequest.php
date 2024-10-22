@@ -62,7 +62,8 @@ class UserRequest extends FormRequest
             'name' => 'nullable|max:100',
             'photo' => 'nullable|file|image',
             'email' => 'nullable|email|unique:m_user,email,'. $this->id,
-            'phone_number' => 'numeric',
+            'password' => 'nullable|min:6',
+            'phone_number' => 'nullable|numeric',
             // 'm_user_roles_id' => 'nullable',
         ];
     }

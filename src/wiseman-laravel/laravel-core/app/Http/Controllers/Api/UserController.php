@@ -63,6 +63,8 @@ class UserController extends Controller
     public function update(UserRequest $request, $id)
     {
         if (isset($request->validator) && $request->validator->fails()) {
+        error_log($request->validator->errors());
+
             return response()->failed($request->validator->errors());
         }
 
