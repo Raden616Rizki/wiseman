@@ -2,7 +2,7 @@
 import simplebar from "simplebar-vue";
 import SideNav from "./side-nav";
 import { useAuthStore } from "@/state/pinia";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import ImageCropper from "@/components/widgets/cropper";
 import { ref, computed, reactive, onMounted } from "vue";
 import { useUserStore, useGroupStore, useGroupUserStore } from "@/state/pinia";
@@ -40,11 +40,13 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const router = useRouter();
+    const route = useRoute();
     const imageUrl = ref("");
     const croppedImageUrl = ref("");
     const isFormUserOpen = ref(false);
     const isFormGroupOpen = ref(false);
     const formGroupTitle = ref("Create");
+    const groupId = route.query.id;
 
     const user = ref(null);
     user.value = authStore.getUser();
@@ -54,6 +56,7 @@ export default {
         group: groupUser.group
       })) || [];
     });
+    const group = ref("");
 
     const formUser = reactive({
       id: "",
@@ -103,12 +106,17 @@ export default {
 
     onMounted(async () => {
       await getAuthUser();
+
+      if (groupId) {
+        group.value = await groupStore.getGroupById(groupId);
+      }
     });
 
     return {
       user: user,
       router: router,
       groups: groups,
+      group: group,
       getAuthUser: getAuthUser,
       formUser: formUser,
       imageUrl: imageUrl,
@@ -134,6 +142,8 @@ export default {
       finishProgress: finishProgress,
       failProgress: failProgress,
       defaultAvatar: defaultAvatar,
+      route: route,
+      groupId: groupId,
     };
   },
   data() {
@@ -285,8 +295,13 @@ export default {
     onImageProfileError(event) {
       event.target.src = defaultAvatar;
     },
-    openGroup(groupId) {
+    async openGroup(groupId) {
       this.router.push({ name: 'default', query: { id: groupId } });
+      this.groupId = groupId;
+
+      this.startProgress();
+      this.group = await this.groupStore.getGroupById(this.groupId);
+      this.finishProgress();
     },
     clearEditImage() {
       this.imageUrl = '';
@@ -529,7 +544,7 @@ export default {
         </div>
       </router-link>
       <router-link to="/group">
-        <div class="p-2 mb-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
+        <div class="p-2 mb-2 palette-3 d-flex justify-content-between align-items-center ws-main-menu shadow-sm">
           <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
           <i class="bx bx-search ws-menu" style="color: #EEEEEE; font-size: medium"></i>
         </div>
@@ -547,6 +562,9 @@ export default {
       <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu" @click="openGroupFormModal('add')">
         <i class="bx bx-plus" style="color: #EEEEEE;"></i>
         <h6 class="font-4 ms-2 mb-0">Create</h6>
+      </div>
+      <div v-if="groupId" class="p-2 mb-2 mt-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
+        <p class="font-4 ms-2 mb-0 sidebar-title"> {{ group.name }} </p>
       </div>
       <hr class="mt-4">
       <div class="noti-icon d-flex align-items-center ws-menu my-4 logout-button" @click="logout">

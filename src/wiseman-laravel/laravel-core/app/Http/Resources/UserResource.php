@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 
 use Illuminate\Support\Facades\Storage;
-use App\Http\Resources\ActivityResource;
 use App\Http\Resources\GroupUserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,8 +20,7 @@ class UserResource extends JsonResource
 			'phone_number' => $this->phone_number,
 			// 'photo' => $this->photo,
             'photo_url' => !empty($this->photo) ? Storage::disk('public')->url($this->photo) : null,
-        	'groupUsers' => GroupUserResource::collection($this->groupUsers),
-			// 'activities' => ActivityResource::collection($this->activities),
+        	'groupUsers' => GroupUserResource::collection($this->groupUsers)
 		];
     }
 }

@@ -4,7 +4,8 @@
       <div class="m-3 left-card">
         <div class="card main-bg p-3">
           <h6 class="font-4 mb-3">Calendar</h6>
-          <DatePicker v-model="date" inline class="w-full sm:w-[30rem]" dateFormat="yy-mm-dd" @update:modelValue="changeDate"/>
+          <DatePicker v-model="date" inline class="w-full sm:w-[30rem]" dateFormat="yy-mm-dd"
+            @update:modelValue="changeDate" />
         </div>
         <div class="card main-bg p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -145,7 +146,7 @@
 <script setup>
 import Layout from "../../layouts/main";
 import DatePicker from 'primevue/datepicker';
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed, watch } from "vue";
 import { useActivityStore, useAuthStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import {
@@ -153,6 +154,14 @@ import {
   showErrorToast,
   showDeleteConfirmationDialog,
 } from "@/helpers/alert.js";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+const groupId = ref(route.query.id);
+
+watch(() => route.query.id, (newVal) => {
+  groupId.value = newVal;
+});
 
 const { startProgress, finishProgress, failProgress } = useProgress();
 
