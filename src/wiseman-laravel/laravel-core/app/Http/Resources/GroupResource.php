@@ -12,7 +12,7 @@ class GroupResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
 			'description' => $this->description,
-        	// 'groupDetails' => GroupUserDetailResource::collection($this->groupUsers),
+        	'groupDetails' => GroupDetailResource::collection($this->groupUsers),
 			// 'activities' => ActivityResource::collection($this->activities),
 			// 'votings' => VotingResource::collection($this->votings),
 			// 'archives' => ArchiveResource::collection($this->archives),

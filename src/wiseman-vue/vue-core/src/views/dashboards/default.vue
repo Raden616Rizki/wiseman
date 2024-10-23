@@ -262,7 +262,12 @@ const openActivityFormModal = async (activityId) => {
     activityFormTitle.value = 'Update';
   } else {
     activityForm.id = '';
-    activityForm.group_id = '';
+
+    if (groupId.value) {
+      activityForm.group_id = groupId.value;
+    } else {
+      activityForm.group_id = '';
+    }
     activityForm.user_id = user.id;
     activityForm.description = '';
     activityForm.start_time = '';

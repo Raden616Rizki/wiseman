@@ -46,7 +46,7 @@ export default {
     const isFormUserOpen = ref(false);
     const isFormGroupOpen = ref(false);
     const formGroupTitle = ref("Create");
-    const groupId = route.query.id;
+    const groupId = ref(route.query.id);
 
     const user = ref(null);
     user.value = authStore.getUser();
@@ -107,8 +107,8 @@ export default {
     onMounted(async () => {
       await getAuthUser();
 
-      if (groupId) {
-        group.value = await groupStore.getGroupById(groupId);
+      if (groupId.value) {
+        group.value = await groupStore.getGroupById(groupId.value);
       }
     });
 
@@ -165,6 +165,10 @@ export default {
                 currentPosition + 300;
         }
       }, 300);
+    },
+    goToDashboard() {
+      this.groupId = null;
+      this.router.push('/');
     },
     logout() {
       this.router.push('/logout');
@@ -296,8 +300,9 @@ export default {
       event.target.src = defaultAvatar;
     },
     async openGroup(groupId) {
-      this.router.push({ name: 'default', query: { id: groupId } });
       this.groupId = groupId;
+
+      this.router.push({ name: 'default', query: { id: groupId } });
 
       this.startProgress();
       this.group = await this.groupStore.getGroupById(this.groupId);
@@ -538,11 +543,9 @@ export default {
         <h6 class="font-4 ms-2 mb-0">{{ user.name }}</h6>
       </div>
       <hr>
-      <router-link to="/">
-        <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm">
+        <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm" @click="goToDashboard">
           <p class="font-4 ms-2 mb-0 sidebar-title">My Activities</p>
         </div>
-      </router-link>
       <router-link to="/group">
         <div class="p-2 mb-2 palette-3 d-flex justify-content-between align-items-center ws-main-menu shadow-sm">
           <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
