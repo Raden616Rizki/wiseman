@@ -305,7 +305,6 @@ export default {
 
       this.startProgress();
       this.group = await this.groupStore.getGroupById(this.groupId);
-      console.log(this.group);
       this.finishProgress();
     },
     clearEditImage() {

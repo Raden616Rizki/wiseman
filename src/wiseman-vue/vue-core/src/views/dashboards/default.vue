@@ -84,6 +84,11 @@
                 </div>
               </td>
               <td style="width: 100%;">
+                <p v-if="activity.group_id" class="activity-description mb-0" :style="{
+                  backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                  color: activity.is_priority === 1 ? 'white' : '',
+                  fontWeight: 'bold',
+                }"> {{ activity.group.name }} </p>
                 <p class="activity-description mb-0" :style="{
                   backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
                   color: activity.is_priority === 1 ? 'white' : '',
@@ -194,6 +199,7 @@ const groupId = ref(route.query.id);
 
 watch(() => route.query.id, (newVal) => {
   groupId.value = newVal;
+  getMemos();
 });
 
 const { startProgress, finishProgress, failProgress } = useProgress();
@@ -217,6 +223,7 @@ const groups = computed(() => {
 });
 
 const date = ref('');
+const choosedDate = ref('');
 const isActivityFormOpen = ref(false);
 const activityFormTitle = ref("New");
 
@@ -315,8 +322,9 @@ const getFormattedDate = (dateData) => {
 const changeDate = async (dateData) => {
   const oldFormattedDate = dateData;
   date.value = getFormattedDate(dateData);
-  activityStore.startTime = date.value;
-  activityStore.endTime = date.value;
+  choosedDate.value = date.value;
+  activityStore.startTime = choosedDate.value;
+  activityStore.endTime = choosedDate.value;
 
   await getActivities();
   date.value = oldFormattedDate;
@@ -337,8 +345,8 @@ const getActivities = async () => {
 const saveActivity = async () => {
   startProgress();
   try {
-    activityForm.start_time = getFormattedTime(date.value, activityForm.start_time);
-    activityForm.end_time = getFormattedTime(date.value, activityForm.end_time);
+    activityForm.start_time = getFormattedTime(choosedDate.value, activityForm.start_time);
+    activityForm.end_time = getFormattedTime(choosedDate.value, activityForm.end_time);
     if (activityForm.id) {
       await activityStore.updateActivity(activityForm);
       if (activityStatusCode.value != 200) {
@@ -350,8 +358,6 @@ const saveActivity = async () => {
         showSuccessToast("Activity updated successfully!");
       }
     } else {
-      console.log(date.value);
-      console.log(activityForm);
       await activityStore.addActivities(activityForm);
       if (activityStatusCode.value != 200) {
         failProgress();
@@ -432,8 +438,9 @@ import {
   deleteDoc,
   setDoc,
   addDoc,
-  orderBy,
-  query
+  // orderBy,
+  query,
+  where
 } from 'firebase/firestore';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -482,17 +489,23 @@ const deleteMemo = async (memoId) => {
   }
 }
 
-onMounted(async () => {
-  const today = new Date().toISOString().slice(0, 10);
-  date.value = today
-  activityStore.startTime = date.value;
-  activityStore.endTime = date.value;
+//Firebase
+const latestQuery = ref(query(collection(db, "memo")));
 
-  await getActivities();
+let unsubscribe = null;
 
-  //Firebase
-  const latestQuery = query(collection(db, "memo"), orderBy('date'));
-  const liveMemos = onSnapshot(latestQuery, (snapshot) => {
+const getMemos = () => {
+  if (unsubscribe) {
+    unsubscribe();
+  }
+
+  if (groupId.value) {
+    latestQuery.value = query(collection(db, "memo"), where('group_id', '==', groupId.value));
+  } else {
+    latestQuery.value = query(collection(db, "memo"))
+  }
+
+  unsubscribe = onSnapshot(latestQuery.value, (snapshot) => {
     memos.value = snapshot.docs.map((doc) => {
       return {
         id: doc.id,
@@ -500,11 +513,28 @@ onMounted(async () => {
         groupName: doc.data().group_name,
         message: doc.data().message,
         time: doc.data().time,
-        date: doc.data().date
-      }
+        date: doc.data().date,
+      };
     });
   });
-  onUnmounted(liveMemos);
+};
+
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe();
+  }
+});
+
+onMounted(async () => {
+  const today = new Date();
+  const formattedToday = getFormattedDate(today)
+
+  date.value = formattedToday
+  activityStore.startTime = date.value;
+  activityStore.endTime = date.value;
+
+  await getActivities();
+  getMemos();
 });
 
 </script>

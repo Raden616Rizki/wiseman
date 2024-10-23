@@ -54,7 +54,7 @@ class ActivityModel extends Model implements CrudInterface
 			$query->where('is_finished', 'LIKE', '%' . $filter['is_finished'] . '%');
 		}
 
-        $sort = $sort ?: 'id DESC';
+        $sort = $sort ?: 'start_time ASC';
         $query->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 
