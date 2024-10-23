@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GroupResource extends JsonResource
+class ShowGroupResource extends JsonResource
 {
     public function toArray($request)
     {
@@ -12,6 +12,7 @@ class GroupResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
 			'description' => $this->description,
+        	'groupDetails' => GroupDetailResource::collection($this->groupUsers),
 		];
     }
 }

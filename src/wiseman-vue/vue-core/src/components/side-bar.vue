@@ -180,7 +180,6 @@ export default {
         this.formUser.name = this.user.name;
         this.formUser.email = this.user.email;
         this.formUser.password = "";
-        // this.formUser.photo = this.user.photo_url;
         this.formUser.phone_number = this.user.phone_number;
         this.imageUrl = this.user.photo_url;
       }
@@ -306,6 +305,7 @@ export default {
 
       this.startProgress();
       this.group = await this.groupStore.getGroupById(this.groupId);
+      console.log(this.group);
       this.finishProgress();
     },
     clearEditImage() {
@@ -543,9 +543,9 @@ export default {
         <h6 class="font-4 ms-2 mb-0">{{ user.name }}</h6>
       </div>
       <hr>
-        <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm" @click="goToDashboard">
-          <p class="font-4 ms-2 mb-0 sidebar-title">My Activities</p>
-        </div>
+      <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm" @click="goToDashboard">
+        <p class="font-4 ms-2 mb-0 sidebar-title">My Activities</p>
+      </div>
       <router-link to="/group">
         <div class="p-2 mb-2 palette-3 d-flex justify-content-between align-items-center ws-main-menu shadow-sm">
           <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
@@ -568,6 +568,18 @@ export default {
       </div>
       <div v-if="groupId" class="p-2 mb-2 mt-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
         <p class="font-4 ms-2 mb-0 sidebar-title"> {{ group.name }} </p>
+      </div>
+      <div v-if="groupId">
+        <div v-for="member in group.groupDetails" :key="member.id"
+          class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu">
+          <h6 class="font-4-normal ms-2 mb-0">
+            {{ member.user.name }}
+          </h6>
+          <div class="d-flex justify-content-center align-items-center">
+            <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Delete Member"></i>
+            <i class="bx bx-plus ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Add task"></i>
+          </div>
+        </div>
       </div>
       <hr class="mt-4">
       <div class="noti-icon d-flex align-items-center ws-menu my-4 logout-button" @click="logout">

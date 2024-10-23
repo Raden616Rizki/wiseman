@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GroupRequest;
 use App\Http\Resources\BaseCollection;
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\ShowGroupResource;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -37,7 +38,7 @@ class GroupController extends Controller
             return response()->failed(['Mohon maaf data tidak ditemukan'], 404);
         }
 
-        return response()->success(new GroupResource($group['data']));
+        return response()->success(new ShowGroupResource($group['data']));
     }
 
     public function store(GroupRequest $request)

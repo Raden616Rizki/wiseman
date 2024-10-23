@@ -11,7 +11,7 @@ class GroupDetailResource extends JsonResource
     {
         return [
             'id' => $this->id,
-			'is_admin' => $this->is_admin,
+			'isAdmin' => $this->is_admin,
             'user' => new GroupUserDetailResource($this->user),
         ];
     }
