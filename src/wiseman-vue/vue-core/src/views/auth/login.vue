@@ -11,11 +11,11 @@
                 </BRow>
               </div>
               <BFormGroup class="mb-3" id="input-group-1" label="Email" label-for="input-1">
-                <BFormInput id="input-1" v-model="formModel.email" type="text" placeholder="Enter email" required></BFormInput>
+                <BFormInput id="input-1" v-model="formModel.email" type="text" placeholder="Enter email" required autocomplete="current-email"></BFormInput>
               </BFormGroup>
 
               <BFormGroup class="mb-3" id="input-group-2" label="Password" label-for="input-2">
-                <BFormInput id="input-2" v-model="formModel.password" type="password" placeholder="Enter password" required>
+                <BFormInput id="input-2" v-model="formModel.password" type="password" placeholder="Enter password" required autocomplete="current-password">
                 </BFormInput>
               </BFormGroup>
               <div class="mt-4 d-grid">

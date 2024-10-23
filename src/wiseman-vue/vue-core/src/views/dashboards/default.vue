@@ -10,18 +10,51 @@
         <div class="card main-bg p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-4 mb-0">Memo</h6>
-            <i class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px;"></i>
+            <i class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer;"
+              @click="openMemoFormModal('add')"></i>
+
+            <!-- ========== Memo Modal ========== -->
+            <BModal v-model="isMemoFormOpen" id="modal-standard" :title="memoFormTitle + ' Memo'" title-class="font-18"
+              :ok-title="memoFormTitle" @ok="saveMemo" @hide.prevent @cancel="isMemoFormOpen = false"
+              @close="isMemoFormOpen = false">
+              <BRow>
+                <BCol cols="12" class="mt-2">
+                  <BForm class="form-horizontal" role="form">
+                    <BRow class="mb-3">
+                      <BCol>
+                        <textarea class="form-control" id="form-memo-message" type="text"
+                          placeholder="Masukkan pesan memo ..." v-model="memoForm.message" required />
+                      </BCol>
+                    </BRow>
+                  </BForm>
+                  <BRow>
+                    <BCol>
+                      <BFormSelect v-model="memoForm.group_id" class="w-100 custom-select">
+                        <option disabled value="">Pilih Group</option>
+                        <option v-for="group in groups" :key="group.id" :value="group.id">{{ group.name }}</option>
+                      </BFormSelect>
+                    </BCol>
+                  </BRow>
+                </BCol>
+              </BRow>
+            </BModal>
           </div>
-          <div class="card bg-white p-2">
+          <div v-for="memo in memos" :key="memo.id" class="card bg-white p-2">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <p class="mb-0 memo-bold-font">Group Alpha</p>
-              <i class="bx bx-dots-vertical-rounded memo-bold-font" style="font-size: 16px;"></i>
+              <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
+              <div>
+                <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Update memo"
+                  style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
+                <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Delete memo"
+                  style="font-size: 16px; cursor: pointer;" @click="deleteMemo(memo.id)"></i>
+              </div>
             </div>
             <div>
-              <p>Pesan Memo</p>
+              <p> {{ memo.message }} </p>
             </div>
-            <div>
-              <p class="memo-bold-font mb-0 d-flex justify-content-end">08:49 06/09/2024</p>
+            <div class="d-flex justify-content-end">
+              <p class="mb-0"> {{ memo.time }} </p>
+              <p class="memo-bold-font mb-0 ms-2"> {{ memo.date }} </p>
             </div>
           </div>
         </div>
@@ -146,8 +179,8 @@
 <script setup>
 import Layout from "../../layouts/main";
 import DatePicker from 'primevue/datepicker';
-import { ref, reactive, onMounted, computed, watch } from "vue";
-import { useActivityStore, useAuthStore } from "@/state/pinia";
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from "vue";
+import { useActivityStore, useAuthStore, useGroupStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import {
   showSuccessToast,
@@ -176,9 +209,20 @@ const authStore = useAuthStore();
 const user = authStore.getUser();
 const userId = user.id;
 
+const groupStore = useGroupStore();
+const groups = computed(() => {
+  return user.groupUsers.map(groupUser =>
+    groupUser.group
+  ) || [];
+});
+
 const date = ref('');
 const isActivityFormOpen = ref(false);
-const activityFormTitle = ref("Create");
+const activityFormTitle = ref("New");
+
+const isMemoFormOpen = ref(false);
+const memoFormTitle = ref("Create");
+const choosedMemoId = ref("");
 
 activityStore.userId = userId;
 
@@ -191,6 +235,14 @@ const activityForm = reactive({
   end_time: "",
   is_priority: 0,
   is_finished: 0,
+});
+
+const memoForm = reactive({
+  group_id: "",
+  group_name: "",
+  message: "",
+  date: new Date().toISOString().slice(0, 10),
+  time: ""
 });
 
 const openActivityFormModal = async (activityId) => {
@@ -218,7 +270,24 @@ const openActivityFormModal = async (activityId) => {
     activityForm.is_priority = 0;
     activityForm.is_finished = 0;
 
-    activityFormTitle.value = 'Create';
+    activityFormTitle.value = 'New';
+  }
+}
+
+const openMemoFormModal = async (memo) => {
+  isMemoFormOpen.value = true;
+  if (memo != 'add') {
+    memoForm.group_id = memo.groupId;
+    memoForm.group_name = memo.groupName;
+    memoForm.message = memo.message;
+    choosedMemoId.value = memo.id;
+    memoFormTitle.value = 'Update';
+  } else {
+    memoForm.group_id = "";
+    memoForm.group_name = "";
+    memoForm.message = "";
+    choosedMemoId.value = "";
+    memoFormTitle.value = 'Create';
   }
 }
 
@@ -337,6 +406,86 @@ const deleteActivity = async (activityId) => {
   }
 }
 
+const getCurrentTime = () => {
+  const now = new Date();
+
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  const currentTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+  return currentTime;
+}
+
+// Firebase
+import {
+  getFirestore,
+  onSnapshot,
+  collection,
+  doc,
+  deleteDoc,
+  setDoc,
+  addDoc,
+  orderBy,
+  query
+} from 'firebase/firestore';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCc_sK7DV60666AlMbovDiZJp1YAVNwJgU",
+  authDomain: "wiseman-131e0.firebaseapp.com",
+  projectId: "wiseman-131e0",
+  storageBucket: "wiseman-131e0.appspot.com",
+  messagingSenderId: "695127333701",
+  appId: "1:695127333701:web:f3b5b6facf9f81908dfc2c",
+  measurementId: "G-NVGFK72G38"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);
+const db = getFirestore(app);
+
+const memos = ref([]);
+
+const saveMemo = async () => {
+  memoForm.time = getCurrentTime();
+
+  const group = await groupStore.getGroupById(memoForm.group_id);
+  memoForm.group_name = group.name;
+
+  if (memoFormTitle.value == 'Create') {
+    addMemo();
+  } else {
+    updateMemo(choosedMemoId.value);
+  }
+}
+
+const addMemo = () => {
+  addDoc(collection(db, 'memo'), memoForm);
+  isMemoFormOpen.value = false;
+}
+
+const updateMemo = (memoId) => {
+  setDoc(doc(db, 'memo', memoId), memoForm)
+  isMemoFormOpen.value = false;
+}
+
+const deleteMemo = async (memoId) => {
+  const confirmed = await showDeleteConfirmationDialog();
+
+  if (confirmed) {
+    deleteDoc(doc(db, 'memo', memoId));
+  }
+}
+
 onMounted(async () => {
   const today = new Date().toISOString().slice(0, 10);
   date.value = today
@@ -344,7 +493,23 @@ onMounted(async () => {
   activityStore.endTime = date.value;
 
   await getActivities();
-})
+
+  //Firebase
+  const latestQuery = query(collection(db, "memo"), orderBy('date'));
+  const liveMemos = onSnapshot(latestQuery, (snapshot) => {
+    memos.value = snapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        groupId: doc.data().group_id,
+        groupName: doc.data().group_name,
+        message: doc.data().message,
+        time: doc.data().time,
+        date: doc.data().date
+      }
+    });
+  });
+  onUnmounted(liveMemos);
+});
 
 </script>
 

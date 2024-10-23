@@ -41,7 +41,7 @@
     "core-js": "^3.33.0",
     "dropzone": "^6.0.0-beta.2",
     "echarts": "^5.4.3",
-    "firebase": "^10.4.0",
+    "firebase": "^11.0.1",
     "maska": "^2.1.9",
     "metismenujs": "^1.4.0",
     "node-sass": "^9.0.0",
