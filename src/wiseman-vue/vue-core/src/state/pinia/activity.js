@@ -36,7 +36,7 @@ export const useActivityStore = defineStore('activity', {
             try {
                 const url = `${this.apiUrl}/v1/activities?page=${this.current}&perPage=${this.perPage}&description=${this.searchQuery}&userId=${this.userId}&groupId=${this.groupId}&startTime=${this.startTime}&endTime=${this.endTime}`;
                 const res = await axios.get(url);
-
+                console.log(url);
                 const activitiesDataList = res.data.data.list
                 this.activities = activitiesDataList
                 this.totalData = res.data.data.meta.total

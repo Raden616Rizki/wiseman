@@ -197,8 +197,15 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const groupId = ref(route.query.id);
 
-watch(() => route.query.id, (newVal) => {
+watch(() => route.query.id, async (newVal) => {
   groupId.value = newVal;
+
+  if (!groupId.value) {
+    groupId.value = '';
+  }
+  activityStore.groupId = groupId.value;
+
+  await getActivities();
   getMemos();
 });
 
@@ -532,6 +539,12 @@ onMounted(async () => {
   date.value = formattedToday
   activityStore.startTime = date.value;
   activityStore.endTime = date.value;
+
+  if (!groupId.value) {
+    groupId.value = '';
+  }
+
+  activityStore.groupId = groupId.value;
 
   await getActivities();
   getMemos();
