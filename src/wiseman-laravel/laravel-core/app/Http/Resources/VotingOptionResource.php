@@ -13,7 +13,7 @@ class VotingOptionResource extends JsonResource
             'id' => $this->id,
             'option' => $this->option,
 			'total' => $this->total,
-			'voting_id' => $this->voting_id,
+			'votingId' => $this->voting_id,
         ];
     }
 }

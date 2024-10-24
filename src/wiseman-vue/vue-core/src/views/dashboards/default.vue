@@ -63,8 +63,13 @@
         <div class="card main-bg p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-4 mb-0">Activity</h6>
-            <i class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer"
-              @click="openActivityFormModal('add')"></i>
+            <div>
+              <i v-if="groupId" class="bx bxs-bar-chart-alt-2 memo-bold-font mt-1 me-4"
+                style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openVotingFormModal('add')"
+                v-b-tooltip.hover title="Create voting"></i>
+              <i class="bx bx-task memo-bold-font mt-1" style="color: #EEEEEE; font-size: 16px; cursor: pointer"
+                @click="openActivityFormModal('add')" v-b-tooltip.hover title="Create acitvity"></i>
+            </div>
           </div>
           <table v-for="activity in activities" :key="activity.id" class="table align-middle" :style="{
             borderRadius: '4px',
@@ -105,7 +110,7 @@
                   backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
                   color: activity.is_priority === 1 ? 'white' : '',
                 }">
-                  <i class="bx bx-edit mt-1" @click="openActivityFormModal(activity.id)" v-b-tooltip.hover
+                  <i class="bx bx-edit mt-1" @click="openActivityFormModal(activity)" v-b-tooltip.hover
                     title="Update activity" style="font-size: 14px; cursor: pointer;"></i>
                   <i class="bx bx-trash ms-1 mt-1" @click="deleteActivity(activity.id)" v-b-tooltip.hover
                     title="Delete activity" style="font-size: 14px; cursor: pointer;"></i>
@@ -138,7 +143,7 @@
                 </BRow>
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="d-flex align-items-center">
-                    <BCol md="5">
+                    <BCol md="6">
                       <input class="form-control" :class="{
                         'is-invalid': !!(activityErrorList && activityErrorList.start_time),
                       }" id="form-start-activity" placeholder="Start time" v-model="activityForm.start_time"
@@ -152,7 +157,7 @@
                     <BCol md="0">
                       <p class="activity-time mb-0 mx-2">-</p>
                     </BCol>
-                    <BCol md="5">
+                    <BCol md="6">
                       <input class="form-control" :class="{
                         'is-invalid': !!(activityErrorList && activityErrorList.end_time),
                       }" id="form-end-activity" placeholder="End ime" v-model="activityForm.end_time" type="time"
@@ -172,6 +177,63 @@
                     </label>
                   </BCol>
                 </div>
+              </BForm>
+            </BCol>
+          </BRow>
+        </BModal>
+
+        <!-- ========== Voting Modal ========== -->
+        <BModal v-model="isVotingFormOpen" id="modal-standard" :title="votingFormTitle + ' Voting'"
+          title-class="font-18" :ok-title="activityFormTitle" @ok="saveVoting" @hide.prevent
+          @cancel="isVotingFormOpen = false" @close="isVotingFormOpen = false">
+          <BRow>
+            <BCol cols="12" class="mt-2">
+              <BForm class="form-horizontal" role="form">
+                <BRow class="mb-3">
+                  <BCol>
+                    <textarea class="form-control" :class="{
+                      'is-invalid': !!(votingErrorList && votingErrorList.description),
+                    }" id="form-voting-description" type="text" placeholder="Masukkan deskripsi voting ..."
+                      v-model="votingForm.description" required />
+
+                    <template v-if="!!(votingErrorList && votingErrorList.description)">
+                      <div class="invalid-feedback" v-for="(err, index) in votingErrorList.description" :key="index">
+                        <span>{{ err }}</span>
+                      </div>
+                    </template>
+                  </BCol>
+                </BRow>
+                <BRow class="mb-3">
+                  <div>
+                    <label class="col-md-2 col-form-label" for="form-option">Opsi Voting</label>
+                    <i class="bx bx-plus memo-bold-font" style="font-size: 16px; cursor: pointer;"
+                      @click="addOption"></i>
+                  </div>
+
+                  <BCol>
+                    <div v-for="(option, index) in votingOptions" :key="index">
+                      <i v-if="option.id" class="bx bx-minus memo-bold-font" style="font-size: 16px; cursor: pointer;"
+                        @click="deleteOption(option.id, index)"></i>
+                      <i v-else class="bx bx-minus memo-bold-font" style="font-size: 16px; cursor: pointer;"
+                        @click="deleteOption('default', index)"></i>
+                      <input type="text" placeholder="Masukkan opsi voting" :value="option.option">
+                    </div>
+                  </BCol>
+                </BRow>
+                <BRow class="mb-3">
+                  <BCol md="6">
+                    <label class="col-md-2 col-form-label" for="form-limit-time">Limit Time</label>
+                    <input class="form-control" :class="{
+                      'is-invalid': !!(votingErrorList && votingErrorList.limit_time),
+                    }" id="form-start-voting" placeholder="Limit time" v-model="votingForm.limit_time" type="time"
+                      required />
+                    <template v-if="!!(votingErrorList && votingErrorList.limit_time)">
+                      <div class="invalid-feedback" v-for="(err, index) in votingErrorList.limit_time" :key="index">
+                        <span>{{ err }}</span>
+                      </div>
+                    </template>
+                  </BCol>
+                </BRow>
               </BForm>
             </BCol>
           </BRow>
@@ -238,6 +300,21 @@ const isMemoFormOpen = ref(false);
 const memoFormTitle = ref("Create");
 const choosedMemoId = ref("");
 
+const isVotingFormOpen = ref(false);
+const votingFormTitle = ref("Create");
+const votingOptions = ref([
+  {
+    option: 'Opsi 1',
+    total: 0,
+    is_added: true
+  },
+  {
+    option: 'Opsi 2',
+    total: 0,
+    is_added: true
+  }
+]);
+
 activityStore.userId = userId;
 
 const activityForm = reactive({
@@ -259,10 +336,18 @@ const memoForm = reactive({
   time: ""
 });
 
-const openActivityFormModal = async (activityId) => {
+const votingForm = reactive({
+  id: "",
+  group_id: "",
+  description: "",
+  limit_time: "",
+  voting_options: votingOptions.value,
+  voting_options_deleted: [],
+});
+
+const openActivityFormModal = async (activity) => {
   isActivityFormOpen.value = true;
-  if (activityId != 'add') {
-    const activity = await activityStore.getActivityById(activityId);
+  if (activity != 'add') {
 
     activityForm.id = activity.id;
     activityForm.group_id = activity.group_id;
@@ -307,6 +392,21 @@ const openMemoFormModal = async (memo) => {
     memoForm.message = "";
     choosedMemoId.value = "";
     memoFormTitle.value = 'Create';
+  }
+}
+
+const openVotingFormModal = async (voting) => {
+  isVotingFormOpen.value = true;
+  if (voting != 'add') {
+    votingForm.group_id = voting.groupId;
+    votingForm.description = voting.description;
+    votingForm.limit_time = voting.limit_time;
+    votingFormTitle.value = 'Update';
+  } else {
+    votingForm.group_id = "";
+    votingForm.description = "";
+    votingForm.limit_time = "";
+    votingFormTitle.value = 'Create';
   }
 }
 
@@ -436,6 +536,23 @@ const getCurrentTime = () => {
   return currentTime;
 }
 
+const addOption = () => {
+  votingOptions.value.push({
+    option: 'Opsi Voting',
+    total: 0,
+    is_added: true
+  })
+}
+
+const deleteOption = (optionId, index) => {
+  votingOptions.value.splice(index, 1);
+  if (optionId != 'default') {
+    votingForm.voting_options_deleted.push({
+      optionId
+    })
+  }
+}
+
 // Firebase
 import {
   getFirestore,
@@ -534,9 +651,10 @@ onUnmounted(() => {
 
 onMounted(async () => {
   const today = new Date();
-  const formattedToday = getFormattedDate(today)
+  const formattedToday = getFormattedDate(today);
 
-  date.value = formattedToday
+  date.value = formattedToday;
+  choosedDate.value = date.value;
   activityStore.startTime = date.value;
   activityStore.endTime = date.value;
 

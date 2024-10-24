@@ -13,9 +13,9 @@ class VotingResource extends JsonResource
         return [
             'id' => $this->id,
             'description' => $this->description,
-			'limit_time' => $this->limit_time,
-			'group_id' => $this->group_id,
-        	'voting_options' => VotingOptionResource::collection($this->votingOptions),
+			'limitTime' => $this->limit_time,
+			'groupId' => $this->group_id,
+        	'votingOptions' => VotingOptionResource::collection($this->votingOptions),
 		];
     }
 }
