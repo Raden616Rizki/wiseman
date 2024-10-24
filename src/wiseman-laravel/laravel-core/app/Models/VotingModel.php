@@ -25,7 +25,7 @@ class VotingModel extends Model implements CrudInterface
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-        
+
 		if (!empty($filter['description'])) {
 			$query->where('description', 'LIKE', '%' . $filter['description'] . '%');
 		}
@@ -70,7 +70,7 @@ class VotingModel extends Model implements CrudInterface
     {
         return $this->find($id)->delete();
     }
-    
+
 	public function group()
 	{
 		return $this->belongsTo(GroupModel::class, 'group_id', 'id');

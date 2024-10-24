@@ -22,8 +22,8 @@ class VotingController extends Controller
     {
         $filter = [
 			'description' => $request->description ?? '',
-			'limit_time' => $request->limit_time ?? '',
-			'group_id' => $request->group_id ?? '',
+			'limit_time' => $request->limitTime ?? '',
+			'group_id' => $request->groupId ?? '',
 		];
 
         $voting = $this->voting->getAll($filter, $request->per_page ?? 25, $request->sort ?? '');

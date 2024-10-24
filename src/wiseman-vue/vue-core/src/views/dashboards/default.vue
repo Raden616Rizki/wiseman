@@ -118,6 +118,38 @@
               </td>
             </tr>
           </table>
+          <table v-for="voting in votings" :key="voting.id" class="table align-middle bg-white" :style="{
+            borderRadius: '4px',
+            overflow: 'hidden',
+            borderCollapse: 'separate',
+          }">
+            <tr>
+              <td style="text-align: center; width: 80px;">
+                <div class="d-flex flex-column align-items-center voting-time bg-white">
+                  <p class="mb-0"> Limit </p>
+                  <p class="mb-0">-</p>
+                  <p class="mb-0"> {{ voting.limitTime.substr(11, 5) }} </p>
+                </div>
+              </td>
+              <td style="width: 100%;">
+                <!-- <p v-if="voting.group_id" class="voting-description mb-0 bg-white" :style="{
+                  fontWeight: 'bold',
+                }"> {{ voting.group.name }} </p> -->
+                <p class="voting-description mb-0 bg-white"> {{ voting.description }} </p>
+              </td>
+              <td style="text-align: center; width: 50px;">
+                <button class="btn votting-button">Voting</button>
+              </td>
+              <td style="text-align: center; width: 40px;">
+                <div class="d-flex justify-content-center align-items-center bg-white">
+                  <i class="bx bx-edit mt-1" @click="openVotingFormModal(voting)" v-b-tooltip.hover
+                    title="Update voting" style="font-size: 14px; cursor: pointer;"></i>
+                  <i class="bx bx-trash ms-1 mt-1" @click="deleteVoting(voting.id)" v-b-tooltip.hover
+                    title="Delete voting" style="font-size: 14px; cursor: pointer;"></i>
+                </div>
+              </td>
+            </tr>
+          </table>
         </div>
 
         <!-- ========== Activity Modal ========== -->
@@ -204,25 +236,27 @@
                   </BCol>
                 </BRow>
                 <BRow class="mb-3">
-                  <div>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
                     <label class="col-md-2 col-form-label" for="form-option">Opsi Voting</label>
                     <i class="bx bx-plus memo-bold-font" style="font-size: 16px; cursor: pointer;"
                       @click="addOption"></i>
                   </div>
 
                   <BCol>
-                    <div v-for="(option, index) in votingOptions" :key="index">
-                      <i v-if="option.id" class="bx bx-minus memo-bold-font" style="font-size: 16px; cursor: pointer;"
-                        @click="deleteOption(option.id, index)"></i>
-                      <i v-else class="bx bx-minus memo-bold-font" style="font-size: 16px; cursor: pointer;"
+                    <div v-for="(option, index) in votingOptions" :key="index"
+                      class="d-flex justify-content-between align-items-center mb-3">
+                      <i v-if="option.id" class="bx bx-minus memo-bold-font me-2"
+                        style="font-size: 16px; cursor: pointer;" @click="deleteOption(option.id, index)"></i>
+                      <i v-else class="bx bx-minus memo-bold-font me-2" style="font-size: 16px; cursor: pointer;"
                         @click="deleteOption('default', index)"></i>
-                      <input type="text" placeholder="Masukkan opsi voting" :value="option.option">
+                      <input class="form-control" type="text" placeholder="Masukkan opsi voting"
+                        v-model="option.option">
                     </div>
                   </BCol>
                 </BRow>
                 <BRow class="mb-3">
-                  <BCol md="6">
-                    <label class="col-md-2 col-form-label" for="form-limit-time">Limit Time</label>
+                  <BCol class="d-flex align-items-center">
+                    <label class="col-form-label" for="form-limit-time">Limit Time</label>
                     <input class="form-control" :class="{
                       'is-invalid': !!(votingErrorList && votingErrorList.limit_time),
                     }" id="form-start-voting" placeholder="Limit time" v-model="votingForm.limit_time" type="time"
@@ -247,7 +281,7 @@
 import Layout from "../../layouts/main";
 import DatePicker from 'primevue/datepicker';
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from "vue";
-import { useActivityStore, useAuthStore, useGroupStore } from "@/state/pinia";
+import { useActivityStore, useAuthStore, useGroupStore, useVotingStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import {
   showSuccessToast,
@@ -266,8 +300,11 @@ watch(() => route.query.id, async (newVal) => {
     groupId.value = '';
   }
   activityStore.groupId = groupId.value;
+  votingStore.groupId = groupId.value;
 
   await getActivities();
+  await getVotings();
+  
   getMemos();
 });
 
@@ -290,6 +327,13 @@ const groups = computed(() => {
     groupUser.group
   ) || [];
 });
+
+const votingStore = useVotingStore();
+const votings = ref([]);
+
+const votingStatusCode = computed(() => votingStore.response.status);
+const votingErrorList = computed(() => votingStore.response?.error || {});
+const votingErrorMessage = computed(() => votingStore.response?.message || "");
 
 const date = ref('');
 const choosedDate = ref('');
@@ -316,6 +360,8 @@ const votingOptions = ref([
 ]);
 
 activityStore.userId = userId;
+
+// Form
 
 const activityForm = reactive({
   id: "",
@@ -344,6 +390,8 @@ const votingForm = reactive({
   voting_options: votingOptions.value,
   voting_options_deleted: [],
 });
+
+// Open Modal
 
 const openActivityFormModal = async (activity) => {
   isActivityFormOpen.value = true;
@@ -398,17 +446,21 @@ const openMemoFormModal = async (memo) => {
 const openVotingFormModal = async (voting) => {
   isVotingFormOpen.value = true;
   if (voting != 'add') {
+    votingForm.id = voting.id;
     votingForm.group_id = voting.groupId;
     votingForm.description = voting.description;
     votingForm.limit_time = voting.limit_time;
     votingFormTitle.value = 'Update';
   } else {
+    votingForm.id = "";
     votingForm.group_id = "";
     votingForm.description = "";
     votingForm.limit_time = "";
     votingFormTitle.value = 'Create';
   }
 }
+
+// Activity
 
 const updatePriority = (event) => {
   activityForm.is_priority = event.target.checked ? 1 : 0;
@@ -432,8 +484,10 @@ const changeDate = async (dateData) => {
   choosedDate.value = date.value;
   activityStore.startTime = choosedDate.value;
   activityStore.endTime = choosedDate.value;
+  votingStore.limitTime = choosedDate.value;
 
   await getActivities();
+  await getVotings();
   date.value = oldFormattedDate;
 }
 
@@ -538,10 +592,20 @@ const getCurrentTime = () => {
 
 const addOption = () => {
   votingOptions.value.push({
-    option: 'Opsi Voting',
+    option: 'Opsi lain',
     total: 0,
     is_added: true
   })
+}
+
+// Voting
+
+const getVotings = async () => {
+  await votingStore.getVotings();
+
+  if (votingStore.votings) {
+    votings.value = votingStore.votings;
+  }
 }
 
 const deleteOption = (optionId, index) => {
@@ -550,6 +614,45 @@ const deleteOption = (optionId, index) => {
     votingForm.voting_options_deleted.push({
       optionId
     })
+  }
+}
+
+const saveVoting = async () => {
+  startProgress();
+  try {
+    if (groupId.value) {
+      votingForm.group_id = groupId.value;
+    } else {
+      votingForm.group_id = '';
+    }
+
+    votingForm.limit_time = getFormattedTime(choosedDate.value, votingForm.limit_time);
+
+    if (votingForm.id) {
+      await votingStore.updateVoting(votingForm);
+      if (votingStatusCode.value != 200) {
+        failProgress();
+        showErrorToast("Failed to update voting", votingErrorMessage);
+      } else {
+        isVotingFormOpen.value = false;
+        finishProgress();
+        showSuccessToast("Voting updated successfully!");
+      }
+    } else {
+      await votingStore.addVotings(votingForm);
+      if (votingStatusCode.value != 200) {
+        failProgress();
+        showErrorToast("Failed to add voting", votingErrorMessage);
+      } else {
+        isVotingFormOpen.value = false;
+
+        finishProgress();
+        showSuccessToast("Voting added successfully!");
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    failProgress();
   }
 }
 
@@ -657,14 +760,18 @@ onMounted(async () => {
   choosedDate.value = date.value;
   activityStore.startTime = date.value;
   activityStore.endTime = date.value;
+  votingStore.limitTime = date.value;
 
   if (!groupId.value) {
     groupId.value = '';
   }
 
   activityStore.groupId = groupId.value;
+  votingStore.groupId = groupId.value;
 
   await getActivities();
+  await getVotings();
+  
   getMemos();
 });
 
@@ -711,5 +818,10 @@ onMounted(async () => {
 
 .right-card {
   width: 55%;
+}
+
+.votting-button {
+  background-color: #00ADB5;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
 }
 </style>

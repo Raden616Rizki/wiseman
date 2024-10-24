@@ -3,11 +3,11 @@ import {
 } from "pinia";
 import axios from 'axios';
 
-export const useActivityStore = defineStore('activity', {
+export const useVotingStore = defineStore('voting', {
     state: () => ({
         apiUrl: process.env.VUE_APP_APIURL,
-        activities: [],
-        activity: null,
+        votings: [],
+        voting: null,
         response: {
             status: null,
             message: null,
@@ -22,23 +22,21 @@ export const useActivityStore = defineStore('activity', {
         current: 1,
         perPage: 5,
         searchQuery: '',
-        userId: '',
         groupId: '',
-        startTime: '',
-        endTime: '',
+        limitTime: '',
     }),
     actions: {
         openForm(newAction, user) {
             this.modalAction.action = newAction
             this.user = user
         },
-        async getActivities() {
+        async getVotings() {
             try {
-                const url = `${this.apiUrl}/v1/activities?page=${this.current}&perPage=${this.perPage}&description=${this.searchQuery}&userId=${this.userId}&groupId=${this.groupId}&startTime=${this.startTime}&endTime=${this.endTime}`;
+                const url = `${this.apiUrl}/v1/votings?page=${this.current}&perPage=${this.perPage}&description=${this.searchQuery}&groupId=${this.groupId}&limitTime=${this.limitTime}`;
                 const res = await axios.get(url);
                 
-                const activitiesDataList = res.data.data.list
-                this.activities = activitiesDataList
+                const votingsDataList = res.data.data.list
+                this.votings = votingsDataList
                 this.totalData = res.data.data.meta.total
             } catch (error) {
                 this.response = {
@@ -47,15 +45,15 @@ export const useActivityStore = defineStore('activity', {
                 };
             } 
         },
-        async getActivityById(id) {
+        async getVotingById(id) {
             try {
-                const url = `${this.apiUrl}/v1/activities/${id}`;
+                const url = `${this.apiUrl}/v1/votings/${id}`;
                 const res = await axios.get(url);
 
-                const activity = res.data.data
-                this.activity = activity;
+                const voting = res.data.data
+                this.voting = voting;
                 
-                return activity;
+                return voting;
             } catch (error) {
                 this.response = {
                     status: error.response ?.status,
@@ -65,17 +63,17 @@ export const useActivityStore = defineStore('activity', {
         },
         async changePage(newPage) {
             this.current = newPage;
-            await this.getActivities(); 
+            await this.getVotings(); 
         },
-        async searchActivities(query) {
+        async searchVotings(query) {
             this.searchQuery = query;
             this.current = 1; 
-            await this.getActivities(); 
+            await this.getVotings(); 
         },
-        async addActivities(activities) {
+        async addVotings(votings) {
             try {
-                const url = `${this.apiUrl}/v1/activities`;
-                const res = await axios.post(url, activities);
+                const url = `${this.apiUrl}/v1/votings`;
+                const res = await axios.post(url, votings);
 
                 this.response = {
                     status: res.status,
@@ -88,13 +86,13 @@ export const useActivityStore = defineStore('activity', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getActivities();
+                this.getVotings();
             }
         },
-        async deleteActivity(id) {
+        async deleteVoting(id) {
             this.loading = true;
             try {
-                await axios.delete(`${this.apiUrl}/v1/activities/${id}`);
+                await axios.delete(`${this.apiUrl}/v1/votings/${id}`);
                 this.response = {
                     status: '200',
                 };
@@ -105,13 +103,13 @@ export const useActivityStore = defineStore('activity', {
                     error: error.response.data.errors,
                 };
             } finally {
-                this.getActivities();
+                this.getVotings();
             }
         },
-        async updateActivity(activities) {
+        async updateVoting(votings) {
             try {
-                const url = `${this.apiUrl}/v1/activities/${activities.id}`;
-                await axios.put(url, activities);
+                const url = `${this.apiUrl}/v1/votings/${votings.id}`;
+                await axios.put(url, votings);
                 
                 this.response = {
                     status: '200',
