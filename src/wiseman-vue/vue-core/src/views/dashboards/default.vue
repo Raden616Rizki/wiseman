@@ -281,11 +281,11 @@
           <BRow>
             <BCol cols="12" class="mt-2">
               <BForm class="form-horizontal" role="form">
-                <BRow v-for="option in votingForm.voting_options" :key="option.id">
+                <BRow v-for="(option, index) in votingForm.voting_options" :key="option.id">
                   <div class="form-check mb-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 border border-dark px-2 py-1 rounded w-100">{{ option.option }}</h6>
 
-                    <input class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + option.id"
+                    <input class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + index"
                       :value="option.id" name="votingOptionsGroup" />
                   </div>
                 </BRow>
@@ -498,6 +498,10 @@ const openVotingModal = async (voting) => {
   votingForm.description = voting.description;
   votingForm.limit_time = voting.limitTime.substr(11, 5);
   votingForm.voting_options = voting.votingOptions;
+}
+
+const openVotingResult = () => {
+  console.log("Open Voting Result");
 }
 
 // Activity

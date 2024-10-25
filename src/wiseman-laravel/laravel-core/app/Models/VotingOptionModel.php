@@ -25,7 +25,7 @@ class VotingOptionModel extends Model implements CrudInterface
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-        
+
 		if (!empty($filter['option'])) {
 			$query->where('option', 'LIKE', '%' . $filter['option'] . '%');
 		}
@@ -65,12 +65,24 @@ class VotingOptionModel extends Model implements CrudInterface
 
         return $query->update($payload);
     }
+    public function addTotalOption(string $id)
+    {
+        $query = $this->find($id);
+
+        if (empty($query)) {
+            return false;
+        }
+
+        $query->increment('total', 1);
+
+        return $query;
+    }
 
     public function drop(string $id)
     {
         return $this->find($id)->delete();
     }
-    
+
 	public function voting()
 	{
 		return $this->belongsTo(VotingModel::class, 'voting_id', 'id');

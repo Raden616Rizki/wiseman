@@ -6,6 +6,7 @@ use App\Helpers\Voting\VotingHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VotingRequest;
 use App\Http\Resources\BaseCollection;
+use App\Http\Resources\VotingOptionResource;
 use App\Http\Resources\VotingResource;
 use Illuminate\Http\Request;
 
@@ -75,6 +76,21 @@ class VotingController extends Controller
         }
 
         return response()->success(new VotingResource($voting['data']), "Data berhasil diganti");
+    }
+    public function addTotalOption($id)
+    {
+        if (isset($request->validator) && $request->validator->fails()) {
+            return response()->failed($request->validator->errors());
+        }
+
+        $votingOption = $this->voting->addTotalOption( $id ?? '0');
+
+
+        if (!$votingOption['status']) {
+            return response()->failed($votingOption['error']);
+        }
+
+        return response()->success(new VotingOptionResource($votingOption['data']), "Data berhasil diganti");
     }
 
     public function destroy($id)

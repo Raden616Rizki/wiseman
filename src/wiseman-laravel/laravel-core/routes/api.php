@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
 	Route::get('/votings/{id}', [VotingController::class, 'show']);
 	Route::post('/votings', [VotingController::class, 'store']);
 	Route::put('/votings/{id}', [VotingController::class, 'update']);
+	Route::put('/votings/option/{id}', [VotingController::class, 'addTotalOption']);
 	Route::delete('/votings/{id}', [VotingController::class, 'destroy']);
 
 	Route::get('/activities', [ActivityController::class, 'index']);

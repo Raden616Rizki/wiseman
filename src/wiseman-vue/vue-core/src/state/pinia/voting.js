@@ -120,6 +120,21 @@ export const useVotingStore = defineStore('voting', {
                     message: error.message,
                 };
             }
+        },
+        async chooseOption(optionId) {
+            try {
+                const url = `${this.apiUrl}/v1/votings/option/${optionId}`;
+                await axios.put(url);
+                
+                this.response = {
+                    status: '200',
+                };
+            } catch (error) {
+                this.response = {
+                    status: error.status,
+                    message: error.message,
+                };
+            }
         }
     },
     getters: {

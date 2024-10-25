@@ -135,4 +135,24 @@ class VotingHelper extends Venturo
 			}
 		}
 	}
+
+	public function addTotalOption(string $id): array
+	{
+        try {
+            $this->beginTransaction();
+            $votingOption = $this->votingOptionModel->addTotalOption($id);
+
+            $this->commitTransaction();
+            return [
+                'status' => true,
+                'data' => $votingOption
+            ];
+        } catch (Throwable $th) {
+            $this->rollbackTransaction();
+            return [
+                'status' => false,
+                'error' => $th->getMessage()
+            ];
+        }
+	}
 }
