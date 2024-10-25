@@ -285,12 +285,21 @@
                   <div class="form-check mb-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 border border-dark px-2 py-1 rounded w-100">{{ option.option }}</h6>
 
-                    <input class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + index"
-                      :value="option.id" name="votingOptionsGroup" />
+                    <input class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + index" :value="option.id"
+                      name="votingOptionsGroup" @change="chooseOption(option.id)" />
                   </div>
                 </BRow>
               </BForm>
             </BCol>
+          </BRow>
+        </BModal>
+
+        <!-- ========== Voting Result Modal ========== -->
+        <BModal v-model="isVotingResultOpen" id="modal-standard" :title="votingForm.description" title-class="font-18"
+          @hide.prevent @cancel="isVotingResultOpen = false" @close="isVotingResultOpen = false" ok-title="Back"
+          @ok="openVotingModal(voting)">
+          <BRow>
+            <Chart type="bar" :data="chartData" :options="chartOptions" />
           </BRow>
         </BModal>
       </div>
@@ -310,6 +319,7 @@ import {
   showDeleteConfirmationDialog,
 } from "@/helpers/alert.js";
 import { useRoute } from "vue-router";
+import Chart from 'primevue/chart';
 
 const route = useRoute();
 const groupId = ref(route.query.id);
@@ -324,7 +334,12 @@ watch(() => route.query.id, async (newVal) => {
   votingStore.groupId = groupId.value;
 
   await getActivities();
-  await getVotings();
+
+  if (groupId.value) {
+    startProgress();
+    await getVotings();
+    finishProgress();
+  }
 
   getMemos();
 });
@@ -351,6 +366,7 @@ const groups = computed(() => {
 
 const votingStore = useVotingStore();
 const votings = ref([]);
+const voting = ref({});
 
 const votingStatusCode = computed(() => votingStore.response.status);
 const votingErrorList = computed(() => votingStore.response?.error || {});
@@ -367,6 +383,7 @@ const choosedMemoId = ref("");
 
 const isVotingFormOpen = ref(false);
 const isVotingOpen = ref(false);
+const isVotingResultOpen = ref(false);
 const votingFormTitle = ref("Create");
 const votingOptions = ref([
   {
@@ -467,6 +484,7 @@ const openMemoFormModal = async (memo) => {
 
 const openVotingFormModal = async (voting) => {
   isVotingFormOpen.value = true;
+
   if (voting != 'add') {
     votingForm.id = voting.id;
     votingForm.group_id = voting.groupId;
@@ -490,18 +508,29 @@ const openVotingFormModal = async (voting) => {
   }
 }
 
-const openVotingModal = async (voting) => {
+const openVotingModal = async (votingData) => {
   isVotingOpen.value = true;
+  isVotingResultOpen.value = false;
 
-  votingForm.id = voting.id;
-  votingForm.group_id = voting.groupId;
-  votingForm.description = voting.description;
-  votingForm.limit_time = voting.limitTime.substr(11, 5);
-  votingForm.voting_options = voting.votingOptions;
+  voting.value = votingData;
+
+  votingForm.id = votingData.id;
+  votingForm.group_id = votingData.groupId;
+  votingForm.description = votingData.description;
+  votingForm.limit_time = votingData.limitTime.substr(11, 5);
+  votingForm.voting_options = votingData.votingOptions;
 }
 
-const openVotingResult = () => {
-  console.log("Open Voting Result");
+const openVotingResult = async () => {
+  startProgress()
+  voting.value = await votingStore.getVotingById(voting.value.id);
+
+  chartData.value = setChartData(voting.value.votingOptions);
+  chartOptions.value = setChartOptions();
+
+  isVotingOpen.value = false;
+  isVotingResultOpen.value = true;
+  finishProgress();
 }
 
 // Activity
@@ -531,7 +560,12 @@ const changeDate = async (dateData) => {
   votingStore.limitTime = choosedDate.value;
 
   await getActivities();
-  await getVotings();
+
+  if (groupId.value) {
+    startProgress();
+    await getVotings();
+    finishProgress();
+  }
   date.value = oldFormattedDate;
 }
 
@@ -721,6 +755,14 @@ const deleteVoting = async (votingId) => {
   }
 }
 
+const chooseOption = async (optionId) => {
+  try {
+    await votingStore.chooseOption(optionId);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 // Firebase
 import {
   getFirestore,
@@ -811,6 +853,62 @@ const getMemos = () => {
   });
 };
 
+// Chart
+
+const chartData = ref();
+const chartOptions = ref();
+
+const setChartData = (votingOptions) => {
+  return {
+    labels: votingOptions.map(option => option.option),
+    datasets: [
+      {
+        label: 'Voting Result',
+        data: votingOptions.map(option => option.total),
+        backgroundColor: '#00ADB5',
+        borderColor: '#067e82',
+        borderWidth: 1
+      }
+    ]
+  };
+};
+
+const setChartOptions = () => {
+  const documentStyle = getComputedStyle(document.documentElement);
+  const textColor = documentStyle.getPropertyValue('--p-text-color');
+  const textColorSecondary = documentStyle.getPropertyValue('--p-text-muted-color');
+  const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
+
+  return {
+    plugins: {
+      legend: {
+        labels: {
+          color: textColor
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        }
+      }
+    }
+  };
+}
+
 onUnmounted(() => {
   if (unsubscribe) {
     unsubscribe();
@@ -835,10 +933,12 @@ onMounted(async () => {
   votingStore.groupId = groupId.value;
 
   await getActivities();
-  await getVotings();
 
   if (groupId.value) {
+    startProgress();
+    await getVotings();
     getMemos();
+    finishProgress();
   }
 });
 
