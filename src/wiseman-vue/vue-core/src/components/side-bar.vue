@@ -548,7 +548,7 @@ export default {
       <router-link to="/group">
         <div class="p-2 mb-2 palette-3 d-flex justify-content-between align-items-center ws-main-menu shadow-sm">
           <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
-          <i class="bx bx-search ws-menu" style="color: #EEEEEE; font-size: medium"></i>
+          <i class="bx bx-search ws-menu mt-1 me-2" style="color: #EEEEEE; font-size: medium"></i>
         </div>
       </router-link>
       <div v-for="group in groups" :key="group.id"

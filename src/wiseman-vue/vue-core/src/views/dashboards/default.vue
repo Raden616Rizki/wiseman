@@ -119,7 +119,7 @@
               </td>
             </tr>
           </table>
-          <table v-for="voting in votings" :key="voting.id" class="table align-middle bg-white" :style="{
+          <table v-for="votingData in votings" :key="votingData.id" class="table align-middle bg-white" :style="{
             borderRadius: '4px',
             overflow: 'hidden',
             borderCollapse: 'separate',
@@ -129,23 +129,24 @@
                 <div class="d-flex flex-column align-items-center voting-time bg-white">
                   <p class="mb-0"> Limit </p>
                   <p class="mb-0">-</p>
-                  <p class="mb-0"> {{ voting.limitTime.substr(11, 5) }} </p>
+                  <p class="mb-0"> {{ votingData.limitTime.substr(11, 5) }} </p>
                 </div>
               </td>
               <td style="width: 100%;">
-                <p v-if="voting.groupId" class="voting-description mb-0 bg-white" :style="{
+                <p v-if="votingData.groupId" class="voting-description mb-0 bg-white" :style="{
                   fontWeight: 'bold',
-                }"> {{ voting.group.name }} </p>
-                <p class="voting-description mb-0 bg-white"> {{ voting.description }} </p>
+                }"> {{ votingData.group.name }} </p>
+                <p class="voting-description mb-0 bg-white"> {{ votingData.description }} </p>
               </td>
               <td style="text-align: center; width: 50px;">
-                <button class="btn votting-button align-items-center" @click="openVotingModal(voting)">Voting</button>
+                <button class="btn votting-button align-items-center"
+                  @click="openVotingModal(votingData)">Voting</button>
               </td>
               <td style="text-align: center; width: 40px;">
                 <div class="d-flex justify-content-center align-items-center bg-white">
-                  <i class="bx bx-edit mt-1" @click="openVotingFormModal(voting)" v-b-tooltip.hover
+                  <i class="bx bx-edit mt-1" @click="openVotingFormModal(votingData)" v-b-tooltip.hover
                     title="Update voting" style="font-size: 14px; cursor: pointer;"></i>
-                  <i class="bx bx-trash ms-1 mt-1" @click="deleteVoting(voting.id)" v-b-tooltip.hover
+                  <i class="bx bx-trash ms-1 mt-1" @click="deleteVoting(votingData.id)" v-b-tooltip.hover
                     title="Delete voting" style="font-size: 14px; cursor: pointer;"></i>
                 </div>
               </td>
@@ -283,7 +284,9 @@
               <BForm class="form-horizontal" role="form">
                 <BRow v-for="(option, index) in votingForm.voting_options" :key="option.id">
                   <div class="form-check mb-3 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 border border-dark px-2 py-1 rounded w-100">{{ option.option }}</h6>
+                    <h6 class="mb-0 border border-dark px-2 py-1 rounded w-100"
+                      :class="{ 'selected-option': selectedOption === option.id, 'default-option': selectedOption !== option.id }">
+                      {{ option.option }}</h6>
 
                     <input class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + index" :value="option.id"
                       name="votingOptionsGroup" @change="chooseOption(option.id)" />
@@ -482,15 +485,15 @@ const openMemoFormModal = async (memo) => {
   }
 }
 
-const openVotingFormModal = async (voting) => {
+const openVotingFormModal = async (votingData) => {
   isVotingFormOpen.value = true;
 
-  if (voting != 'add') {
-    votingForm.id = voting.id;
-    votingForm.group_id = voting.groupId;
-    votingForm.description = voting.description;
-    votingForm.limit_time = voting.limitTime.substr(11, 5);
-    votingForm.voting_options = voting.votingOptions.map(option => ({
+  if (votingData != 'add') {
+    votingForm.id = votingData.id;
+    votingForm.group_id = votingData.groupId;
+    votingForm.description = votingData.description;
+    votingForm.limit_time = votingData.limitTime.substr(11, 5);
+    votingForm.voting_options = votingData.votingOptions.map(option => ({
       ...option,
       is_updated: false
     }));
@@ -697,7 +700,9 @@ const deleteOption = (id, index) => {
 
 const markAsUpdated = (index) => {
   if (votingFormTitle.value == 'Update') {
-    votingForm.voting_options[index].is_updated = true;
+    if (!votingForm.voting_options[index].is_added) {
+      votingForm.voting_options[index].is_updated = true;
+    }
   }
 };
 
@@ -756,6 +761,7 @@ const deleteVoting = async (votingId) => {
 }
 
 const chooseOption = async (optionId) => {
+  selectedOption.value = optionId;
   try {
     await votingStore.chooseOption(optionId);
   } catch (error) {
@@ -857,6 +863,7 @@ const getMemos = () => {
 
 const chartData = ref();
 const chartOptions = ref();
+const selectedOption = ref(null);
 
 const setChartData = (votingOptions) => {
   return {
@@ -964,6 +971,11 @@ onMounted(async () => {
   font-size: 12px;
 }
 
+.default-option {
+  background-color: white;
+  color: black;
+}
+
 .left-card {
   width: 40%;
 }
@@ -985,6 +997,11 @@ onMounted(async () => {
 
 .right-card {
   width: 55%;
+}
+
+.selected-option {
+  background-color: #067e82;
+  color: white;
 }
 
 .votting-button {
