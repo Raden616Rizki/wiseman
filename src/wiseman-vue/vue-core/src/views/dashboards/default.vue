@@ -7,7 +7,7 @@
           <DatePicker v-model="date" inline class="w-full sm:w-[30rem]" dateFormat="yy-mm-dd"
             @update:modelValue="changeDate" />
         </div>
-        <div class="card main-bg p-3">
+        <div v-if="groupId" class="card main-bg p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-4 mb-0">Memo</h6>
             <i class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer;"
@@ -139,7 +139,7 @@
                 <p class="voting-description mb-0 bg-white"> {{ voting.description }} </p>
               </td>
               <td style="text-align: center; width: 50px;">
-                <button class="btn votting-button align-items-center" @click="openVotingModal(voting)" >Voting</button>
+                <button class="btn votting-button align-items-center" @click="openVotingModal(voting)">Voting</button>
               </td>
               <td style="text-align: center; width: 40px;">
                 <div class="d-flex justify-content-center align-items-center bg-white">
@@ -250,8 +250,8 @@
                         style="font-size: 16px; cursor: pointer;" @click="deleteOption(option.id, index)"></i>
                       <i v-else class="bx bx-minus memo-bold-font me-2" style="font-size: 16px; cursor: pointer;"
                         @click="deleteOption('default', index)"></i>
-                      <input class="form-control" type="text" placeholder="Masukkan opsi voting"
-                        v-model="option.option">
+                      <input class="form-control" type="text" placeholder="Masukkan opsi voting" v-model="option.option"
+                        @input="markAsUpdated(index)">
                     </div>
                   </BCol>
                 </BRow>
@@ -472,15 +472,20 @@ const openVotingFormModal = async (voting) => {
     votingForm.group_id = voting.groupId;
     votingForm.description = voting.description;
     votingForm.limit_time = voting.limitTime.substr(11, 5);
-    votingForm.voting_options = voting.votingOptions;
-    console.log(votingForm);
+    votingForm.voting_options = voting.votingOptions.map(option => ({
+      ...option,
+      is_updated: false
+    }));
     votingFormTitle.value = 'Update';
   } else {
+    if (groupId.value) {
+      votingForm.group_id = groupId.value;
+    }
+
     votingForm.id = "";
-    votingForm.group_id = "";
     votingForm.description = "";
     votingForm.limit_time = "";
-    votingForm.voting_options = [];
+    votingForm.voting_options = votingOptions.value;
     votingFormTitle.value = 'Create';
   }
 }
@@ -625,14 +630,6 @@ const getCurrentTime = () => {
   return currentTime;
 }
 
-const addOption = () => {
-  votingOptions.value.push({
-    option: 'Opsi lain',
-    total: 0,
-    is_added: true
-  })
-}
-
 // Voting
 
 const getVotings = async () => {
@@ -643,14 +640,28 @@ const getVotings = async () => {
   }
 }
 
-const deleteOption = (optionId, index) => {
+const addOption = () => {
+  votingForm.voting_options.push({
+    option: 'Opsi lain',
+    total: 0,
+    is_added: true
+  })
+}
+
+const deleteOption = (id, index) => {
   votingForm.voting_options.splice(index, 1);
-  if (optionId != 'default') {
+  if (id != 'default') {
     votingForm.voting_options_deleted.push({
-      optionId
+      id
     })
   }
 }
+
+const markAsUpdated = (index) => {
+  if (votingFormTitle.value == 'Update') {
+    votingForm.voting_options[index].is_updated = true;
+  }
+};
 
 const saveVoting = async () => {
   startProgress();
@@ -822,7 +833,9 @@ onMounted(async () => {
   await getActivities();
   await getVotings();
 
-  getMemos();
+  if (groupId.value) {
+    getMemos();
+  }
 });
 
 </script>

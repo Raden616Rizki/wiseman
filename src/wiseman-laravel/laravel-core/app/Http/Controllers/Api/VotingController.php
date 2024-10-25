@@ -43,9 +43,11 @@ class VotingController extends Controller
 
     public function store(VotingRequest $request)
     {
+
         if (isset($request->validator) && $request->validator->fails()) {
             return response()->failed($request->validator->errors());
         }
+
 
         $payload = $request->only(['description', 'limit_time', 'group_id', 'voting_options']);
         $voting = $this->voting->create($payload);

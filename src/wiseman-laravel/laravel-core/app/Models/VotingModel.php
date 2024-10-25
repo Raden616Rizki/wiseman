@@ -58,8 +58,6 @@ class VotingModel extends Model implements CrudInterface
     public function edit(array $payload, string $id)
     {
         $query = $this->find($id);
-        error_log(json_encode($payload));
-
 
         if (empty($query)) {
             return false;
