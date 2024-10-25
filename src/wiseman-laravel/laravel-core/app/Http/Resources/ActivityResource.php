@@ -18,6 +18,7 @@ class ActivityResource extends JsonResource
 			'end_time' => $this->end_time,
 			'is_priority' => $this->is_priority,
 			'is_finished' => $this->is_finished,
+			'google_calendar_event_id' => $this->google_calendar_event_id,
         	'group' => new GroupResource($this->group)
         ];
     }
