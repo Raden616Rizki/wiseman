@@ -63,8 +63,10 @@ class VotingController extends Controller
             return response()->failed($request->validator->errors());
         }
 
+
         $payload = $request->only(['description', 'limit_time', 'group_id', 'voting_options', 'voting_options_deleted']);
         $voting = $this->voting->update($payload, $id ?? '');
+
 
         if (!$voting['status']) {
             return response()->failed($voting['error']);
@@ -80,6 +82,8 @@ class VotingController extends Controller
         if (!$voting) {
             return response()->failed(['Mohon maaf data tidak ditemukan']);
         }
+
+        error_log($id);
 
         return response()->success($voting, 'Data berhasil dihapus');
     }

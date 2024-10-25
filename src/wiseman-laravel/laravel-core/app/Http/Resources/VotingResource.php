@@ -16,6 +16,7 @@ class VotingResource extends JsonResource
 			'limitTime' => $this->limit_time,
 			'groupId' => $this->group_id,
         	'votingOptions' => VotingOptionResource::collection($this->votingOptions),
+            'group' => new GroupResource($this->group),
 		];
     }
 }

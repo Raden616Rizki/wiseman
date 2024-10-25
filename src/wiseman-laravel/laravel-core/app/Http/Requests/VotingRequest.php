@@ -38,11 +38,11 @@ class VotingRequest extends FormRequest
     private function updateRules(): array
     {
         return [
-            'description' => 'required',
-			'limit_time' => 'required',
-			'group_id' => 'required',
-			'voting_options.*.option' => 'required',
-			'voting_options.*.total' => 'required',
+            'description' => 'nullable',
+			'limit_time' => 'nullable',
+			'group_id' => 'nullable',
+			'voting_options.*.option' => 'nullable',
+			'voting_options.*.total' => 'nullable',
         ];
     }
 

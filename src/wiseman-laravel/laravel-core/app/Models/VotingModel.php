@@ -38,7 +38,7 @@ class VotingModel extends Model implements CrudInterface
 			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
 
-        $sort = $sort ?: 'id DESC';
+        $sort = $sort ?: 'limit_time ASC';
         $query->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 
@@ -58,6 +58,8 @@ class VotingModel extends Model implements CrudInterface
     public function edit(array $payload, string $id)
     {
         $query = $this->find($id);
+        error_log(json_encode($payload));
+
 
         if (empty($query)) {
             return false;

@@ -103,7 +103,8 @@
                 <input class="form-check-input activity-check me-2" type="checkbox"
                   :id="'flexCheckChecked-' + activity.id"
                   @change="finishActivity(activity.id, $event.target.checked ? 1 : 0)"
-                  :checked="activity.is_finished === 1" style="border: 2px solid #303841;">
+                  :checked="activity.is_finished === 1"
+                  :style="{ border: activity.is_priority === 1 ? '2px solid #EEEEEE' : '2px solid black' }">
               </td>
               <td style="text-align: center; width: 40px;">
                 <div class="d-flex justify-content-center align-items-center" :style="{
@@ -132,13 +133,13 @@
                 </div>
               </td>
               <td style="width: 100%;">
-                <!-- <p v-if="voting.group_id" class="voting-description mb-0 bg-white" :style="{
+                <p v-if="voting.groupId" class="voting-description mb-0 bg-white" :style="{
                   fontWeight: 'bold',
-                }"> {{ voting.group.name }} </p> -->
+                }"> {{ voting.group.name }} </p>
                 <p class="voting-description mb-0 bg-white"> {{ voting.description }} </p>
               </td>
               <td style="text-align: center; width: 50px;">
-                <button class="btn votting-button">Voting</button>
+                <button class="btn votting-button align-items-center" @click="openVotingModal(voting)" >Voting</button>
               </td>
               <td style="text-align: center; width: 40px;">
                 <div class="d-flex justify-content-center align-items-center bg-white">
@@ -216,7 +217,7 @@
 
         <!-- ========== Voting Modal ========== -->
         <BModal v-model="isVotingFormOpen" id="modal-standard" :title="votingFormTitle + ' Voting'"
-          title-class="font-18" :ok-title="activityFormTitle" @ok="saveVoting" @hide.prevent
+          title-class="font-18" :ok-title="votingFormTitle" @ok="saveVoting" @hide.prevent
           @cancel="isVotingFormOpen = false" @close="isVotingFormOpen = false">
           <BRow>
             <BCol cols="12" class="mt-2">
@@ -243,7 +244,7 @@
                   </div>
 
                   <BCol>
-                    <div v-for="(option, index) in votingOptions" :key="index"
+                    <div v-for="(option, index) in votingForm.voting_options" :key="index"
                       class="d-flex justify-content-between align-items-center mb-3">
                       <i v-if="option.id" class="bx bx-minus memo-bold-font me-2"
                         style="font-size: 16px; cursor: pointer;" @click="deleteOption(option.id, index)"></i>
@@ -267,6 +268,26 @@
                       </div>
                     </template>
                   </BCol>
+                </BRow>
+              </BForm>
+            </BCol>
+          </BRow>
+        </BModal>
+
+        <!-- ========== Open Voting Modal ========== -->
+        <BModal v-model="isVotingOpen" id="modal-standard" :title="votingForm.description" title-class="font-18"
+          @hide.prevent @cancel="isVotingOpen = false" @close="isVotingOpen = false" size="sm" ok-title="Voting Result"
+          @ok="openVotingResult">
+          <BRow>
+            <BCol cols="12" class="mt-2">
+              <BForm class="form-horizontal" role="form">
+                <BRow v-for="option in votingForm.voting_options" :key="option.id">
+                  <div class="form-check mb-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 border border-dark px-2 py-1 rounded w-100">{{ option.option }}</h6>
+
+                    <input class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + option.id"
+                      :value="option.id" name="votingOptionsGroup" />
+                  </div>
                 </BRow>
               </BForm>
             </BCol>
@@ -304,7 +325,7 @@ watch(() => route.query.id, async (newVal) => {
 
   await getActivities();
   await getVotings();
-  
+
   getMemos();
 });
 
@@ -345,6 +366,7 @@ const memoFormTitle = ref("Create");
 const choosedMemoId = ref("");
 
 const isVotingFormOpen = ref(false);
+const isVotingOpen = ref(false);
 const votingFormTitle = ref("Create");
 const votingOptions = ref([
   {
@@ -449,15 +471,28 @@ const openVotingFormModal = async (voting) => {
     votingForm.id = voting.id;
     votingForm.group_id = voting.groupId;
     votingForm.description = voting.description;
-    votingForm.limit_time = voting.limit_time;
+    votingForm.limit_time = voting.limitTime.substr(11, 5);
+    votingForm.voting_options = voting.votingOptions;
+    console.log(votingForm);
     votingFormTitle.value = 'Update';
   } else {
     votingForm.id = "";
     votingForm.group_id = "";
     votingForm.description = "";
     votingForm.limit_time = "";
+    votingForm.voting_options = [];
     votingFormTitle.value = 'Create';
   }
+}
+
+const openVotingModal = async (voting) => {
+  isVotingOpen.value = true;
+
+  votingForm.id = voting.id;
+  votingForm.group_id = voting.groupId;
+  votingForm.description = voting.description;
+  votingForm.limit_time = voting.limitTime.substr(11, 5);
+  votingForm.voting_options = voting.votingOptions;
 }
 
 // Activity
@@ -573,7 +608,7 @@ const deleteActivity = async (activityId) => {
     } catch (error) {
       console.error(error);
       failProgress();
-      showSuccessToast("Delete activity failed");
+      showErrorToast("Delete activity failed");
     }
   }
 }
@@ -609,7 +644,7 @@ const getVotings = async () => {
 }
 
 const deleteOption = (optionId, index) => {
-  votingOptions.value.splice(index, 1);
+  votingForm.voting_options.splice(index, 1);
   if (optionId != 'default') {
     votingForm.voting_options_deleted.push({
       optionId
@@ -620,12 +655,6 @@ const deleteOption = (optionId, index) => {
 const saveVoting = async () => {
   startProgress();
   try {
-    if (groupId.value) {
-      votingForm.group_id = groupId.value;
-    } else {
-      votingForm.group_id = '';
-    }
-
     votingForm.limit_time = getFormattedTime(choosedDate.value, votingForm.limit_time);
 
     if (votingForm.id) {
@@ -650,9 +679,30 @@ const saveVoting = async () => {
         showSuccessToast("Voting added successfully!");
       }
     }
+    await getVotings();
+
   } catch (error) {
     console.error(error);
     failProgress();
+  }
+}
+
+const deleteVoting = async (votingId) => {
+  const confirmed = await showDeleteConfirmationDialog();
+
+  if (confirmed) {
+    startProgress();
+    try {
+      await votingStore.deleteVoting(votingId);
+      await getVotings();
+
+      finishProgress();
+      showSuccessToast("Delete voting successfully");
+    } catch (error) {
+      console.error(error);
+      failProgress();
+      showErrorToast("Delete voting failed");
+    }
   }
 }
 
@@ -771,7 +821,7 @@ onMounted(async () => {
 
   await getActivities();
   await getVotings();
-  
+
   getMemos();
 });
 
@@ -821,7 +871,8 @@ onMounted(async () => {
 }
 
 .votting-button {
+  color: white;
   background-color: #00ADB5;
-  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
 }
 </style>
