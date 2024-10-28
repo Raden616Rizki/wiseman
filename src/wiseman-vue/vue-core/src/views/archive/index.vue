@@ -6,21 +6,24 @@
             <i class="bx bx-plus memo-bold-font" style="font-size: 24px; cursor: pointer;"
                 @click="openArchiveFormModal('create')"></i>
         </div>
-        <div class="card main-bg py-3 px-4">
+        <div class="card main-bg py-3 px-4" style="min-height: 440px;">
             <div class="palette-3 py-1 px-2 rounded mb-4">
-                <p class="archive-path mb-0">/Images/Liburan</p>
+                <p class="archive-path mb-0">/</p>
             </div>
             <div class="d-flex">
                 <div v-for="archiveData in archives" :key="archiveData.id">
                     <div v-if="archiveData.file" class="file me-4 my-1 d-flex flex-column align-items-center"
                         @contextmenu.prevent="showContextMenu($event, archiveData)">
-                        <img :src="archiveData.file || fileIcon" class="file-icon" alt="file-icon" @error="onImageError">
-                        <p class="file-name">{{ archiveData.name }}.{{ archiveData.file.split('.').pop() }}</p>
+                        <img :src="archiveData.file || fileIcon" class="file-icon" alt="file-icon"
+                            @error="onImageError">
+                        <p class="file-name" v-b-tooltip.hover
+                            :title="archiveData.name + '.' + archiveData.file.split('.').pop()">{{ archiveData.name
+                            }}.{{ archiveData.file.split('.').pop() }}</p>
                     </div>
                     <div v-else class="folder me-4 my-1 flex-column align-items-center"
                         @contextmenu.prevent="showContextMenu($event, archiveData)">
                         <img :src="folderIcon" class="folder-icon" alt="folder-icon">
-                        <p class="folder-name">{{ archiveData.name }}</p>
+                        <p class="folder-name" v-b-tooltip.hover :title="archiveData.name">{{ archiveData.name }}</p>
                     </div>
                 </div>
             </div>
@@ -30,7 +33,8 @@
                         Copy
                         <i class="bx bx-copy"></i>
                     </li>
-                    <li v-if="archive.file" @click="downloadFile(archive.file)" class="d-flex justify-content-between align-items-center">
+                    <li v-if="archive.file" @click="downloadFile(archive.file)"
+                        class="d-flex justify-content-between align-items-center">
                         Download
                         <i class="bx bx-download"></i>
                     </li>
@@ -38,7 +42,8 @@
                         Move
                         <i class="bx bx-move"></i>
                     </li>
-                    <li @click="openArchiveFormModal('update')" class="d-flex justify-content-between align-items-center">
+                    <li @click="openArchiveFormModal('update')"
+                        class="d-flex justify-content-between align-items-center">
                         Rename
                         <i class="bx bx-edit"></i>
                     </li>
@@ -68,7 +73,7 @@
                             <BCol md="10">
                                 <input class="form-control" type="file" :class="{
                                     'is-invalid': !!(archiveErrorList && archiveErrorList.file),
-                                }" id="form-file-archive" placeholder="Masukkan file" />
+                                }" id="form-file-archive" placeholder="Masukkan file" @change="handleFileChange" />
                                 <template v-if="!!(archiveErrorList && archiveErrorList.file)">
                                     <div class="invalid-feedback" v-for="(err, index) in archiveErrorList.file"
                                         :key="index">
@@ -110,6 +115,10 @@ import {
     showErrorToast,
     showDeleteConfirmationDialog,
 } from "@/helpers/alert.js";
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const groupId = route.params.id;
 
 const { startProgress, finishProgress, failProgress } = useProgress();
 
@@ -117,6 +126,7 @@ const archiveStore = useArchiveStore();
 const searchByName = ref('');
 const archives = ref([]);
 const archive = ref({});
+archiveStore.groupId = groupId;
 
 const archiveStatusCode = computed(() => archiveStore.response.status);
 const archiveErrorList = computed(() => archiveStore.response?.error || {});
@@ -129,7 +139,7 @@ const archiveForm = reactive({
     id: "",
     file: null,
     name: "",
-    group_id: "",
+    group_id: groupId,
     parent_id: "",
 });
 
@@ -193,7 +203,7 @@ const openArchiveFormModal = async (method) => {
         archiveForm.id = "";
         archiveForm.file = null;
         archiveForm.name = "";
-        archiveForm.group_id = "";
+        archiveForm.group_id = groupId;
         archiveForm.parent_id = "";
 
         archiveFormTitle.value = 'Add';
@@ -214,7 +224,8 @@ const saveArchive = async () => {
                 showSuccessToast("Archive updated successfully!");
             }
         } else {
-            await archiveStore.addActivities(archiveForm);
+            console.log(archiveForm)
+            await archiveStore.addArchives(archiveForm);
             if (archiveStatusCode.value != 200) {
                 failProgress();
                 showErrorToast("Failed to add archive", archiveErrorMessage);
@@ -270,6 +281,11 @@ const downloadFile = (fileUrl) => {
 
     document.body.removeChild(link);
 };
+
+const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    archiveForm.file = file || null;
+}
 
 onMounted(async () => {
     await getArchives();
@@ -328,9 +344,13 @@ document.addEventListener('click', hideContextMenu);
 .file-name {
     margin-top: 8px;
     color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .folder {
+    width: 64px;
     cursor: pointer;
 }
 
@@ -341,6 +361,9 @@ document.addEventListener('click', hideContextMenu);
 
 .folder-name {
     color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .input-archive {

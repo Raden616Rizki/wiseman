@@ -3,7 +3,7 @@
         <div>
             <input v-model="searchByName" type="text" class="form-control input-group ms-0 mb-4" placeholder="Cari group..." @keydown.enter="handleFilterByName" style="margin-left: 100px;">
         </div>
-        <div class="card main-bg py-3 px-4">
+        <div class="card main-bg py-3 px-4" style="min-height: 440px;">
             <div v-for="group in groups" :key="group.id">
                 <div class="p-2 bg-white d-flex justify-content-between mb-3 align-items-center card-group">
                     <div>

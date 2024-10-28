@@ -187,6 +187,7 @@ export default {
     async saveUser() {
       try {
         if (this.formUser.id) {
+          console.log(this.formUser);
           await this.userStore.updateUser(this.formUser);
           if (this.userStatusCode != 200) {
             showErrorToast("Failed to add user", this.userErrorMessage);
@@ -557,8 +558,11 @@ export default {
         <div class="d-flex justify-content-center align-items-center">
           <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
             v-b-tooltip.hover title="Leave group"></i>
-          <i class="bx bx-edit ws-menu" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
+          <i class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
             v-b-tooltip.hover title="Edit group"></i>
+          <router-link :to="`/archive/${group.group.id}`">
+            <i class="bx bx-folder ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
+          </router-link>
         </div>
       </div>
       <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu" @click="openGroupFormModal('add')">

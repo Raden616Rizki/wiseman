@@ -23,8 +23,8 @@ class ArchiveController extends Controller
         $filter = [
 			'name' => $request->name ?? '',
 			'file' => $request->file ?? '',
-			'parent_id' => $request->parent_id ?? '',
-			'group_id' => $request->group_id ?? '',
+			'parent_id' => $request->parentId ?? '',
+			'group_id' => $request->groupId ?? '',
 		];
 
         $archive = $this->archive->getAll($filter, $request->per_page ?? 25, $request->sort ?? '');
@@ -45,6 +45,7 @@ class ArchiveController extends Controller
     public function store(ArchiveRequest $request)
     {
         if (isset($request->validator) && $request->validator->fails()) {
+            error_log($request->validator->errors());
             return response()->failed($request->validator->errors());
         }
 

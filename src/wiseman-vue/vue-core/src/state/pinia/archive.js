@@ -21,6 +21,7 @@ export const useArchiveStore = defineStore('archive', {
         totalData: 0,
         current: 1,
         perPage: 5,
+        groupId: '',
         searchQuery: '',
     }),
     actions: {
@@ -30,7 +31,7 @@ export const useArchiveStore = defineStore('archive', {
         },
         async getArchives() {
             try {
-                const url = `${this.apiUrl}/v1/archives?page=${this.current}&perPage=${this.perPage}&name=${this.searchQuery}`;
+                const url = `${this.apiUrl}/v1/archives?page=${this.current}&perPage=${this.perPage}&name=${this.searchQuery}&groupId=${this.groupId}`;
                 const res = await axios.get(url);
 
                 const archivesDataList = res.data.data.list

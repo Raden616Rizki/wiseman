@@ -19,7 +19,7 @@ export default [
     component: () => import("../views/group")
   },
   {
-    path: "/archive",
+    path: "/archive/:id",
     name: "archive",
     meta: { title: "Master archive", authRequired: true },
     component: () => import("../views/archive")
