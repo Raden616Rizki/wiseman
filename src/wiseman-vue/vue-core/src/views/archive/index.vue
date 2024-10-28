@@ -1,24 +1,149 @@
 <template>
     <Layout>
-        <div>
-            <input v-model="searchByName" type="text" class="form-control input-archive ms-0 mb-4" placeholder="Cari arsip..." @keydown.enter="handleFilterByName" style="margin-left: 100px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <input v-model="searchByName" type="text" class="form-control input-archive ms-0"
+                placeholder="Cari arsip..." @keydown.enter="handleFilterByName" style="margin-left: 100px;">
+            <i class="bx bx-plus memo-bold-font" style="font-size: 24px; cursor: pointer;"
+                @click="openArchiveFormModal('add')"></i>
         </div>
         <div class="card main-bg py-3 px-4">
+            <div class="palette-3 py-1 px-2 rounded mb-4">
+                <p class="archive-path mb-0">/Images/Liburan</p>
+            </div>
+            <div class="d-flex">
+                <div class="folder me-4 my-1 flex-column align-items-center"
+                    @contextmenu.prevent="showContextMenu($event)">
+                    <img :src="folderIcon" class="folder-icon" alt="folder-icon">
+                    <p class="folder-name">Images</p>
+                </div>
+                <div class="folder me-4 my-1 flex-column align-items-center"
+                    @contextmenu.prevent="showContextMenu($event)">
+                    <img :src="folderIcon" class="folder-icon" alt="folder-icon">
+                    <p class="folder-name">Images</p>
+                </div>
+                <div class="folder me-4 my-1 flex-column align-items-center"
+                    @contextmenu.prevent="showContextMenu($event)">
+                    <img :src="folderIcon" class="folder-icon" alt="folder-icon">
+                    <p class="folder-name">Images</p>
+                </div>
+                <div class="file me-4 my-1 d-flex flex-column align-items-center"
+                    @contextmenu.prevent="showContextMenu($event)">
+                    <img :src="fileIcon" class="file-icon" alt="file-icon">
+                    <p class="file-name">Images.jpg</p>
+                </div>
+                <div class="file me-4 my-1 flex-column align-items-center"
+                    @contextmenu.prevent="showContextMenu($event)">
+                    <img :src="fileIcon" class="file-icon" alt="file-icon">
+                    <p class="file-name">Images.jpg</p>
+                </div>
+            </div>
+            <div v-if="isContextMenuVisible" class="context-menu" :style="contextMenuStyle">
+                <ul>
+                    <li @click="copyFile" class="d-flex justify-content-between align-items-center">
+                        Copy
+                        <i class="bx bx-copy"></i>
+                    </li>
+                    <li @click="downloadFile" class="d-flex justify-content-between align-items-center">
+                        Download
+                        <i class="bx bx-download"></i>
+                    </li>
+                    <li @click="moveFile" class="d-flex justify-content-between align-items-center">
+                        Move
+                        <i class="bx bx-move"></i>
+                    </li>
+                    <li @click="openArchiveFormModal('edit')" class="d-flex justify-content-between align-items-center">
+                        Rename
+                        <i class="bx bx-edit"></i>
+                    </li>
+                    <li @click="deleteArchive('null')" class="d-flex justify-content-between align-items-center">
+                        Delete
+                        <i class="bx bx-trash"></i>
+                    </li>
+                </ul>
+            </div>
         </div>
+
+        <!-- ========== Archive Form Modal ========== -->
+        <BModal v-model="isArchiveFormOpen" id="modal-standard" :title="archiveFormTitle + ' Archive'"
+            title-class="font-18" :ok-title="archiveFormTitle" @ok="saveArchive" @hide.prevent
+            @cancel="isArchiveFormOpen = false" @close="isArchiveFormOpen = false">
+            <BRow>
+                <BCol cols="12" class="mt-4">
+                    <BForm class="form-horizontal" role="form">
+                        <BRow class="mb-3">
+                            <label class="col-md-2 col-form-label" for="form-file-archive">File</label>
+                            <BCol md="10">
+                                <input class="form-control" type="file" :class="{
+                                    'is-invalid': !!(archiveErrorList && archiveErrorList.file),
+                                }" id="form-file-archive" placeholder="Masukkan Nama" />
+                                <template v-if="!!(archiveErrorList && archiveErrorList.file)">
+                                    <div class="invalid-feedback" v-for="(err, index) in archiveErrorList.file"
+                                        :key="index">
+                                        <span>{{ err }}</span>
+                                    </div>
+                                </template>
+                            </BCol>
+                        </BRow>
+                        <BRow class="mb-3">
+                            <label class="col-md-2 col-form-label" for="form-name-archive">Name</label>
+                            <BCol md="10">
+                                <input class="form-control" :class="{
+                                    'is-invalid': !!(archiveErrorList && archiveErrorList.name),
+                                }" id="form-name-archive" placeholder="Masukkan Nama" v-model="archiveForm.name" />
+                                <template v-if="!!(archiveErrorList && archiveErrorList.name)">
+                                    <div class="invalid-feedback" v-for="(err, index) in archiveErrorList.name"
+                                        :key="index">
+                                        <span>{{ err }}</span>
+                                    </div>
+                                </template>
+                            </BCol>
+                        </BRow>
+                    </BForm>
+                </BCol>
+            </BRow>
+        </BModal>
     </Layout>
 </template>
 
 <script setup>
 import Layout from "../../layouts/main";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive, computed } from "vue";
 import { useArchiveStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
+import folderIcon from "@/assets/images/folder-icon.svg";
+import fileIcon from "@/assets/images/file-icon.svg";
+import {
+  showSuccessToast,
+  showErrorToast,
+  showDeleteConfirmationDialog,
+} from "@/helpers/alert.js";
 
 const { startProgress, finishProgress, failProgress } = useProgress();
 
 const archiveStore = useArchiveStore();
 const searchByName = ref('');
 const archives = ref([]);
+
+const archiveStatusCode = computed(() => archiveStore.response.status);
+const archiveErrorList = computed(() => archiveStore.response?.error || {});
+const archiveErrorMessage = computed(() => archiveStore.response?.message || "");
+
+const isArchiveFormOpen = ref(false);
+const archiveFormTitle = ref('Add');
+
+const archiveForm = reactive({
+    id: "",
+    file: "",
+    name: "",
+    group_id: "",
+    parent_id: "",
+});
+
+const isContextMenuVisible = ref(false);
+const contextMenuStyle = ref({
+    top: '0px',
+    left: '0px'
+})
 
 const handleFilterByName = async () => {
     archiveStore.searchQuery = searchByName.value;
@@ -37,13 +162,164 @@ const getArchives = async () => {
     }
 }
 
+const showContextMenu = (event) => {
+    contextMenuStyle.value = {
+        top: `${event.clientY - 90}px`,
+        left: `${event.clientX - 280}px`
+    };
+
+    isContextMenuVisible.value = true;
+}
+
+const hideContextMenu = () => {
+    isContextMenuVisible.value = false;
+}
+
+const openArchiveFormModal = async (archive) => {
+    isArchiveFormOpen.value = true;
+    if (archive != 'add') {
+        archiveForm.id = archive.id,
+        archiveForm.file = archive.file,
+        archiveForm.name = archive.name,
+        archiveForm.group_id = archive.group_id,
+        archiveForm.parent_id = archive.parent_id,
+
+        archiveFormTitle.value = 'Update';
+    } else {
+        archiveForm.id = "",
+        archiveForm.file = "",
+        archiveForm.name = "",
+        archiveForm.group_id = "",
+        archiveForm.parent_id = "",
+
+        archiveFormTitle.value = 'Add';
+    }
+}
+
+const saveArchive = async () => {
+  startProgress();
+  try {
+    if (archiveForm.id) {
+      await archiveStore.updateArchive(archiveForm);
+      if (archiveStatusCode.value != 200) {
+        failProgress();
+        showErrorToast("Failed to update archive", archiveErrorMessage);
+      } else {
+        isArchiveFormOpen.value = false;
+        finishProgress();
+        showSuccessToast("Archive updated successfully!");
+      }
+    } else {
+      await archiveStore.addActivities(archiveForm);
+      if (archiveStatusCode.value != 200) {
+        failProgress();
+        showErrorToast("Failed to add archive", archiveErrorMessage);
+      } else {
+        isArchiveFormOpen.value = false;
+
+        finishProgress();
+        showSuccessToast("Archove added successfully!");
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    showErrorToast("Failed to saved archive", archiveErrorMessage);
+    failProgress();
+  }
+
+  await getArchives();
+}
+
+const deleteArchive = async (archiveId) => {
+  const confirmed = await showDeleteConfirmationDialog();
+
+  if (confirmed) {
+    startProgress();
+    try {
+      await archiveStore.deleteArchive(archiveId);
+      await getArchives();
+
+      finishProgress();
+      showSuccessToast("Delete archive successfully");
+    } catch (error) {
+      console.error(error);
+      failProgress();
+      showErrorToast("Delete archive failed");
+    }
+  }
+}
+
 onMounted(async () => {
     await getArchives();
 })
 
+document.addEventListener('click', hideContextMenu);
+
 </script>
 
 <style scoped>
+.archive-path {
+    color: white;
+}
+
+.context-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: 120px;
+}
+
+.context-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.context-menu li {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.context-menu i {
+    font-size: 16px;
+    cursor: pointer;
+    color: #067e82;
+    font-weight: bold;
+}
+
+.context-menu li:hover {
+    background-color: #f0f0f0;
+}
+
+.file {
+    cursor: pointer;
+}
+
+.file-icon {
+    width: 56px;
+    height: 56px;
+}
+
+.file-name {
+    margin-top: 8px;
+    color: white;
+}
+
+.folder {
+    cursor: pointer;
+}
+
+.folder-icon {
+    width: 64px;
+    height: 64px;
+}
+
+.folder-name {
+    color: white;
+}
 
 .input-archive {
     border-radius: 4px;
@@ -53,8 +329,12 @@ onMounted(async () => {
 }
 
 .main-bg {
-  background-color: #3A4750;
-  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+    background-color: #3A4750;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
+.palette-3 {
+    /* background-color: #00ADB5; */
+    background-color: #067e82;
+}
 </style>
