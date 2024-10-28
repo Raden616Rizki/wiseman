@@ -11,30 +11,17 @@
                 <p class="archive-path mb-0">/Images/Liburan</p>
             </div>
             <div class="d-flex">
-                <div class="folder me-4 my-1 flex-column align-items-center"
-                    @contextmenu.prevent="showContextMenu($event)">
-                    <img :src="folderIcon" class="folder-icon" alt="folder-icon">
-                    <p class="folder-name">Images</p>
-                </div>
-                <div class="folder me-4 my-1 flex-column align-items-center"
-                    @contextmenu.prevent="showContextMenu($event)">
-                    <img :src="folderIcon" class="folder-icon" alt="folder-icon">
-                    <p class="folder-name">Images</p>
-                </div>
-                <div class="folder me-4 my-1 flex-column align-items-center"
-                    @contextmenu.prevent="showContextMenu($event)">
-                    <img :src="folderIcon" class="folder-icon" alt="folder-icon">
-                    <p class="folder-name">Images</p>
-                </div>
-                <div class="file me-4 my-1 d-flex flex-column align-items-center"
-                    @contextmenu.prevent="showContextMenu($event)">
-                    <img :src="fileIcon" class="file-icon" alt="file-icon">
-                    <p class="file-name">Images.jpg</p>
-                </div>
-                <div class="file me-4 my-1 flex-column align-items-center"
-                    @contextmenu.prevent="showContextMenu($event)">
-                    <img :src="fileIcon" class="file-icon" alt="file-icon">
-                    <p class="file-name">Images.jpg</p>
+                <div v-for="archive in archives" :key="archive.id">
+                    <div v-if="archive.file" class="file me-4 my-1 d-flex flex-column align-items-center"
+                        @contextmenu.prevent="showContextMenu($event)">
+                        <img :src="archive.file || fileIcon" class="file-icon" alt="file-icon" @error="onImageError">
+                        <p class="file-name">{{ archive.name }}.{{ archive.file.split('.').pop() }}</p>
+                    </div>
+                    <div v-else class="folder me-4 my-1 flex-column align-items-center"
+                        @contextmenu.prevent="showContextMenu($event)">
+                        <img :src="folderIcon" class="folder-icon" alt="folder-icon">
+                        <p class="folder-name">{{ archive.name }}</p>
+                    </div>
                 </div>
             </div>
             <div v-if="isContextMenuVisible" class="context-menu" :style="contextMenuStyle">
@@ -68,14 +55,20 @@
             title-class="font-18" :ok-title="archiveFormTitle" @ok="saveArchive" @hide.prevent
             @cancel="isArchiveFormOpen = false" @close="isArchiveFormOpen = false">
             <BRow>
-                <BCol cols="12" class="mt-4">
+                <BCol cols="12" class="mt-1">
                     <BForm class="form-horizontal" role="form">
-                        <BRow class="mb-3">
+                        <BRow class="mb-3" v-if="uploadType === 'File'">
+                            <BCol md="10" class="d-flex align-items-center">
+                                <BFormRadioGroup v-model="uploadType" :options="uploadOptions"
+                                    name="uploadTypeOptions" />
+                            </BCol>
+                        </BRow>
+                        <BRow class="mb-3" v-if="uploadType === 'File'">
                             <label class="col-md-2 col-form-label" for="form-file-archive">File</label>
                             <BCol md="10">
                                 <input class="form-control" type="file" :class="{
                                     'is-invalid': !!(archiveErrorList && archiveErrorList.file),
-                                }" id="form-file-archive" placeholder="Masukkan Nama" />
+                                }" id="form-file-archive" placeholder="Masukkan file" />
                                 <template v-if="!!(archiveErrorList && archiveErrorList.file)">
                                     <div class="invalid-feedback" v-for="(err, index) in archiveErrorList.file"
                                         :key="index">
@@ -84,7 +77,7 @@
                                 </template>
                             </BCol>
                         </BRow>
-                        <BRow class="mb-3">
+                        <BRow class="mb-1">
                             <label class="col-md-2 col-form-label" for="form-name-archive">Name</label>
                             <BCol md="10">
                                 <input class="form-control" :class="{
@@ -113,9 +106,9 @@ import { useProgress } from "@/helpers/progress";
 import folderIcon from "@/assets/images/folder-icon.svg";
 import fileIcon from "@/assets/images/file-icon.svg";
 import {
-  showSuccessToast,
-  showErrorToast,
-  showDeleteConfirmationDialog,
+    showSuccessToast,
+    showErrorToast,
+    showDeleteConfirmationDialog,
 } from "@/helpers/alert.js";
 
 const { startProgress, finishProgress, failProgress } = useProgress();
@@ -133,7 +126,7 @@ const archiveFormTitle = ref('Add');
 
 const archiveForm = reactive({
     id: "",
-    file: "",
+    file: null,
     name: "",
     group_id: "",
     parent_id: "",
@@ -143,7 +136,13 @@ const isContextMenuVisible = ref(false);
 const contextMenuStyle = ref({
     top: '0px',
     left: '0px'
-})
+});
+
+const uploadType = ref('File');
+const uploadOptions = [
+    { text: 'File', value: 'File' },
+    { text: 'Folder', value: 'Folder' }
+];
 
 const handleFilterByName = async () => {
     archiveStore.searchQuery = searchByName.value;
@@ -178,76 +177,84 @@ const hideContextMenu = () => {
 const openArchiveFormModal = async (archive) => {
     isArchiveFormOpen.value = true;
     if (archive != 'add') {
-        archiveForm.id = archive.id,
-        archiveForm.file = archive.file,
-        archiveForm.name = archive.name,
-        archiveForm.group_id = archive.group_id,
-        archiveForm.parent_id = archive.parent_id,
+        uploadType.value = 'Folder';
+
+        archiveForm.id = archive.id;
+        archiveForm.file = archive.file;
+        archiveForm.name = archive.name;
+        archiveForm.group_id = archive.group_id;
+        archiveForm.parent_id = archive.parent_id;
 
         archiveFormTitle.value = 'Update';
     } else {
-        archiveForm.id = "",
-        archiveForm.file = "",
-        archiveForm.name = "",
-        archiveForm.group_id = "",
-        archiveForm.parent_id = "",
+        uploadType.value = 'File';
+
+        archiveForm.id = "";
+        archiveForm.file = null;
+        archiveForm.name = "";
+        archiveForm.group_id = "";
+        archiveForm.parent_id = "";
 
         archiveFormTitle.value = 'Add';
     }
 }
 
 const saveArchive = async () => {
-  startProgress();
-  try {
-    if (archiveForm.id) {
-      await archiveStore.updateArchive(archiveForm);
-      if (archiveStatusCode.value != 200) {
-        failProgress();
-        showErrorToast("Failed to update archive", archiveErrorMessage);
-      } else {
-        isArchiveFormOpen.value = false;
-        finishProgress();
-        showSuccessToast("Archive updated successfully!");
-      }
-    } else {
-      await archiveStore.addActivities(archiveForm);
-      if (archiveStatusCode.value != 200) {
-        failProgress();
-        showErrorToast("Failed to add archive", archiveErrorMessage);
-      } else {
-        isArchiveFormOpen.value = false;
+    startProgress();
+    try {
+        if (archiveForm.id) {
+            await archiveStore.updateArchive(archiveForm);
+            if (archiveStatusCode.value != 200) {
+                failProgress();
+                showErrorToast("Failed to update archive", archiveErrorMessage);
+            } else {
+                isArchiveFormOpen.value = false;
+                finishProgress();
+                showSuccessToast("Archive updated successfully!");
+            }
+        } else {
+            await archiveStore.addActivities(archiveForm);
+            if (archiveStatusCode.value != 200) {
+                failProgress();
+                showErrorToast("Failed to add archive", archiveErrorMessage);
+            } else {
+                isArchiveFormOpen.value = false;
 
-        finishProgress();
-        showSuccessToast("Archove added successfully!");
-      }
+                finishProgress();
+                showSuccessToast("Archove added successfully!");
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        showErrorToast("Failed to saved archive", archiveErrorMessage);
+        failProgress();
     }
-  } catch (error) {
-    console.error(error);
-    showErrorToast("Failed to saved archive", archiveErrorMessage);
-    failProgress();
-  }
 
-  await getArchives();
+    await getArchives();
 }
 
 const deleteArchive = async (archiveId) => {
-  const confirmed = await showDeleteConfirmationDialog();
+    const confirmed = await showDeleteConfirmationDialog();
 
-  if (confirmed) {
-    startProgress();
-    try {
-      await archiveStore.deleteArchive(archiveId);
-      await getArchives();
+    if (confirmed) {
+        startProgress();
+        try {
+            await archiveStore.deleteArchive(archiveId);
+            await getArchives();
 
-      finishProgress();
-      showSuccessToast("Delete archive successfully");
-    } catch (error) {
-      console.error(error);
-      failProgress();
-      showErrorToast("Delete archive failed");
+            finishProgress();
+            showSuccessToast("Delete archive successfully");
+        } catch (error) {
+            console.error(error);
+            failProgress();
+            showErrorToast("Delete archive failed");
+        }
     }
-  }
 }
+
+const onImageError = (event) => {
+    event.target.src = fileIcon;
+};
 
 onMounted(async () => {
     await getArchives();
