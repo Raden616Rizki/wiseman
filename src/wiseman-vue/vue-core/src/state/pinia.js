@@ -5,9 +5,10 @@ import { useGroupStore } from "./pinia/group";
 import { useGroupUserStore } from "./pinia/groupUser";
 import { useActivityStore } from "./pinia/activity";
 import { useVotingStore } from "./pinia/voting";
+import { useArchiveStore } from "./pinia/archive";
 import { createPinia } from "pinia";
 
 const pinia = createPinia();
 export default pinia;
 
-export { useLayoutStore, useAuthStore, useUserStore, useGroupStore, useGroupUserStore, useActivityStore, useVotingStore };
+export { useLayoutStore, useAuthStore, useUserStore, useGroupStore, useGroupUserStore, useActivityStore, useVotingStore, useArchiveStore };
