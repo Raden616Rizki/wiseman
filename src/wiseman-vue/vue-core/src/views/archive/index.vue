@@ -4,23 +4,23 @@
             <input v-model="searchByName" type="text" class="form-control input-archive ms-0"
                 placeholder="Cari arsip..." @keydown.enter="handleFilterByName" style="margin-left: 100px;">
             <i class="bx bx-plus memo-bold-font" style="font-size: 24px; cursor: pointer;"
-                @click="openArchiveFormModal('add')"></i>
+                @click="openArchiveFormModal('create')"></i>
         </div>
         <div class="card main-bg py-3 px-4">
             <div class="palette-3 py-1 px-2 rounded mb-4">
                 <p class="archive-path mb-0">/Images/Liburan</p>
             </div>
             <div class="d-flex">
-                <div v-for="archive in archives" :key="archive.id">
-                    <div v-if="archive.file" class="file me-4 my-1 d-flex flex-column align-items-center"
-                        @contextmenu.prevent="showContextMenu($event)">
-                        <img :src="archive.file || fileIcon" class="file-icon" alt="file-icon" @error="onImageError">
-                        <p class="file-name">{{ archive.name }}.{{ archive.file.split('.').pop() }}</p>
+                <div v-for="archiveData in archives" :key="archiveData.id">
+                    <div v-if="archiveData.file" class="file me-4 my-1 d-flex flex-column align-items-center"
+                        @contextmenu.prevent="showContextMenu($event, archiveData)">
+                        <img :src="archiveData.file || fileIcon" class="file-icon" alt="file-icon" @error="onImageError">
+                        <p class="file-name">{{ archiveData.name }}.{{ archiveData.file.split('.').pop() }}</p>
                     </div>
                     <div v-else class="folder me-4 my-1 flex-column align-items-center"
-                        @contextmenu.prevent="showContextMenu($event)">
+                        @contextmenu.prevent="showContextMenu($event, archiveData)">
                         <img :src="folderIcon" class="folder-icon" alt="folder-icon">
-                        <p class="folder-name">{{ archive.name }}</p>
+                        <p class="folder-name">{{ archiveData.name }}</p>
                     </div>
                 </div>
             </div>
@@ -30,7 +30,7 @@
                         Copy
                         <i class="bx bx-copy"></i>
                     </li>
-                    <li @click="downloadFile" class="d-flex justify-content-between align-items-center">
+                    <li v-if="archive.file" @click="downloadFile(archive.file)" class="d-flex justify-content-between align-items-center">
                         Download
                         <i class="bx bx-download"></i>
                     </li>
@@ -38,11 +38,11 @@
                         Move
                         <i class="bx bx-move"></i>
                     </li>
-                    <li @click="openArchiveFormModal('edit')" class="d-flex justify-content-between align-items-center">
+                    <li @click="openArchiveFormModal('update')" class="d-flex justify-content-between align-items-center">
                         Rename
                         <i class="bx bx-edit"></i>
                     </li>
-                    <li @click="deleteArchive('null')" class="d-flex justify-content-between align-items-center">
+                    <li @click="deleteArchive()" class="d-flex justify-content-between align-items-center">
                         Delete
                         <i class="bx bx-trash"></i>
                     </li>
@@ -116,6 +116,7 @@ const { startProgress, finishProgress, failProgress } = useProgress();
 const archiveStore = useArchiveStore();
 const searchByName = ref('');
 const archives = ref([]);
+const archive = ref({});
 
 const archiveStatusCode = computed(() => archiveStore.response.status);
 const archiveErrorList = computed(() => archiveStore.response?.error || {});
@@ -161,12 +162,13 @@ const getArchives = async () => {
     }
 }
 
-const showContextMenu = (event) => {
+const showContextMenu = (event, archiveData) => {
     contextMenuStyle.value = {
         top: `${event.clientY - 90}px`,
         left: `${event.clientX - 280}px`
     };
 
+    archive.value = archiveData;
     isContextMenuVisible.value = true;
 }
 
@@ -174,16 +176,15 @@ const hideContextMenu = () => {
     isContextMenuVisible.value = false;
 }
 
-const openArchiveFormModal = async (archive) => {
+const openArchiveFormModal = async (method) => {
     isArchiveFormOpen.value = true;
-    if (archive != 'add') {
+    if (method == 'update') {
         uploadType.value = 'Folder';
 
-        archiveForm.id = archive.id;
-        archiveForm.file = archive.file;
-        archiveForm.name = archive.name;
-        archiveForm.group_id = archive.group_id;
-        archiveForm.parent_id = archive.parent_id;
+        archiveForm.id = archive.value.id;
+        archiveForm.name = archive.value.name;
+        archiveForm.group_id = archive.value.group_id;
+        archiveForm.parent_id = archive.value.parent_id;
 
         archiveFormTitle.value = 'Update';
     } else {
@@ -233,13 +234,13 @@ const saveArchive = async () => {
     await getArchives();
 }
 
-const deleteArchive = async (archiveId) => {
+const deleteArchive = async () => {
     const confirmed = await showDeleteConfirmationDialog();
 
     if (confirmed) {
         startProgress();
         try {
-            await archiveStore.deleteArchive(archiveId);
+            await archiveStore.deleteArchive(archive.value.id);
             await getArchives();
 
             finishProgress();
@@ -254,6 +255,20 @@ const deleteArchive = async (archiveId) => {
 
 const onImageError = (event) => {
     event.target.src = fileIcon;
+};
+
+const downloadFile = (fileUrl) => {
+    if (!fileUrl) return;
+
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.target = "_blank";
+    link.download = fileUrl.split("/").pop();
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
 };
 
 onMounted(async () => {
