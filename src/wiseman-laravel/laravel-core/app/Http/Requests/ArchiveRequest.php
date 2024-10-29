@@ -38,10 +38,10 @@ class ArchiveRequest extends FormRequest
     private function updateRules(): array
     {
         return [
-            'name' => 'required',
+            'name' => 'nullable',
 			'file' => 'nullable|file',
 			'parent_id' => 'nullable',
-			'group_id' => 'required',
+			'group_id' => 'nullable',
         ];
     }
 

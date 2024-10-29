@@ -8,14 +8,14 @@
         </div>
         <div class="card main-bg py-3 px-4" style="min-height: 440px;"
             @contextmenu.prevent="openArchiveFormModal('create')">
-            <div class="palette-3 py-1 px-2 rounded mb-4 d-flex">
+            <div class="palette-3 py-1 px-3 rounded mb-4 d-flex flex-wrap">
                 <p class="archive-path mb-0" @click="changePath('home')">Home</p>
                 <div v-for="(path, index) in pathArchive" :key="index" class="d-flex">
                     <p class="text-white mb-0 mx-2">></p>
                     <p class="archive-path mb-0" @click="changePath(path, index)"> {{ path.name }} </p>
                 </div>
             </div>
-            <div class="d-flex">
+            <div class="d-flex flex-wrap" style="padding-left: 13.3px;">
                 <div v-for="archiveData in archives" :key="archiveData.id">
                     <div v-if="archiveData.file" class="file me-4 my-1 d-flex flex-column align-items-center"
                         @contextmenu.prevent="showContextMenu($event, archiveData)">
@@ -44,7 +44,7 @@
                         Download
                         <i class="bx bx-download"></i>
                     </li>
-                    <li @click="moveFile" class="d-flex justify-content-between align-items-center">
+                    <li @click="openListFolderModal('null')" class="d-flex justify-content-between align-items-center">
                         Move
                         <i class="bx bx-move"></i>
                     </li>
@@ -93,7 +93,8 @@
                             <BCol md="10">
                                 <input class="form-control" :class="{
                                     'is-invalid': !!(archiveErrorList && archiveErrorList.name),
-                                }" id="form-name-archive" placeholder="Masukkan nama file" v-model="archiveForm.name" />
+                                }" id="form-name-archive" placeholder="Masukkan nama file"
+                                    v-model="archiveForm.name" />
                                 <template v-if="!!(archiveErrorList && archiveErrorList.name)">
                                     <div class="invalid-feedback" v-for="(err, index) in archiveErrorList.name"
                                         :key="index">
@@ -104,6 +105,18 @@
                         </BRow>
                     </BForm>
                 </BCol>
+            </BRow>
+        </BModal>
+
+        <!-- ========== List Folder Modal ========== -->
+        <BModal v-model="isListFolderOpen" id="modal-standard" title="Daftar Folder" title-class="font-18" ok-title="ok"
+            @ok="saveArchive" @hide.prevent @cancel="isListFolderOpen = false" @close="isListFolderOpen = false"
+            hide-footer>
+            <BRow v-for="folder in listFolder" :key="folder.id" class="mt-0">
+                <div class="main-bg rounded w-100 text-white me-2 mt-2 p-2" style="cursor: pointer;"
+                    @click="moveArchive(folder.id)">
+                    <p class="mb-0">{{ folder.name }}</p>
+                </div>
             </BRow>
         </BModal>
     </Layout>
@@ -150,7 +163,10 @@ const archiveErrorList = computed(() => archiveStore.response?.error || {});
 const archiveErrorMessage = computed(() => archiveStore.response?.message || "");
 
 const isArchiveFormOpen = ref(false);
+const isListFolderOpen = ref(false);
 const archiveFormTitle = ref('Add');
+const listFolder = ref([]);
+// const clicked = ref(false);
 
 const archiveForm = reactive({
     id: "",
@@ -231,6 +247,11 @@ const openArchiveFormModal = async (method) => {
     }
 }
 
+const openListFolderModal = async (id) => {
+    isListFolderOpen.value = true;
+    listFolder.value = await archiveStore.getListFolder(id);
+}
+
 const saveArchive = async () => {
     startProgress();
     try {
@@ -279,6 +300,16 @@ const deleteArchive = async () => {
             showErrorToast("Delete archive failed");
         }
     }
+}
+
+const moveArchive = async (newParentId) => {
+    archiveForm.id = archive.value.id;
+    archiveForm.name = archive.value.name;
+    archiveForm.group_id = archive.value.group_id;
+    archiveForm.parent_id = newParentId;
+
+    await saveArchive();
+    isListFolderOpen.value = false;
 }
 
 const onImageError = (event) => {
@@ -333,6 +364,8 @@ const handleFileChange = (event) => {
 }
 
 const changePath = async (folderData, index) => {
+    // clicked.value = true;
+
     if (folderData === 'home') {
         archiveStore.parentId = null;
         await getArchives();

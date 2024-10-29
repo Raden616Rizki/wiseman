@@ -44,7 +44,7 @@ export const useArchiveStore = defineStore('archive', {
                     status: error.response ?.status,
                     message: error.message,
                 };
-            } 
+            }
         },
         async getArchiveById(id) {
             try {
@@ -53,23 +53,23 @@ export const useArchiveStore = defineStore('archive', {
 
                 const archive = res.data.data
                 this.archive = archive;
-                
+
                 return archive;
             } catch (error) {
                 this.response = {
                     status: error.response ?.status,
                     message: error.message,
                 };
-            } 
+            }
         },
         async changePage(newPage) {
             this.current = newPage;
-            await this.getArchives(); 
+            await this.getArchives();
         },
         async searchArchives(query) {
             this.searchQuery = query;
-            this.current = 1; 
-            await this.getArchives(); 
+            this.current = 1;
+            await this.getArchives();
         },
         async addArchives(archives) {
             try {
@@ -82,7 +82,7 @@ export const useArchiveStore = defineStore('archive', {
                 };
 
                 const archive = res.data.data;
-                
+
                 return archive;
             } catch (error) {
                 this.response = {
@@ -133,6 +133,20 @@ export const useArchiveStore = defineStore('archive', {
             } catch (error) {
                 this.response = {
                     status: error.status,
+                    message: error.message,
+                };
+            }
+        },
+        async getListFolder(parentId) {
+            try {
+                const url = `${this.apiUrl}/v1/archives?page=${this.current}&perPage=${this.perPage}&name=${this.searchQuery}&groupId=${this.groupId}&parentId=${parentId}&file=null`;
+                const res = await axios.get(url);
+
+                const archivesDataList = res.data.data.list
+                return archivesDataList;
+            } catch (error) {
+                this.response = {
+                    status: error.response ?.status,
                     message: error.message,
                 };
             }
