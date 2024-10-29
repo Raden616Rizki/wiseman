@@ -29,7 +29,8 @@
             </div>
             <div v-if="isContextMenuVisible" class="context-menu" :style="contextMenuStyle">
                 <ul>
-                    <li @click="copyFile" class="d-flex justify-content-between align-items-center">
+                    <li v-if="archive.file" @click="copyFile()"
+                        class="d-flex justify-content-between align-items-center">
                         Copy
                         <i class="bx bx-copy"></i>
                     </li>
@@ -289,6 +290,17 @@ const downloadFile = (fileUrl) => {
     document.body.removeChild(link);
 };
 
+const copyFile = async () => {
+    const archiveId = archive.value.id;
+
+    try {
+        await archiveStore.copyArchive(archiveId);
+        await getArchives();
+    } catch(error) {
+        console.error(error);
+    }
+}
+
 const handleFileChange = (event) => {
     const file = event.target.files[0];
 
@@ -356,6 +368,7 @@ document.addEventListener('click', hideContextMenu);
 
 .file {
     cursor: pointer;
+    width: 56px;
 }
 
 .file-icon {
@@ -369,6 +382,8 @@ document.addEventListener('click', hideContextMenu);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
+    display: block;
 }
 
 .folder {

@@ -85,4 +85,15 @@ class ArchiveController extends Controller
 
         return response()->success($archive, 'Data berhasil dihapus');
     }
+
+    public function copy($id)
+    {
+        $archive = $this->archive->copy($id);
+
+        if (!$archive) {
+            return response()->failed(['Mohon maaf data tidak ditemukan']);
+        }
+
+        return response()->success($archive, 'Data berhasil disalin');
+    }
 }

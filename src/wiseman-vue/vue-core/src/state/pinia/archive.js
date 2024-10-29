@@ -121,6 +121,19 @@ export const useArchiveStore = defineStore('archive', {
                     message: error.message,
                 };
             }
+        },
+        async copyArchive(archiveId) {
+            try {
+                await axios.post(`${this.apiUrl}/v1/archives/${archiveId}`);
+                this.response = {
+                    status: '200',
+                };
+            } catch (error) {
+                this.response = {
+                    status: error.status,
+                    message: error.message,
+                };
+            }
         }
     },
     getters: {

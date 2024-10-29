@@ -27,6 +27,7 @@ Route::prefix('v1')->group(function () {
 	Route::get('/archives', [ArchiveController::class, 'index']);
 	Route::get('/archives/{id}', [ArchiveController::class, 'show']);
 	Route::post('/archives', [ArchiveController::class, 'store']);
+	Route::post('/archives/{id}', [ArchiveController::class, 'copy']);
 	Route::put('/archives/{id}', [ArchiveController::class, 'update']);
 	Route::delete('/archives/{id}', [ArchiveController::class, 'destroy']);
 

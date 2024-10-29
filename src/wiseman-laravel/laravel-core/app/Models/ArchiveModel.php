@@ -25,7 +25,7 @@ class ArchiveModel extends Model implements CrudInterface
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-        
+
 		if (!empty($filter['name'])) {
 			$query->where('name', 'LIKE', '%' . $filter['name'] . '%');
 		}
@@ -42,7 +42,7 @@ class ArchiveModel extends Model implements CrudInterface
 			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
 
-        $sort = $sort ?: 'id DESC';
+        $sort = $sort ?: 'name ASC';
         $query->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 
@@ -74,7 +74,7 @@ class ArchiveModel extends Model implements CrudInterface
     {
         return $this->find($id)->delete();
     }
-    
+
 	public function group()
 	{
 		return $this->belongsTo(GroupModel::class, 'group_id', 'id');
