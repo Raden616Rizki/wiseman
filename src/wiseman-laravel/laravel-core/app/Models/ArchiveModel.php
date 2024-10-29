@@ -31,18 +31,26 @@ class ArchiveModel extends Model implements CrudInterface
 		}
 
 		if (!empty($filter['file'])) {
-			$query->where('file', 'LIKE', '%' . $filter['file'] . '%');
+            if ($filter['file'] === 'null') {
+                $query->whereNull('file');
+            } else {
+                $query->where('file', 'LIKE', '%' . $filter['file'] . '%');
+            }
 		}
 
 		if (!empty($filter['parent_id'])) {
-			$query->where('parent_id', 'LIKE', '%' . $filter['parent_id'] . '%');
+            if ($filter['parent_id'] === 'null') {
+                $query->whereNull('parent_id');
+            } else {
+                $query->where('parent_id', 'LIKE', '%' . $filter['parent_id'] . '%');
+            }
 		}
 
 		if (!empty($filter['group_id'])) {
 			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
 
-        $sort = $sort ?: 'name ASC';
+        $sort = $sort ?: 'ISNULL(file) DESC, name ASC';
         $query->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 

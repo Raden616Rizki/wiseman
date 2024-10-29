@@ -6,9 +6,14 @@
             <i class="bx bx-plus memo-bold-font" style="font-size: 24px; cursor: pointer;"
                 @click="openArchiveFormModal('create')"></i>
         </div>
-        <div class="card main-bg py-3 px-4" style="min-height: 440px;">
-            <div class="palette-3 py-1 px-2 rounded mb-4">
-                <p class="archive-path mb-0">/</p>
+        <div class="card main-bg py-3 px-4" style="min-height: 440px;"
+            @contextmenu.prevent="openArchiveFormModal('create')">
+            <div class="palette-3 py-1 px-2 rounded mb-4 d-flex">
+                <p class="archive-path mb-0" @click="changePath('home')">Home</p>
+                <div v-for="(path, index) in pathArchive" :key="index" class="d-flex">
+                    <p class="text-white mb-0 mx-2">></p>
+                    <p class="archive-path mb-0" @click="changePath(path, index)"> {{ path.name }} </p>
+                </div>
             </div>
             <div class="d-flex">
                 <div v-for="archiveData in archives" :key="archiveData.id">
@@ -21,7 +26,7 @@
                             }}.{{ archiveData.file.split('.').pop() }}</p>
                     </div>
                     <div v-else class="folder me-4 my-1 flex-column align-items-center"
-                        @contextmenu.prevent="showContextMenu($event, archiveData)">
+                        @contextmenu.prevent="showContextMenu($event, archiveData)" @click="changePath(archiveData)">
                         <img :src="folderIcon" class="folder-icon" alt="folder-icon">
                         <p class="folder-name" v-b-tooltip.hover :title="archiveData.name">{{ archiveData.name }}</p>
                     </div>
@@ -88,7 +93,7 @@
                             <BCol md="10">
                                 <input class="form-control" :class="{
                                     'is-invalid': !!(archiveErrorList && archiveErrorList.name),
-                                }" id="form-name-archive" placeholder="Masukkan Nama" v-model="archiveForm.name" />
+                                }" id="form-name-archive" placeholder="Masukkan nama file" v-model="archiveForm.name" />
                                 <template v-if="!!(archiveErrorList && archiveErrorList.name)">
                                     <div class="invalid-feedback" v-for="(err, index) in archiveErrorList.name"
                                         :key="index">
@@ -167,6 +172,8 @@ const uploadOptions = [
     { text: 'Folder', value: 'Folder' }
 ];
 
+const pathArchive = ref([]);
+
 const handleFilterByName = async () => {
     archiveStore.searchQuery = searchByName.value;
     await getArchives();
@@ -199,26 +206,28 @@ const hideContextMenu = () => {
 }
 
 const openArchiveFormModal = async (method) => {
-    isArchiveFormOpen.value = true;
-    if (method == 'update') {
-        uploadType.value = 'Folder';
+    if (!isContextMenuVisible.value) {
+        isArchiveFormOpen.value = true;
+        if (method == 'update') {
+            uploadType.value = 'Folder';
 
-        archiveForm.id = archive.value.id;
-        archiveForm.name = archive.value.name;
-        archiveForm.group_id = archive.value.group_id;
-        archiveForm.parent_id = archive.value.parent_id;
+            archiveForm.id = archive.value.id;
+            archiveForm.name = archive.value.name;
+            archiveForm.group_id = archive.value.group_id;
+            archiveForm.parent_id = archive.value.parent_id;
 
-        archiveFormTitle.value = 'Update';
-    } else {
-        uploadType.value = 'File';
+            archiveFormTitle.value = 'Update';
+        } else {
+            uploadType.value = 'File';
 
-        archiveForm.id = "";
-        archiveForm.file = null;
-        archiveForm.name = "";
-        archiveForm.group_id = groupId.value;
-        archiveForm.parent_id = "";
+            archiveForm.id = "";
+            archiveForm.file = null;
+            archiveForm.name = "";
+            archiveForm.group_id = groupId.value || "";
+            archiveForm.parent_id = archiveStore.parentId || "";
 
-        archiveFormTitle.value = 'Add';
+            archiveFormTitle.value = 'Add';
+        }
     }
 }
 
@@ -244,7 +253,7 @@ const saveArchive = async () => {
                 isArchiveFormOpen.value = false;
 
                 finishProgress();
-                showSuccessToast("Archove added successfully!");
+                showSuccessToast("Archive added successfully!");
             }
         }
     } catch (error) {
@@ -296,13 +305,14 @@ const copyFile = async () => {
     try {
         await archiveStore.copyArchive(archiveId);
         await getArchives();
-    } catch(error) {
+    } catch (error) {
         console.error(error);
     }
 }
 
 const handleFileChange = (event) => {
     const file = event.target.files[0];
+    const fileName = file.name.split('.')[0];
 
     if (file) {
         const reader = new FileReader();
@@ -310,6 +320,7 @@ const handleFileChange = (event) => {
 
         reader.onload = () => {
             archiveForm.file = reader.result;
+            archiveForm.name = fileName;
         };
 
         reader.onerror = (error) => {
@@ -321,7 +332,24 @@ const handleFileChange = (event) => {
     }
 }
 
+const changePath = async (folderData, index) => {
+    if (folderData === 'home') {
+        archiveStore.parentId = null;
+        await getArchives();
+        pathArchive.value = [];
+    } else if (index >= 0) {
+        archiveStore.parentId = folderData.id;
+        await getArchives();
+        pathArchive.value = pathArchive.value.slice(0, index + 1);
+    } else {
+        archiveStore.parentId = folderData.id;
+        await getArchives();
+        pathArchive.value.push(folderData);
+    }
+}
+
 onMounted(async () => {
+    archiveStore.parentId = null;
     await getArchives();
 })
 
@@ -332,6 +360,7 @@ document.addEventListener('click', hideContextMenu);
 <style scoped>
 .archive-path {
     color: white;
+    cursor: pointer;
 }
 
 .context-menu {
@@ -377,7 +406,7 @@ document.addEventListener('click', hideContextMenu);
 }
 
 .file-name {
-    margin-top: 8px;
+    margin-top: 9px;
     color: white;
     white-space: nowrap;
     overflow: hidden;
