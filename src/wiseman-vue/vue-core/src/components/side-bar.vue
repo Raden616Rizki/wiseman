@@ -187,7 +187,6 @@ export default {
     async saveUser() {
       try {
         if (this.formUser.id) {
-          console.log(this.formUser);
           await this.userStore.updateUser(this.formUser);
           if (this.userStatusCode != 200) {
             showErrorToast("Failed to add user", this.userErrorMessage);
@@ -309,7 +308,7 @@ export default {
       this.finishProgress();
     },
     clearEditImage() {
-      this.imageUrl = '';
+      this.imageUrl = null;
     }
   },
   watch: {
@@ -415,15 +414,15 @@ export default {
     ok-title="Update Profile" @ok="saveUser" @hide.prevent @cancel="isFormUserOpen = false"
     @close="isFormUserOpen = false">
     <BRow>
-      <BCol v-if="imageUrl" cols="12">
+      <!-- <BCol v-if="imageUrl" cols="12">
         <div class="preview d-flex">
           <div class="delete-button" @click="clearEditImage">
             <BButton class="btn btn-sm btn-danger"><i class="mdi mdi-delete-outline"></i></BButton>
           </div>
           <img :src="imageUrl" alt="Cropped Image" class="mx-auto" />
         </div>
-      </BCol>
-      <BCol v-else cols="12">
+      </BCol> -->
+      <BCol cols="12">
         <ImageCropper :aspectRatio="1 / 1" :uploadText="'Letakkan foto disini atau klik untuk mengunggah'"
           @update:imageUrl="imageUrl = $event" @update:croppedImageUrl="
             croppedImageUrl = $event;

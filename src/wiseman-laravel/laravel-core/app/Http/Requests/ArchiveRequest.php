@@ -47,15 +47,15 @@ class ArchiveRequest extends FormRequest
 
     protected function base64FileKeys(): array
 	{
-        $file = $this->file('file');
+        // $file = $this->file('file');
 
-        if ($file) {
-            $extension = $file->getClientOriginalExtension();
-            $filename = 'file.' . $extension;
-            return [
-                'file' => $filename,
-            ];
-        }
+        // if ($file) {
+        //     $extension = $file->getClientOriginalExtension();
+        //     $filename = 'file.' . $extension;
+        //     return [
+        //         'file' => $filename,
+        //     ];
+        // }
 
 		return [
 			'file' => 'file.jpg',

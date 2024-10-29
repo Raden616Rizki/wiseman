@@ -105,7 +105,7 @@
 
 <script setup>
 import Layout from "../../layouts/main";
-import { ref, onMounted, reactive, computed } from "vue";
+import { ref, onMounted, reactive, computed, watch } from "vue";
 import { useArchiveStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import folderIcon from "@/assets/images/folder-icon.svg";
@@ -118,7 +118,18 @@ import {
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const groupId = route.params.id;
+const groupId = ref(route.params.id);
+
+watch(() => route.params.id, async (newVal) => {
+    groupId.value = newVal;
+
+    if (!groupId.value) {
+        groupId.value = '';
+    }
+    archiveStore.groupId = groupId.value;
+
+    await getArchives();
+});
 
 const { startProgress, finishProgress, failProgress } = useProgress();
 
@@ -126,7 +137,7 @@ const archiveStore = useArchiveStore();
 const searchByName = ref('');
 const archives = ref([]);
 const archive = ref({});
-archiveStore.groupId = groupId;
+archiveStore.groupId = groupId.value;
 
 const archiveStatusCode = computed(() => archiveStore.response.status);
 const archiveErrorList = computed(() => archiveStore.response?.error || {});
@@ -139,7 +150,7 @@ const archiveForm = reactive({
     id: "",
     file: null,
     name: "",
-    group_id: groupId,
+    group_id: groupId.value,
     parent_id: "",
 });
 
@@ -203,7 +214,7 @@ const openArchiveFormModal = async (method) => {
         archiveForm.id = "";
         archiveForm.file = null;
         archiveForm.name = "";
-        archiveForm.group_id = groupId;
+        archiveForm.group_id = groupId.value;
         archiveForm.parent_id = "";
 
         archiveFormTitle.value = 'Add';
@@ -224,7 +235,6 @@ const saveArchive = async () => {
                 showSuccessToast("Archive updated successfully!");
             }
         } else {
-            console.log(archiveForm)
             await archiveStore.addArchives(archiveForm);
             if (archiveStatusCode.value != 200) {
                 failProgress();
@@ -249,16 +259,13 @@ const deleteArchive = async () => {
     const confirmed = await showDeleteConfirmationDialog();
 
     if (confirmed) {
-        startProgress();
         try {
             await archiveStore.deleteArchive(archive.value.id);
             await getArchives();
 
-            finishProgress();
             showSuccessToast("Delete archive successfully");
         } catch (error) {
             console.error(error);
-            failProgress();
             showErrorToast("Delete archive failed");
         }
     }
@@ -284,7 +291,22 @@ const downloadFile = (fileUrl) => {
 
 const handleFileChange = (event) => {
     const file = event.target.files[0];
-    archiveForm.file = file || null;
+
+    if (file) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+            archiveForm.file = reader.result;
+        };
+
+        reader.onerror = (error) => {
+            console.error("Error converting file to Base64:", error);
+            archiveForm.file = null;
+        };
+    } else {
+        archiveForm.file = null;
+    }
 }
 
 onMounted(async () => {
