@@ -111,4 +111,9 @@ class UserModel extends Authenticatable implements CrudInterface, JWTSubject
 	{
 		return $this->hasMany(ActivityModel::class, 'user_id', 'id');
 	}
+
+	public function enrollments()
+	{
+		return $this->hasMany(EnrollmentModel::class, 'user_id', 'id');
+	}
 }

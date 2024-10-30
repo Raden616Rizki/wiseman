@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class GroupModel extends Model implements CrudInterface
+class EnrollmentModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
@@ -17,24 +17,24 @@ class GroupModel extends Model implements CrudInterface
     public $timestamps = true;
 
     protected $fillable = [
-        'name', 'description'
+        'user_id', 'group_id'
     ];
 
-    protected $table = 'm_groups';
+    protected $table = 't_enrollments';
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
-
-		if (!empty($filter['name'])) {
-			$query->where('name', 'LIKE', '%' . $filter['name'] . '%');
+        
+		if (!empty($filter['user_id'])) {
+			$query->where('user_id', 'LIKE', '%' . $filter['user_id'] . '%');
 		}
 
-		if (!empty($filter['description'])) {
-			$query->where('description', 'LIKE', '%' . $filter['description'] . '%');
+		if (!empty($filter['group_id'])) {
+			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
 		}
 
-        $sort = $sort ?: 'name ASC';
+        $sort = $sort ?: 'id DESC';
         $query->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 
@@ -48,7 +48,6 @@ class GroupModel extends Model implements CrudInterface
 
     public function store(array $payload)
     {
-
         return $this->create($payload);
     }
 
@@ -67,35 +66,15 @@ class GroupModel extends Model implements CrudInterface
     {
         return $this->find($id)->delete();
     }
-
-
-	public function groupUsers()
+    
+	public function user()
 	{
-		return $this->hasMany(GroupUserModel::class, 'group_id', 'id');
+		return $this->belongsTo(UserModel::class, 'user_id', 'id');
 	}
 
-	public function activities()
+	public function group()
 	{
-		return $this->hasMany(ActivityModel::class, 'group_id', 'id');
+		return $this->belongsTo(GroupModel::class, 'group_id', 'id');
 	}
 
-	public function votings()
-	{
-		return $this->hasMany(VotingModel::class, 'group_id', 'id');
-	}
-
-	public function archives()
-	{
-		return $this->hasMany(ArchiveModel::class, 'group_id', 'id');
-	}
-
-	public function memos()
-	{
-		return $this->hasMany(MemoModel::class, 'group_id', 'id');
-	}
-
-	public function enrollments()
-	{
-		return $this->hasMany(EnrollmentModel::class, 'group_id', 'id');
-	}
 }

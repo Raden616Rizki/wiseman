@@ -13,12 +13,10 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            // 'm_user_roles_id' => $this->m_user_roles_id,
 			'name' => $this->name,
 			'email' => $this->email,
 			'password' => $this->password,
 			'phone_number' => $this->phone_number,
-			// 'photo' => $this->photo,
             'photo_url' => !empty($this->photo) ? Storage::disk('public')->url($this->photo) : null,
         	'groupUsers' => GroupUserResource::collection($this->groupUsers)
 		];

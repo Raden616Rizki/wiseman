@@ -2,16 +2,17 @@
 
 namespace App\Http\Resources;
 
+
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GroupResource extends JsonResource
+class EnrollmentResource extends JsonResource
 {
     public function toArray($request)
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-			'description' => $this->description,
-		];
+            'user_id' => $this->user_id,
+			'group_id' => $this->group_id,
+        ];
     }
 }
