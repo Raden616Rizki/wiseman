@@ -46,7 +46,7 @@
                 <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Update memo"
                   style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
                 <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Delete memo"
-                  style="font-size: 16px; cursor: pointer;" @click="deleteMemo(memo.id)"></i>
+                  style="font-size: 16px; cursor: pointer;" @click="deleteMemo(memo.id, memo.memoId)"></i>
               </div>
             </div>
             <div>
@@ -314,7 +314,7 @@
 import Layout from "../../layouts/main";
 import DatePicker from 'primevue/datepicker';
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from "vue";
-import { useActivityStore, useAuthStore, useGroupStore, useVotingStore } from "@/state/pinia";
+import { useActivityStore, useAuthStore, useGroupStore, useVotingStore, useMemoStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import {
   showSuccessToast,
@@ -375,6 +375,8 @@ const votingStatusCode = computed(() => votingStore.response.status);
 const votingErrorList = computed(() => votingStore.response?.error || {});
 const votingErrorMessage = computed(() => votingStore.response?.message || "");
 
+const memoStore = useMemoStore();
+
 const date = ref('');
 const choosedDate = ref('');
 const isActivityFormOpen = ref(false);
@@ -417,6 +419,7 @@ const activityForm = reactive({
 });
 
 const memoForm = reactive({
+  id: "",
   group_id: "",
   group_name: "",
   message: "",
@@ -471,12 +474,14 @@ const openActivityFormModal = async (activity) => {
 const openMemoFormModal = async (memo) => {
   isMemoFormOpen.value = true;
   if (memo != 'add') {
+    memoForm.id = memo.memoId;
     memoForm.group_id = memo.groupId;
     memoForm.group_name = memo.groupName;
     memoForm.message = memo.message;
     choosedMemoId.value = memo.id;
     memoFormTitle.value = 'Update';
   } else {
+    memoForm.id = "";
     memoForm.group_id = "";
     memoForm.group_name = "";
     memoForm.message = "";
@@ -802,27 +807,49 @@ const saveMemo = async () => {
   memoForm.group_name = group.name;
 
   if (memoFormTitle.value == 'Create') {
-    addMemo();
+    await addMemo();
   } else {
-    updateMemo(choosedMemoId.value);
+    await updateMemo(choosedMemoId.value);
   }
 }
 
-const addMemo = () => {
-  addDoc(collection(db, 'memo'), memoForm);
-  isMemoFormOpen.value = false;
+const addMemo = async () => {
+  startProgress();
+  try {
+    const memo = await memoStore.addMemos(memoForm);
+    memoForm.id = memo.id;
+
+    addDoc(collection(db, 'memo'), memoForm);
+    isMemoFormOpen.value = false;
+    finishProgress();
+  } catch (error) {
+    console.error(error);
+    failProgress();
+  }
 }
 
-const updateMemo = (memoId) => {
-  setDoc(doc(db, 'memo', memoId), memoForm)
-  isMemoFormOpen.value = false;
+const updateMemo = async (memoId) => {
+  try {
+    setDoc(doc(db, 'memo', memoId), memoForm)
+    isMemoFormOpen.value = false;
+
+    await memoStore.updateMemo(memoForm);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-const deleteMemo = async (memoId) => {
+const deleteMemo = async (id, memoId) => {
   const confirmed = await showDeleteConfirmationDialog();
 
   if (confirmed) {
-    deleteDoc(doc(db, 'memo', memoId));
+    try {
+      deleteDoc(doc(db, 'memo', id));
+
+      await memoStore.deleteMemo(memoId);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 
@@ -846,6 +873,7 @@ const getMemos = () => {
     memos.value = snapshot.docs.map((doc) => {
       return {
         id: doc.id,
+        memoId: doc.data().id,
         groupId: doc.data().group_id,
         groupName: doc.data().group_name,
         message: doc.data().message,
