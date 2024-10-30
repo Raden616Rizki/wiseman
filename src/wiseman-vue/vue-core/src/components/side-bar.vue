@@ -5,7 +5,13 @@ import { useAuthStore } from "@/state/pinia";
 import { useRouter, useRoute } from "vue-router";
 import ImageCropper from "@/components/widgets/cropper";
 import { ref, computed, reactive, onMounted } from "vue";
-import { useUserStore, useGroupStore, useGroupUserStore } from "@/state/pinia";
+import {
+  useUserStore,
+  useGroupStore,
+  useGroupUserStore,
+  useEnrollmentStore,
+  // useActivityStore
+} from "@/state/pinia";
 import {
   showSuccessToast,
   showErrorToast,
@@ -57,6 +63,7 @@ export default {
       })) || [];
     });
     const group = ref("");
+    const enrollments = ref([]);
 
     const formUser = reactive({
       id: "",
@@ -91,6 +98,18 @@ export default {
     const groupUserErrorList = computed(() => groupUserStore.response?.error || {});
     const groupUserErrorMessage = computed(() => groupUserStore.response?.message || "");
 
+    const enrollmentStore = useEnrollmentStore();
+
+    const enrollmentStatusCode = computed(() => enrollmentStore.response.status);
+    const enrollmentErrorList = computed(() => enrollmentStore.response?.error || {});
+    const enrollmentErrorMessage = computed(() => enrollmentStore.response?.message || "");
+
+    // const activityStore = useActivityStore();
+
+    // const activityStatusCode = computed(() => activityStore.response.status);
+    // const activityErrorList = computed(() => activityStore.response?.error || {});
+    // const activityErrorMessage = computed(() => activityStore.response?.message || "");
+
     const { startProgress, finishProgress, failProgress } = useProgress();
 
     const getAuthUser = async () => {
@@ -109,6 +128,10 @@ export default {
 
       if (groupId.value) {
         group.value = await groupStore.getGroupById(groupId.value);
+
+        enrollmentStore.groupId = groupId.value
+        await enrollmentStore.getEnrollments();
+        enrollments.value = enrollmentStore.enrollments;
       }
     });
 
@@ -144,6 +167,15 @@ export default {
       defaultAvatar: defaultAvatar,
       route: route,
       groupId: groupId,
+      enrollmentStore: enrollmentStore,
+      enrollmentStatusCode: enrollmentStatusCode,
+      enrollmentErrorList: enrollmentErrorList,
+      enrollmentErrorMessage: enrollmentErrorMessage,
+      enrollments: enrollments,
+      // activityStore: activityStore,
+      // activityStatusCode: activityStatusCode,
+      // activityErrorList: activityErrorList,
+      // activityErrorMessage: activityErrorMessage,
     };
   },
   data() {
@@ -305,7 +337,38 @@ export default {
 
       this.startProgress();
       this.group = await this.groupStore.getGroupById(this.groupId);
+      this.enrollmentStore.groupId = this.groupId
+      await this.enrollmentStore.getEnrollments();
+      this.enrollments = this.enrollmentStore.enrollments;
       this.finishProgress();
+    },
+    async acceptRequest(enrollment) {
+      this.startProgress();
+      try {
+        // Add group user
+        const groupId = enrollment.group_id;
+        const userId = enrollment.user_id;
+        const isAdmin = 0;
+
+        await this.saveGroupUser(groupId, userId, isAdmin);
+
+        // delete enrollment
+        const enrollmentId = enrollment.id;
+
+        this.enrollmentStore.deleteEnrollment(enrollmentId);
+
+        await this.enrollmentStore.getEnrollments();
+        this.enrollments = this.enrollmentStore.enrollments;
+
+        this.finishProgress();
+        showSuccessToast("User diterima");
+      } catch (error) {
+        console.error(error);
+        this.failProgress();
+        showErrorToast("Gagal menerima user");
+      }
+      this.group = await this.groupStore.getGroupById(this.groupId);
+      await this.getAuthUser();
     },
     clearEditImage() {
       this.imageUrl = null;
@@ -534,6 +597,67 @@ export default {
     </BRow>
   </BModal>
 
+  <!-- ========== Activity Modal ========== -->
+  <!-- <BModal v-model="isActivityFormOpen" id="modal-standard" :title="activityFormTitle + ' Activity'"
+    title-class="font-18" :ok-title="activityFormTitle" @ok="saveActivity" @hide.prevent
+    @cancel="isActivityFormOpen = false" @close="isActivityFormOpen = false">
+    <BRow>
+      <BCol cols="12" class="mt-2">
+        <BForm class="form-horizontal" role="form">
+          <BRow class="mb-3">
+            <BCol>
+              <textarea class="form-control" :class="{
+                'is-invalid': !!(activityErrorList && activityErrorList.description),
+              }" id="form-activity-description" type="text" placeholder="Masukkan deskripsi aktivitas ..."
+                v-model="activityForm.description" required />
+
+              <template v-if="!!(activityErrorList && activityErrorList.description)">
+                <div class="invalid-feedback" v-for="(err, index) in activityErrorList.description" :key="index">
+                  <span>{{ err }}</span>
+                </div>
+              </template>
+            </BCol>
+          </BRow>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <BCol md="6">
+                <input class="form-control" :class="{
+                  'is-invalid': !!(activityErrorList && activityErrorList.start_time),
+                }" id="form-start-activity" placeholder="Start time" v-model="activityForm.start_time" type="time"
+                  required />
+                <template v-if="!!(activityErrorList && activityErrorList.start_time)">
+                  <div class="invalid-feedback" v-for="(err, index) in activityErrorList.start_time" :key="index">
+                    <span>{{ err }}</span>
+                  </div>
+                </template>
+              </BCol>
+              <BCol md="0">
+                <p class="activity-time mb-0 mx-2">-</p>
+              </BCol>
+              <BCol md="6">
+                <input class="form-control" :class="{
+                  'is-invalid': !!(activityErrorList && activityErrorList.end_time),
+                }" id="form-end-activity" placeholder="End ime" v-model="activityForm.end_time" type="time" required />
+                <template v-if="!!(activityErrorList && activityErrorList.end_time)">
+                  <div class="invalid-feedback" v-for="(err, index) in activityErrorList.end_time" :key="index">
+                    <span>{{ err }}</span>
+                  </div>
+                </template>
+              </BCol>
+            </div>
+            <BCol md="2 d-flex">
+              <input class="form-check-input activity-check-form" type="checkbox" id="form-priority-activity"
+                @change="updatePriority" :checked="activityForm.is_priority === 1 || false" />
+              <label class="form-check-label mt-1 ms-1" for="form-priority-activity">
+                Prioritas
+              </label>
+            </BCol>
+          </div>
+        </BForm>
+      </BCol>
+    </BRow>
+  </BModal> -->
+
   <!-- ========== Left Sidebar Start ========== -->
   <div class="vertical-menu sidebar-bg ws-sidebar" style="box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.25);">
     <simplebar v-if="!isCondensed" :settings="settings" class="h-100" ref="currentMenu" id="my-element">
@@ -544,29 +668,6 @@ export default {
       <hr>
       <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm" @click="goToDashboard">
         <p class="font-4 ms-2 mb-0 sidebar-title">My Activities</p>
-      </div>
-      <router-link to="/group">
-        <div class="p-2 mb-2 palette-3 d-flex justify-content-between align-items-center ws-main-menu shadow-sm">
-          <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
-          <i class="bx bx-search ws-menu mt-1 me-2" style="color: #EEEEEE; font-size: medium"></i>
-        </div>
-      </router-link>
-      <div v-for="group in groups" :key="group.id"
-        class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu">
-        <h6 class="font-4-normal ms-2 mb-0" @click="openGroup(group.group.id)" role="button">{{ group.group.name }}</h6>
-        <div class="d-flex justify-content-center align-items-center">
-          <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
-            v-b-tooltip.hover title="Leave group"></i>
-          <i class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
-            v-b-tooltip.hover title="Edit group"></i>
-          <router-link :to="`/archive/${group.group.id}`">
-            <i class="bx bx-folder ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
-          </router-link>
-        </div>
-      </div>
-      <div class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu" @click="openGroupFormModal('add')">
-        <i class="bx bx-plus" style="color: #EEEEEE;"></i>
-        <h6 class="font-4 ms-2 mb-0">Create</h6>
       </div>
       <div v-if="groupId" class="p-2 mb-2 mt-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
         <p class="font-4 ms-2 mb-0 sidebar-title"> {{ group.name }} </p>
@@ -582,6 +683,48 @@ export default {
             <i class="bx bx-plus ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Add task"></i>
           </div>
         </div>
+      </div>
+      <div v-if="groupId && enrollments.length > 0"
+        class="p-2 mb-2 mt-4 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
+        <p class="font-4 ms-2 mb-0 sidebar-title"> Request </p>
+      </div>
+      <div v-if="groupId && enrollments">
+        <div v-for="enrollment in enrollments" :key="enrollment.id"
+          class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu mb-2">
+          <h6 class="font-4-normal ms-2 mb-0">
+            {{ enrollment.user.name }}
+          </h6>
+          <button class="btn btn-success btn-sm" @click="acceptRequest(enrollment)">
+            accept
+          </button>
+        </div>
+      </div>
+      <router-link to="/group" v-if="!groupId">
+        <div class="p-2 mb-2 mt-3 palette-3 d-flex justify-content-between align-items-center ws-main-menu shadow-sm">
+          <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
+          <i class="bx bx-search ws-menu mt-1 me-2" style="color: #EEEEEE; font-size: medium"></i>
+        </div>
+      </router-link>
+      <div v-if="!groupId">
+        <div v-for="group in groups" :key="group.id"
+          class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu">
+          <h6 class="font-4-normal ms-2 mb-0" @click="openGroup(group.group.id)" role="button">{{ group.group.name }}
+          </h6>
+          <div class="d-flex justify-content-center align-items-center">
+            <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
+              v-b-tooltip.hover title="Leave group"></i>
+            <i class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
+              v-b-tooltip.hover title="Edit group"></i>
+            <router-link :to="`/archive/${group.group.id}`">
+              <i class="bx bx-folder ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
+            </router-link>
+          </div>
+        </div>
+      </div>
+      <div v-if="!groupId" class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu"
+        @click="openGroupFormModal('add')">
+        <i class="bx bx-plus" style="color: #EEEEEE;"></i>
+        <h6 class="font-4 ms-2 mb-0">Create</h6>
       </div>
       <hr class="mt-4">
       <div class="noti-icon d-flex align-items-center ws-menu my-4 logout-button" @click="logout">

@@ -21,8 +21,8 @@ class EnrollmentController extends Controller
     public function index(Request $request)
     {
         $filter = [
-			'user_id' => $request->user_id ?? '',
-			'group_id' => $request->group_id ?? '',
+			'user_id' => $request->userId ?? '',
+			'group_id' => $request->groupId ?? '',
 		];
 
         $enrollment = $this->enrollment->getAll($filter, $request->per_page ?? 25, $request->sort ?? '');

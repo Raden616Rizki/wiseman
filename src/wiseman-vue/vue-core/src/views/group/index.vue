@@ -10,7 +10,7 @@
                         <p class="mb-0 ms-2 group-text"> {{ group.name }} </p>
                         <p class="mb-0 ms-2"> {{ group.description }} </p>
                     </div>
-                    <button class="btn btn-sm palette-3 text-white join-button " >
+                    <button class="btn btn-sm palette-3 text-white join-button " @click="joinGroup(group)" >
                         Join
                     </button>
                 </div>
@@ -22,14 +22,24 @@
 <script setup>
 import Layout from "../../layouts/main";
 import { ref, onMounted } from "vue";
-import { useGroupStore } from "@/state/pinia";
+import { useGroupStore, useEnrollmentStore, useAuthStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "@/helpers/alert.js";
 
 const { startProgress, finishProgress, failProgress } = useProgress();
 
 const groupStore = useGroupStore();
 const searchByName = ref('');
 const groups = ref([]);
+
+const enrollmentStore = useEnrollmentStore();
+
+const authStore = useAuthStore();
+const user = authStore.getUser();
+const userId = user.id;
 
 const handleFilterByName = async () => {
     groupStore.searchQuery = searchByName.value;
@@ -44,6 +54,24 @@ const getGroups = async () => {
         groups.value = groupStore.groups;
         finishProgress()
     } else {
+        failProgress();
+    }
+}
+
+const joinGroup = async (group) => {
+    startProgress();
+    try {
+        const groupId = group.id;
+        const enrollmentForm = {
+            group_id: groupId,
+            user_id: userId
+        }
+        await enrollmentStore.addEnrollments(enrollmentForm);
+        showSuccessToast('Berhasil mendaftar ke Group ' + group.name, 'Mohon tunggu konfirmasi admin');
+        finishProgress();
+    } catch (error) {
+        error.log(error);
+        showErrorToast('Gagal mendaftar ke Group ' + group.name, 'Tunggu beberapa saat lagi' );
         failProgress();
     }
 }

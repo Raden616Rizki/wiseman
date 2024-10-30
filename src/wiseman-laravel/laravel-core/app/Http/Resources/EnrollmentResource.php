@@ -13,6 +13,7 @@ class EnrollmentResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
 			'group_id' => $this->group_id,
+            'user' => new GroupUserDetailResource($this->user),
         ];
     }
 }

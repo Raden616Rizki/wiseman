@@ -181,7 +181,7 @@
                       <input class="form-control" :class="{
                         'is-invalid': !!(activityErrorList && activityErrorList.start_time),
                       }" id="form-start-activity" placeholder="Start time" v-model="activityForm.start_time"
-                        type="time" required />
+                        type="time" step="300" required />
                       <template v-if="!!(activityErrorList && activityErrorList.start_time)">
                         <div class="invalid-feedback" v-for="(err, index) in activityErrorList.start_time" :key="index">
                           <span>{{ err }}</span>
