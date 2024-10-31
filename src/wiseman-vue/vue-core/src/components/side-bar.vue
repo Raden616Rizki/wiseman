@@ -154,6 +154,8 @@ export default {
       if (groupId.value) {
         group.value = await groupStore.getGroupById(groupId.value);
 
+        isAdmin.value = this.checkIsAdmin(this.group.value);
+
         enrollmentStore.groupId = groupId.value
         await enrollmentStore.getEnrollments();
         enrollments.value = enrollmentStore.enrollments;
@@ -235,6 +237,7 @@ export default {
     goToDashboard() {
       this.groupId = null;
       this.router.push('/');
+      this.isAdmin = false;
     },
     logout() {
       this.router.push('/logout');
@@ -372,7 +375,9 @@ export default {
 
       this.startProgress();
       this.group = await this.groupStore.getGroupById(this.groupId);
-      console.log(this.group);
+
+      this.isAdmin = this.checkIsAdmin(this.group);
+
       this.enrollmentStore.groupId = this.groupId
       await this.enrollmentStore.getEnrollments();
       this.enrollments = this.enrollmentStore.enrollments;
@@ -440,6 +445,19 @@ export default {
         this.failProgress();
         showErrorToast("Gagal menambah aktivitas anggota", error);
       }
+    },
+    checkIsAdmin(group) {
+      const isAdmin = group.groupDetails.some(
+        (detail) => detail.user.id === this.userId && detail.isAdmin === 1
+      );
+
+      return isAdmin;
+    },
+    async checkIsAdminById(groupId) {
+      const group = await this.groupStore.getGroupById(groupId);
+      const isAdmin = this.checkIsAdmin(group);
+      
+      return isAdmin;
     }
   },
   watch: {
@@ -751,7 +769,7 @@ export default {
           <h6 class="font-4-normal ms-2 mb-0">
             {{ member.user.name }}
           </h6>
-          <div v-if="userId != member.user.id" class="d-flex justify-content-center align-items-center">
+          <div v-if="userId != member.user.id && isAdmin" class="d-flex justify-content-center align-items-center">
             <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Delete Member"
               @click="leaveGroup(member.id)"></i>
             <i class="bx bx-plus ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Add task"
@@ -788,7 +806,7 @@ export default {
           <div class="d-flex justify-content-center align-items-center">
             <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
               v-b-tooltip.hover title="Leave group"></i>
-            <i class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
+            <i v-if="checkIsAdminById(group.group.id)" class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
               v-b-tooltip.hover title="Edit group"></i>
             <router-link :to="`/archive/${group.group.id}`">
               <i class="bx bx-folder ws-menu mt-1" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>

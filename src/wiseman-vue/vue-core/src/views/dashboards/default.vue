@@ -10,7 +10,7 @@
         <div v-if="groupId" class="card main-bg p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-4 mb-0">Memo</h6>
-            <i class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer;"
+            <i v-if="isAdmin" class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer;"
               @click="openMemoFormModal('add')"></i>
 
             <!-- ========== Memo Modal ========== -->
@@ -40,7 +40,7 @@
             </BModal>
           </div>
           <div style="height: 250px; overflow-y: auto; padding-right: 10px"
-            @contextmenu.prevent="openMemoFormModal('add')" >
+            @contextmenu.prevent="openMemoFormModal('add')">
             <div v-for="memo in memos" :key="memo.id" class="card bg-white p-2">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
@@ -70,11 +70,12 @@
               <i v-if="groupId" class="bx bxs-bar-chart-alt-2 memo-bold-font mt-1 me-4"
                 style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openVotingFormModal('add')"
                 v-b-tooltip.hover title="Create voting"></i>
-              <i class="bx bx-task memo-bold-font mt-1" style="color: #EEEEEE; font-size: 16px; cursor: pointer"
+              <i v-if="!groupId || isAdmin" class="bx bx-task memo-bold-font mt-1" style="color: #EEEEEE; font-size: 16px; cursor: pointer"
                 @click="openActivityFormModal('add')" v-b-tooltip.hover title="Create acitvity"></i>
             </div>
           </div>
-          <div class="m-3" style="height: 627px; overflow-y: auto; padding-right: 10px" @contextmenu.prevent="openActivityFormModal('add')">
+          <div class="m-3" style="height: 627px; overflow-y: auto; padding-right: 10px"
+            @contextmenu.prevent="openActivityFormModal('add')">
             <table v-for="activity in activities" :key="activity.id" class="table align-middle" :style="{
               borderRadius: '4px',
               backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
@@ -104,14 +105,14 @@
                   }"> {{ activity.description }} </p>
                 </td>
                 <td style="text-align: center; width: 50px;">
-                  <input v-if="!activity.group_id" class="form-check-input activity-check me-2" type="checkbox"
+                  <input v-if="!groupId || isAdmin" class="form-check-input activity-check me-2" type="checkbox"
                     :id="'flexCheckChecked-' + activity.id"
                     @change="finishActivity(activity.id, $event.target.checked ? 1 : 0)"
                     :checked="activity.is_finished === 1"
                     :style="{ border: activity.is_priority === 1 ? '2px solid #EEEEEE' : '2px solid black' }">
                 </td>
                 <td style="text-align: center; width: 40px;">
-                  <div v-if="!activity.group_id" class="d-flex justify-content-center align-items-center" :style="{
+                  <div v-if="!groupId || isAdmin" class="d-flex justify-content-center align-items-center" :style="{
                     backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
                     color: activity.is_priority === 1 ? 'white' : '',
                   }">
@@ -146,7 +147,7 @@
                   <button class="btn votting-button align-items-center"
                     @click="openVotingModal(votingData)">Voting</button>
                 </td>
-                <td style="text-align: center; width: 40px;">
+                <td v-if="isAdmin" style="text-align: center; width: 40px;">
                   <div class="d-flex justify-content-center align-items-center bg-white">
                     <i class="bx bx-edit mt-1" @click="openVotingFormModal(votingData)" v-b-tooltip.hover
                       title="Update voting" style="font-size: 14px; cursor: pointer;"></i>
@@ -333,13 +334,17 @@ import Chart from 'primevue/chart';
 
 const route = useRoute();
 const groupId = ref(route.query.id);
+const isAdmin = ref(false);
 
 watch(() => route.query.id, async (newVal) => {
   groupId.value = newVal;
 
   if (!groupId.value) {
     groupId.value = '';
+  } else {
+    isAdmin.value = await checkIsAdminById(groupId.value);
   }
+
   activityStore.groupId = groupId.value;
   votingStore.groupId = groupId.value;
 
@@ -373,6 +378,21 @@ const groups = computed(() => {
     groupUser.group
   ) || [];
 });
+
+const checkIsAdmin = (group) => {
+  const isAdmin = group.groupDetails.some(
+    (detail) => detail.user.id === userId && detail.isAdmin === 1
+  );
+
+  return isAdmin;
+};
+
+const checkIsAdminById = async (groupId) => {
+  const group = await groupStore.getGroupById(groupId);
+  const isAdmin = checkIsAdmin(group);
+
+  return isAdmin;
+}
 
 const votingStore = useVotingStore();
 const votings = ref([]);
@@ -446,54 +466,58 @@ const votingForm = reactive({
 // Open Modal
 
 const openActivityFormModal = async (activity) => {
-  isActivityFormOpen.value = true;
-  if (activity != 'add') {
+  if (isAdmin.value) {
+    isActivityFormOpen.value = true;
+    if (activity != 'add') {
 
-    activityForm.id = activity.id;
-    activityForm.group_id = activity.group_id;
-    activityForm.user_id = activity.user_id;
-    activityForm.description = activity.description;
-    activityForm.start_time = activity.start_time.substr(11, 5);
-    activityForm.end_time = activity.end_time.substr(11, 5);
-    activityForm.is_priority = activity.is_priority;
-    activityForm.is_finished = activity.is_finished;
+      activityForm.id = activity.id;
+      activityForm.group_id = activity.group_id;
+      activityForm.user_id = activity.user_id;
+      activityForm.description = activity.description;
+      activityForm.start_time = activity.start_time.substr(11, 5);
+      activityForm.end_time = activity.end_time.substr(11, 5);
+      activityForm.is_priority = activity.is_priority;
+      activityForm.is_finished = activity.is_finished;
 
-    activityFormTitle.value = 'Update';
-  } else {
-    activityForm.id = '';
-
-    if (groupId.value) {
-      activityForm.group_id = groupId.value;
+      activityFormTitle.value = 'Update';
     } else {
-      activityForm.group_id = '';
-    }
-    activityForm.user_id = user.id;
-    activityForm.description = '';
-    activityForm.start_time = '';
-    activityForm.end_time = '';
-    activityForm.is_priority = 0;
-    activityForm.is_finished = 0;
+      activityForm.id = '';
 
-    activityFormTitle.value = 'New';
+      if (groupId.value) {
+        activityForm.group_id = groupId.value;
+      } else {
+        activityForm.group_id = '';
+      }
+      activityForm.user_id = user.id;
+      activityForm.description = '';
+      activityForm.start_time = '';
+      activityForm.end_time = '';
+      activityForm.is_priority = 0;
+      activityForm.is_finished = 0;
+
+      activityFormTitle.value = 'New';
+    }
   }
 }
 
 const openMemoFormModal = async (memo) => {
-  isMemoFormOpen.value = true;
-  if (memo != 'add') {
-    memoForm.id = memo.memoId;
-    memoForm.group_id = memo.groupId;
-    memoForm.group_name = memo.groupName;
-    memoForm.message = memo.message;
-    choosedMemoId.value = memo.id;
-    memoFormTitle.value = 'Update';
-  } else {
-    memoForm.id = "";
-    memoForm.group_id = groupId.value;
-    memoForm.group_name = "";
-    memoForm.message = "";
-    choosedMemoId.value = "";
-    memoFormTitle.value = 'Create';
+  if (isAdmin.value) {
+    isMemoFormOpen.value = true;
+    if (memo != 'add') {
+      memoForm.id = memo.memoId;
+      memoForm.group_id = memo.groupId;
+      memoForm.group_name = memo.groupName;
+      memoForm.message = memo.message;
+      choosedMemoId.value = memo.id;
+      memoFormTitle.value = 'Update';
+    } else {
+      memoForm.id = "";
+      memoForm.group_id = groupId.value;
+      memoForm.group_name = "";
+      memoForm.message = "";
+      choosedMemoId.value = "";
+      memoFormTitle.value = 'Create';
+    }
   }
 }
 
@@ -966,6 +990,8 @@ onMounted(async () => {
 
   if (!groupId.value) {
     groupId.value = '';
+  } else {
+    isAdmin.value = await checkIsAdminById(groupId.value);
   }
 
   activityStore.groupId = groupId.value;
