@@ -59,6 +59,7 @@ export default {
     user.value = authStore.getUser();
     const userId = user.value.id;
     const isAdmin = ref(false);
+    const isAdminStatus = ref([]);
     const groups = computed(() => {
       return user.value?.groupUsers.map(groupUser => ({
         groupUserId: groupUser.id,
@@ -148,13 +149,33 @@ export default {
       return `${year}-${month}-${day}`;
     };
 
+    const checkIsAdmin = (groupData) => {
+      const isAdminValue = groupData.groupDetails.some(
+        (detail) => detail.user.id === userId && detail.isAdmin === 1
+      );
+
+      return isAdminValue;
+    };
+
+    const checkIsAdminById = async (groupIdData) => {
+      const groupData = await groupStore.getGroupById(groupIdData);
+      const isAdminValue = checkIsAdmin(groupData);
+
+      return isAdminValue;
+    }
+
     onMounted(async () => {
       await getAuthUser();
+
+      for (var i = 0; i < groups.value.length; i++) {
+        const isAdmin = await checkIsAdminById(groups.value[i].group.id);
+        isAdminStatus.value.push(isAdmin);
+      }
 
       if (groupId.value) {
         group.value = await groupStore.getGroupById(groupId.value);
 
-        isAdmin.value = this.checkIsAdmin(this.group.value);
+        isAdmin.value = checkIsAdmin(group.value);
 
         enrollmentStore.groupId = groupId.value
         await enrollmentStore.getEnrollments();
@@ -166,12 +187,13 @@ export default {
     });
 
     return {
+      getAuthUser: getAuthUser,
+      getFormattedDate: getFormattedDate,
+      checkIsAdmin: checkIsAdmin,
       user: user,
       router: router,
       groups: groups,
       group: group,
-      getAuthUser: getAuthUser,
-      getFormattedDate: getFormattedDate,
       formUser: formUser,
       imageUrl: imageUrl,
       croppedImageUrl: croppedImageUrl,
@@ -212,6 +234,7 @@ export default {
       date: date,
       userId: userId,
       isAdmin: isAdmin,
+      isAdminStatus: isAdminStatus,
     };
   },
   data() {
@@ -446,19 +469,6 @@ export default {
         showErrorToast("Gagal menambah aktivitas anggota", error);
       }
     },
-    checkIsAdmin(group) {
-      const isAdmin = group.groupDetails.some(
-        (detail) => detail.user.id === this.userId && detail.isAdmin === 1
-      );
-
-      return isAdmin;
-    },
-    async checkIsAdminById(groupId) {
-      const group = await this.groupStore.getGroupById(groupId);
-      const isAdmin = this.checkIsAdmin(group);
-      
-      return isAdmin;
-    }
   },
   watch: {
     $route: {
@@ -799,14 +809,14 @@ export default {
         </div>
       </router-link>
       <div v-if="!groupId">
-        <div v-for="group in groups" :key="group.id"
+        <div v-for="(group, index) in groups" :key="group.id"
           class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu">
           <h6 class="font-4-normal ms-2 mb-0" @click="openGroup(group.group.id)" role="button">{{ group.group.name }}
           </h6>
           <div class="d-flex justify-content-center align-items-center">
             <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
               v-b-tooltip.hover title="Leave group"></i>
-            <i v-if="checkIsAdminById(group.group.id)" class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
+            <i v-if="isAdminStatus[index]" class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
               v-b-tooltip.hover title="Edit group"></i>
             <router-link :to="`/archive/${group.group.id}`">
               <i class="bx bx-folder ws-menu mt-1" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>

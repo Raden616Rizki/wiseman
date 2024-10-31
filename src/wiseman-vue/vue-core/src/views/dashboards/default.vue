@@ -10,8 +10,8 @@
         <div v-if="groupId" class="card main-bg p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-4 mb-0">Memo</h6>
-            <i v-if="isAdmin" class="bx bx-plus memo-bold-font" style="color: #EEEEEE; font-size: 16px; cursor: pointer;"
-              @click="openMemoFormModal('add')"></i>
+            <i v-if="isAdmin" class="bx bx-plus memo-bold-font"
+              style="color: #EEEEEE; font-size: 16px; cursor: pointer;" @click="openMemoFormModal('add')"></i>
 
             <!-- ========== Memo Modal ========== -->
             <BModal v-model="isMemoFormOpen" id="modal-standard" :title="memoFormTitle + ' Memo'" title-class="font-18"
@@ -70,8 +70,9 @@
               <i v-if="groupId" class="bx bxs-bar-chart-alt-2 memo-bold-font mt-1 me-4"
                 style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openVotingFormModal('add')"
                 v-b-tooltip.hover title="Create voting"></i>
-              <i v-if="!groupId || isAdmin" class="bx bx-task memo-bold-font mt-1" style="color: #EEEEEE; font-size: 16px; cursor: pointer"
-                @click="openActivityFormModal('add')" v-b-tooltip.hover title="Create acitvity"></i>
+              <i v-if="!groupId || isAdmin" class="bx bx-task memo-bold-font mt-1"
+                style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openActivityFormModal('add')"
+                v-b-tooltip.hover title="Create acitvity"></i>
             </div>
           </div>
           <div class="m-3" style="height: 627px; overflow-y: auto; padding-right: 10px"
@@ -296,7 +297,7 @@
                       :class="{ 'selected-option': selectedOption === option.id, 'default-option': selectedOption !== option.id }">
                       {{ option.option }}</h6>
 
-                    <input class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + index" :value="option.id"
+                    <input v-if="isPastLimitTime" class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + index" :value="option.id"
                       name="votingOptionsGroup" @change="chooseOption(option.id)" />
                   </div>
                 </BRow>
@@ -393,6 +394,13 @@ const checkIsAdminById = async (groupId) => {
 
   return isAdmin;
 }
+
+const isPastLimitTime = computed(() => {
+  const now = new Date();
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  console.log(currentTime > votingForm.limit_time);
+  return currentTime > votingForm.limit_time;
+});
 
 const votingStore = useVotingStore();
 const votings = ref([]);
