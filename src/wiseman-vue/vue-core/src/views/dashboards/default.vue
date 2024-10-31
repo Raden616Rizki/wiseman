@@ -104,14 +104,14 @@
                   }"> {{ activity.description }} </p>
                 </td>
                 <td style="text-align: center; width: 50px;">
-                  <input class="form-check-input activity-check me-2" type="checkbox"
+                  <input v-if="!activity.group_id" class="form-check-input activity-check me-2" type="checkbox"
                     :id="'flexCheckChecked-' + activity.id"
                     @change="finishActivity(activity.id, $event.target.checked ? 1 : 0)"
                     :checked="activity.is_finished === 1"
                     :style="{ border: activity.is_priority === 1 ? '2px solid #EEEEEE' : '2px solid black' }">
                 </td>
                 <td style="text-align: center; width: 40px;">
-                  <div class="d-flex justify-content-center align-items-center" :style="{
+                  <div v-if="!activity.group_id" class="d-flex justify-content-center align-items-center" :style="{
                     backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
                     color: activity.is_priority === 1 ? 'white' : '',
                   }">

@@ -10,7 +10,7 @@ import {
   useGroupStore,
   useGroupUserStore,
   useEnrollmentStore,
-  // useActivityStore
+  useActivityStore
 } from "@/state/pinia";
 import {
   showSuccessToast,
@@ -19,6 +19,7 @@ import {
 } from "@/helpers/alert.js";
 import { useProgress } from "@/helpers/progress";
 import defaultAvatar from "@/assets/images/users/user-dummy-img.jpg";
+import { Date } from "core-js";
 
 /**
  * Sidebar component
@@ -56,6 +57,8 @@ export default {
 
     const user = ref(null);
     user.value = authStore.getUser();
+    const userId = user.value.id;
+    const isAdmin = ref(false);
     const groups = computed(() => {
       return user.value?.groupUsers.map(groupUser => ({
         groupUserId: groupUser.id,
@@ -64,6 +67,8 @@ export default {
     });
     const group = ref("");
     const enrollments = ref([]);
+
+    const isActivityFormOpen = ref(false);
 
     const formUser = reactive({
       id: "",
@@ -78,6 +83,16 @@ export default {
       id: "",
       name: "",
       description: "",
+    });
+
+    const formActivity = reactive({
+      group_id: "",
+      user_id: "",
+      description: "",
+      start_time: "",
+      end_time: "",
+      is_priority: 0,
+      is_finished: 0,
     });
 
     const userStore = useUserStore();
@@ -104,13 +119,15 @@ export default {
     const enrollmentErrorList = computed(() => enrollmentStore.response?.error || {});
     const enrollmentErrorMessage = computed(() => enrollmentStore.response?.message || "");
 
-    // const activityStore = useActivityStore();
+    const activityStore = useActivityStore();
 
-    // const activityStatusCode = computed(() => activityStore.response.status);
-    // const activityErrorList = computed(() => activityStore.response?.error || {});
-    // const activityErrorMessage = computed(() => activityStore.response?.message || "");
+    const activityStatusCode = computed(() => activityStore.response.status);
+    const activityErrorList = computed(() => activityStore.response?.error || {});
+    const activityErrorMessage = computed(() => activityStore.response?.message || "");
 
     const { startProgress, finishProgress, failProgress } = useProgress();
+
+    const date = ref('');
 
     const getAuthUser = async () => {
       try {
@@ -123,6 +140,14 @@ export default {
       }
     };
 
+    const getFormattedDate = (dateData) => {
+      const year = dateData.getFullYear();
+      const month = String(dateData.getMonth() + 1).padStart(2, '0');
+      const day = String(dateData.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    };
+
     onMounted(async () => {
       await getAuthUser();
 
@@ -132,6 +157,9 @@ export default {
         enrollmentStore.groupId = groupId.value
         await enrollmentStore.getEnrollments();
         enrollments.value = enrollmentStore.enrollments;
+
+        const today = new Date();
+        date.value = getFormattedDate(today);
       }
     });
 
@@ -141,6 +169,7 @@ export default {
       groups: groups,
       group: group,
       getAuthUser: getAuthUser,
+      getFormattedDate: getFormattedDate,
       formUser: formUser,
       imageUrl: imageUrl,
       croppedImageUrl: croppedImageUrl,
@@ -172,10 +201,15 @@ export default {
       enrollmentErrorList: enrollmentErrorList,
       enrollmentErrorMessage: enrollmentErrorMessage,
       enrollments: enrollments,
-      // activityStore: activityStore,
-      // activityStatusCode: activityStatusCode,
-      // activityErrorList: activityErrorList,
-      // activityErrorMessage: activityErrorMessage,
+      activityStore: activityStore,
+      activityStatusCode: activityStatusCode,
+      activityErrorList: activityErrorList,
+      activityErrorMessage: activityErrorMessage,
+      isActivityFormOpen: isActivityFormOpen,
+      formActivity: formActivity,
+      date: date,
+      userId: userId,
+      isAdmin: isAdmin,
     };
   },
   data() {
@@ -317,6 +351,7 @@ export default {
         this.startProgress();
         try {
           await this.groupUserStore.deleteGroupUser(groupUserId);
+          this.group = await this.groupStore.getGroupById(this.groupId);
           await this.getAuthUser();
           this.finishProgress();
           showSuccessToast("Leave group successfully");
@@ -337,6 +372,7 @@ export default {
 
       this.startProgress();
       this.group = await this.groupStore.getGroupById(this.groupId);
+      console.log(this.group);
       this.enrollmentStore.groupId = this.groupId
       await this.enrollmentStore.getEnrollments();
       this.enrollments = this.enrollmentStore.enrollments;
@@ -372,6 +408,38 @@ export default {
     },
     clearEditImage() {
       this.imageUrl = null;
+    },
+    openActivityFormModal(userId) {
+      this.isActivityFormOpen = true;
+
+      this.formActivity.group_id = '';
+      this.formActivity.user_id = userId;
+      this.formActivity.description = '';
+      this.formActivity.start_time = '';
+      this.formActivity.end_time = '';
+      this.formActivity.is_priority = 0;
+      this.formActivity.is_finished = 0;
+    },
+    getFormattedTime(dateData, timeData) {
+      return `${dateData} ${timeData}:00`;
+    },
+    async saveActivityMember() {
+      this.startProgress();
+      try {
+        this.formActivity.start_time = this.getFormattedTime(this.date, this.formActivity.start_time);
+        this.formActivity.end_time = this.getFormattedTime(this.date, this.formActivity.end_time);
+
+        await this.activityStore.addActivities(this.formActivity);
+
+        this.isActivityFormOpen = false;
+
+        this.finishProgress();
+        showSuccessToast("Aktivitas anggota berhasil ditambahkan");
+      } catch (error) {
+        error.log(error);
+        this.failProgress();
+        showErrorToast("Gagal menambah aktivitas anggota", error);
+      }
     }
   },
   watch: {
@@ -598,9 +666,10 @@ export default {
   </BModal>
 
   <!-- ========== Activity Modal ========== -->
-  <!-- <BModal v-model="isActivityFormOpen" id="modal-standard" :title="activityFormTitle + ' Activity'"
-    title-class="font-18" :ok-title="activityFormTitle" @ok="saveActivity" @hide.prevent
-    @cancel="isActivityFormOpen = false" @close="isActivityFormOpen = false">
+  <BModal v-model="isActivityFormOpen" id="modal-standard" title="Create Member Activity" title-class="font-18"
+    ok-title="Create" @ok="saveActivityMember" @hide.prevent @cancel="isActivityFormOpen = false"
+    @close="isActivityFormOpen = false"
+    :ok-disabled="!formActivity.description || !date || !formActivity.start_time || !formActivity.end_time">
     <BRow>
       <BCol cols="12" class="mt-2">
         <BForm class="form-horizontal" role="form">
@@ -608,8 +677,8 @@ export default {
             <BCol>
               <textarea class="form-control" :class="{
                 'is-invalid': !!(activityErrorList && activityErrorList.description),
-              }" id="form-activity-description" type="text" placeholder="Masukkan deskripsi aktivitas ..."
-                v-model="activityForm.description" required />
+              }" id="form-activity-description-member" type="text" placeholder="Masukkan deskripsi aktivitas ..."
+                v-model="formActivity.description" required />
 
               <template v-if="!!(activityErrorList && activityErrorList.description)">
                 <div class="invalid-feedback" v-for="(err, index) in activityErrorList.description" :key="index">
@@ -618,13 +687,16 @@ export default {
               </template>
             </BCol>
           </BRow>
+          <div>
+            <input v-model="date" class="form-control mb-3" type="date" placeholder="Masukkan tanggal">
+          </div>
           <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
               <BCol md="6">
                 <input class="form-control" :class="{
                   'is-invalid': !!(activityErrorList && activityErrorList.start_time),
-                }" id="form-start-activity" placeholder="Start time" v-model="activityForm.start_time" type="time"
-                  required />
+                }" id="form-start-activity-member" placeholder="Start time" v-model="formActivity.start_time"
+                  type="time" required />
                 <template v-if="!!(activityErrorList && activityErrorList.start_time)">
                   <div class="invalid-feedback" v-for="(err, index) in activityErrorList.start_time" :key="index">
                     <span>{{ err }}</span>
@@ -637,7 +709,8 @@ export default {
               <BCol md="6">
                 <input class="form-control" :class="{
                   'is-invalid': !!(activityErrorList && activityErrorList.end_time),
-                }" id="form-end-activity" placeholder="End ime" v-model="activityForm.end_time" type="time" required />
+                }" id="form-end-activity-member" placeholder="End ime" v-model="formActivity.end_time" type="time"
+                  required />
                 <template v-if="!!(activityErrorList && activityErrorList.end_time)">
                   <div class="invalid-feedback" v-for="(err, index) in activityErrorList.end_time" :key="index">
                     <span>{{ err }}</span>
@@ -646,8 +719,8 @@ export default {
               </BCol>
             </div>
             <BCol md="2 d-flex">
-              <input class="form-check-input activity-check-form" type="checkbox" id="form-priority-activity"
-                @change="updatePriority" :checked="activityForm.is_priority === 1 || false" />
+              <input class="form-check-input activity-check-form" type="checkbox" id="form-priority-activity-member"
+                @change="updatePriority" :checked="formActivity.is_priority === 1 || false" />
               <label class="form-check-label mt-1 ms-1" for="form-priority-activity">
                 Prioritas
               </label>
@@ -656,7 +729,7 @@ export default {
         </BForm>
       </BCol>
     </BRow>
-  </BModal> -->
+  </BModal>
 
   <!-- ========== Left Sidebar Start ========== -->
   <div class="vertical-menu sidebar-bg ws-sidebar" style="box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.25);">
@@ -678,9 +751,11 @@ export default {
           <h6 class="font-4-normal ms-2 mb-0">
             {{ member.user.name }}
           </h6>
-          <div class="d-flex justify-content-center align-items-center">
-            <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Delete Member"></i>
-            <i class="bx bx-plus ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Add task"></i>
+          <div v-if="userId != member.user.id" class="d-flex justify-content-center align-items-center">
+            <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Delete Member"
+              @click="leaveGroup(member.id)"></i>
+            <i class="bx bx-plus ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Add task"
+              @click="openActivityFormModal(member.user.id)"></i>
           </div>
         </div>
       </div>
@@ -716,7 +791,7 @@ export default {
             <i class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
               v-b-tooltip.hover title="Edit group"></i>
             <router-link :to="`/archive/${group.group.id}`">
-              <i class="bx bx-folder ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
+              <i class="bx bx-folder ws-menu mt-1" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
             </router-link>
           </div>
         </div>
