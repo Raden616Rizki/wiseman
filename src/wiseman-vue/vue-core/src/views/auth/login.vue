@@ -7,7 +7,7 @@
             <BForm class="p-4">
               <div>
                 <BRow>
-                  <h5 class="form-title mb-4">Login</h5>
+                  <h5 class="form-title my-4">Login</h5>
                 </BRow>
               </div>
               <BFormGroup class="mb-3" id="input-group-1" label="Email" label-for="input-1">
