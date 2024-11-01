@@ -44,7 +44,7 @@
             <div v-for="memo in memos" :key="memo.id" class="card bg-white p-2">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
-                <div v-if="isAdmin" >
+                <div v-if="isAdmin">
                   <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Update memo"
                     style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
                   <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Delete memo"
@@ -209,6 +209,11 @@
                           <span>{{ err }}</span>
                         </div>
                       </template>
+                      <!-- <template v-if="endTimeError">
+                        <div class="invalid-feedback">
+                          <span>End time cannot be earlier than start time.</span>
+                        </div>
+                      </template> -->
                     </BCol>
                   </div>
                   <BCol md="2 d-flex">
@@ -338,11 +343,13 @@ const route = useRoute();
 const groupId = ref(route.query.id);
 const isAdmin = ref(false);
 const hasVoted = ref(false);
+// const endTimeError = ref(false);
 
 watch(() => route.query.id, async (newVal) => {
   groupId.value = newVal;
 
   if (!groupId.value) {
+    activityStore.userId = ''
     groupId.value = '';
     votings.value = [];
   } else {
@@ -455,6 +462,7 @@ const activityForm = reactive({
   end_time: "",
   is_priority: 0,
   is_finished: 0,
+  google_calendar_event_id: "",
 });
 
 const memoForm = reactive({
@@ -475,10 +483,24 @@ const votingForm = reactive({
   voting_options_deleted: [],
 });
 
+// const validateEndTime = () => {
+//   if (activityForm.start_time && activityForm.end_time) {
+//     endTimeError.value =
+//       activityForm.end_time < activityForm.start_time;
+//   } else {
+//     endTimeError.value = false;
+//   }
+// };
+
+// watch(
+//   () => activityForm.end_time,
+//   validateEndTime
+// );
+
 // Open Modal
 
 const openActivityFormModal = async (activity) => {
-  if (isAdmin.value) {
+  if (!groupId.value || isAdmin.value) {
     isActivityFormOpen.value = true;
     if (activity != 'add') {
 
@@ -490,6 +512,7 @@ const openActivityFormModal = async (activity) => {
       activityForm.end_time = activity.end_time.substr(11, 5);
       activityForm.is_priority = activity.is_priority;
       activityForm.is_finished = activity.is_finished;
+      activityForm.google_calendar_event_id = activity.google_calendar_event_id;
 
       activityFormTitle.value = 'Update';
     } else {
@@ -497,15 +520,17 @@ const openActivityFormModal = async (activity) => {
 
       if (groupId.value) {
         activityForm.group_id = groupId.value;
+        activityForm.user_id = '';
       } else {
         activityForm.group_id = '';
+        activityForm.user_id = user.id;
       }
-      activityForm.user_id = user.id;
       activityForm.description = '';
       activityForm.start_time = '';
       activityForm.end_time = '';
       activityForm.is_priority = 0;
       activityForm.is_finished = 0;
+      activityForm.google_calendar_event_id = '';
 
       activityFormTitle.value = 'New';
     }
@@ -682,6 +707,7 @@ const finishActivity = async (activityId, isFinished) => {
     activityForm.start_time = activity.start_time.substr(11, 5);
     activityForm.end_time = activity.end_time.substr(11, 5);
     activityForm.is_priority = activity.is_priority;
+    activityForm.google_calendar_event_id = activity.google_calendar_event_id;
     activityForm.is_finished = isFinished;
 
     await saveActivity();

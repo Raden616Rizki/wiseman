@@ -93,6 +93,7 @@ class ActivityController extends Controller
 
     public function update(ActivityRequest $request, $id)
     {
+
         if (isset($request->validator) && $request->validator->fails()) {
             return response()->failed($request->validator->errors());
         }
