@@ -67,7 +67,7 @@
           <div class="d-flex justify-content-between align-items-center m-3">
             <h6 class="font-4 mb-0">Activity</h6>
             <div>
-              <i v-if="groupId" class="bx bxs-bar-chart-alt-2 memo-bold-font mt-1 me-4"
+              <i v-if="groupId && isAdmin" class="bx bxs-bar-chart-alt-2 memo-bold-font mt-1 me-4"
                 style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openVotingFormModal('add')"
                 v-b-tooltip.hover title="Create voting"></i>
               <i v-if="!groupId || isAdmin" class="bx bx-task memo-bold-font mt-1"
@@ -145,7 +145,7 @@
                   <p class="voting-description mb-0 bg-white"> {{ votingData.description }} </p>
                 </td>
                 <td style="text-align: center; width: 50px;">
-                  <button class="btn votting-button align-items-center"
+                  <button class="btn votting-button align-items-center me-3"
                     @click="openVotingModal(votingData)">Voting</button>
                 </td>
                 <td v-if="isAdmin" style="text-align: center; width: 40px;">
@@ -297,8 +297,9 @@
                       :class="{ 'selected-option': selectedOption === option.id, 'default-option': selectedOption !== option.id }">
                       {{ option.option }}</h6>
 
-                    <input v-if="isPastLimitTime" class="form-check-input ms-3 mt-0" type="radio" :id="'option-' + index" :value="option.id"
-                      name="votingOptionsGroup" @change="chooseOption(option.id)" />
+                    <input v-if="isBeforeLimitTime" class="form-check-input ms-3 mt-0" type="radio"
+                      :id="'option-' + index" :value="option.id" name="votingOptionsGroup"
+                      @change="chooseOption(option.id)" :disabled="hasVoted" />
                   </div>
                 </BRow>
               </BForm>
@@ -336,12 +337,14 @@ import Chart from 'primevue/chart';
 const route = useRoute();
 const groupId = ref(route.query.id);
 const isAdmin = ref(false);
+const hasVoted = ref(false);
 
 watch(() => route.query.id, async (newVal) => {
   groupId.value = newVal;
 
   if (!groupId.value) {
     groupId.value = '';
+    votings.value = [];
   } else {
     isAdmin.value = await checkIsAdminById(groupId.value);
   }
@@ -395,11 +398,12 @@ const checkIsAdminById = async (groupId) => {
   return isAdmin;
 }
 
-const isPastLimitTime = computed(() => {
+const isBeforeLimitTime = computed(() => {
+  if (!voting.value.limitTime) return false;
+
   const now = new Date();
-  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  console.log(currentTime > votingForm.limit_time);
-  return currentTime > votingForm.limit_time;
+  const limitDateTime = new Date(voting.value.limitTime.replace(' ', 'T'));
+  return now < limitDateTime;
 });
 
 const votingStore = useVotingStore();
@@ -556,21 +560,24 @@ const openVotingFormModal = async (votingData) => {
 }
 
 const openVotingModal = async (votingData) => {
-  isVotingOpen.value = true;
-  isVotingResultOpen.value = false;
-
   voting.value = votingData;
+
+  checkHasVoted();
 
   votingForm.id = votingData.id;
   votingForm.group_id = votingData.groupId;
   votingForm.description = votingData.description;
   votingForm.limit_time = votingData.limitTime.substr(11, 5);
   votingForm.voting_options = votingData.votingOptions;
+
+  isVotingOpen.value = true;
+  isVotingResultOpen.value = false;
 }
 
 const openVotingResult = async () => {
-  startProgress()
-  voting.value = await votingStore.getVotingById(voting.value.id);
+  startProgress();
+
+  voting.value = await votingStore.getVotingById(voting.value.votingOptions[0].votingId);
 
   chartData.value = setChartData(voting.value.votingOptions);
   chartOptions.value = setChartOptions();
@@ -808,8 +815,28 @@ const chooseOption = async (optionId) => {
   selectedOption.value = optionId;
   try {
     await votingStore.chooseOption(optionId);
+
+    hasVoted.value = true;
+    const votes = JSON.parse(localStorage.getItem('selectedOption')) || [];
+
+    votes.push({ userId, optionId });
+
+    localStorage.setItem('selectedOption', JSON.stringify(votes));
   } catch (error) {
     console.error(error);
+  }
+}
+
+const checkHasVoted = () => {
+  const storedData = JSON.parse(localStorage.getItem('selectedOption')) || [];
+
+  const userVote = storedData.find(entry => entry.userId === userId);
+
+  if (userVote) {
+    voting.value.id = userVote.optionId;
+    hasVoted.value = true;
+  } else {
+    hasVoted.value = false;
   }
 }
 

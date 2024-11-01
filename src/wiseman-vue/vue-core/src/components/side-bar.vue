@@ -797,7 +797,7 @@ export default {
           <h6 class="font-4-normal ms-2 mb-0">
             {{ enrollment.user.name }}
           </h6>
-          <button class="btn btn-success btn-sm" @click="acceptRequest(enrollment)">
+          <button v-if="isAdmin" class="btn btn-success btn-sm" @click="acceptRequest(enrollment)">
             accept
           </button>
         </div>
