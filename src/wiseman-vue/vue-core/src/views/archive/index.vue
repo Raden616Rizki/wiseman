@@ -117,6 +117,10 @@
                     @click="moveArchive(folder.id)">
                     <p class="mb-0">{{ folder.name }}</p>
                 </div>
+                <div v-for="subFolder in folder.subFolders" :key="subFolder.id" class="rounded w-100 text-white me-2 mt-2 p-2 ms-4" style="cursor: pointer;"
+                    @click="moveArchive(subFolder.id)">
+                    <p class="mb-0">{{ subFolder.name }}</p>
+                </div>
             </BRow>
         </BModal>
     </Layout>
@@ -248,9 +252,26 @@ const openArchiveFormModal = async (method) => {
 }
 
 const openListFolderModal = async (id) => {
+    startProgress();
     isListFolderOpen.value = true;
     listFolder.value = await archiveStore.getListFolder(id);
+
+    listFolder.value = await fetchSubFolders(listFolder.value);
+
+    finishProgress();
 }
+
+const fetchSubFolders = async (folders) => {
+    for (const folder of folders) {
+        const subFolder = await archiveStore.getListFolder(folder.id);
+        if (subFolder && subFolder.length > 0) {
+            folder.subFolders = subFolder;
+            await fetchSubFolders(subFolder);
+        }
+    }
+
+    return folders;
+};
 
 const saveArchive = async () => {
     startProgress();
