@@ -353,7 +353,31 @@ export default {
 
       await this.getAuthUser();
     },
+    async addAsAdmin(groupUserData) {
+      this.startProgress();
+      try {
+        const id = groupUserData.id;
+        const groupId = this.groupId;
+        const userId = groupUserData.user.id;
+        const isAdmin = 1;
 
+        const formGroupUser = {
+          id: id,
+          group_id: groupId,
+          user_id: userId,
+          is_admin: isAdmin
+        }
+        await this.groupUserStore.updateGroupUser(formGroupUser);
+        
+        this.group = await this.groupStore.getGroupById(this.groupId);
+        await this.getAuthUser();
+        this.finishProgress();
+        showSuccessToast('Admin added successfully')
+      } catch (error) {
+        error.log(error);
+        showErrorToast('Failed to add as admin')
+      }
+    },
     async saveGroupUser(groupId, userId, isAdmin) {
       try {
         const formGroupUser = {
@@ -782,6 +806,8 @@ export default {
           <div v-if="userId != member.user.id && isAdmin" class="d-flex justify-content-center align-items-center">
             <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Delete Member"
               @click="leaveGroup(member.id)"></i>
+            <i v-if="member.isAdmin == 0" class='bx bx-user ws-menu me-1' ws-menu me-2 style="color: #EEEEEE;"
+              v-b-tooltip.hover title="Add as Admin" @click="addAsAdmin(member)"></i>
             <i class="bx bx-plus ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Add task"
               @click="openActivityFormModal(member.user.id)"></i>
           </div>
@@ -816,8 +842,8 @@ export default {
           <div class="d-flex justify-content-center align-items-center">
             <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
               v-b-tooltip.hover title="Leave group"></i>
-            <i v-if="isAdminStatus[index]" class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;" @click="openGroupFormModal(group.group.id)"
-              v-b-tooltip.hover title="Edit group"></i>
+            <i v-if="isAdminStatus[index]" class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;"
+              @click="openGroupFormModal(group.group.id)" v-b-tooltip.hover title="Edit group"></i>
             <router-link :to="`/archive/${group.group.id}`">
               <i class="bx bx-folder ws-menu mt-1" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
             </router-link>
