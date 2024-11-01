@@ -787,17 +787,17 @@ export default {
           </div>
         </div>
       </div>
-      <div v-if="groupId && enrollments.length > 0"
+      <div v-if="groupId && enrollments.length > 0 && isAdmin"
         class="p-2 mb-2 mt-4 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
         <p class="font-4 ms-2 mb-0 sidebar-title"> Request </p>
       </div>
-      <div v-if="groupId && enrollments">
+      <div v-if="groupId && enrollments && isAdmin">
         <div v-for="enrollment in enrollments" :key="enrollment.id"
           class="p-2 list-group-item d-flex justify-content-between align-items-center ws-main-menu mb-2">
           <h6 class="font-4-normal ms-2 mb-0">
             {{ enrollment.user.name }}
           </h6>
-          <button v-if="isAdmin" class="btn btn-success btn-sm" @click="acceptRequest(enrollment)">
+          <button class="btn btn-success btn-sm" @click="acceptRequest(enrollment)">
             accept
           </button>
         </div>

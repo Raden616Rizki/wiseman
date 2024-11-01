@@ -44,7 +44,7 @@
             <div v-for="memo in memos" :key="memo.id" class="card bg-white p-2">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
-                <div>
+                <div v-if="isAdmin" >
                   <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Update memo"
                     style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
                   <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Delete memo"
