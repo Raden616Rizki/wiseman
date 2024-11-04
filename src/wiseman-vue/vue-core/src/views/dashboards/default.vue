@@ -331,10 +331,10 @@ import DatePicker from 'primevue/datepicker';
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from "vue";
 import {
   useActivityStore,
-  useAuthStore, 
-  useGroupStore, 
-  useVotingStore, 
-  useMemoStore, 
+  useAuthStore,
+  useGroupStore,
+  useVotingStore,
+  useMemoStore,
   useUserVotingStore
 } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
@@ -356,10 +356,11 @@ watch(() => route.query.id, async (newVal) => {
   groupId.value = newVal;
 
   if (!groupId.value) {
-    activityStore.userId = ''
+    activityStore.userId = userId;
     groupId.value = '';
     votings.value = [];
   } else {
+    activityStore.userId = '';
     isAdmin.value = await checkIsAdminById(groupId.value);
   }
 
@@ -529,10 +530,10 @@ const openActivityFormModal = async (activity) => {
 
       if (groupId.value) {
         activityForm.group_id = groupId.value;
-        activityForm.user_id = '';
+        activityForm.user_id = userId;
       } else {
         activityForm.group_id = '';
-        activityForm.user_id = user.id;
+        activityForm.user_id = userId;
       }
       activityForm.description = '';
       activityForm.start_time = '';
@@ -852,7 +853,7 @@ const chooseOption = async (optionId, votingId) => {
     await votingStore.chooseOption(optionId);
 
     hasVoted.value = true;
-    
+
     const userVotingForm = {
       user_id: userId,
       voting_id: votingId
@@ -1059,7 +1060,9 @@ onMounted(async () => {
 
   if (!groupId.value) {
     groupId.value = '';
+    activityStore.userId = userId;
   } else {
+    activityStore.userId = '';
     isAdmin.value = await checkIsAdminById(groupId.value);
   }
 

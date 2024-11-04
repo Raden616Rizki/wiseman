@@ -57,6 +57,7 @@ class ActivityController extends Controller
     public function store(ActivityRequest $request)
     {
         if (isset($request->validator) && $request->validator->fails()) {
+            error_log($request->validator->errors());
             return response()->failed($request->validator->errors());
         }
 
