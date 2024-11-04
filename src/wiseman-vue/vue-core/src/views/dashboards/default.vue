@@ -41,23 +41,28 @@
           </div>
           <div style="height: 250px; overflow-y: auto; padding-right: 10px"
             @contextmenu.prevent="openMemoFormModal('add')">
-            <div v-for="memo in memos" :key="memo.id" class="card bg-white p-2">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
-                <div v-if="isAdmin">
-                  <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Update memo"
-                    style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
-                  <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Delete memo"
-                    style="font-size: 16px; cursor: pointer;" @click="deleteMemo(memo.id, memo.memoId)"></i>
+            <div v-if="memos.length != 0">
+              <div v-for="memo in memos" :key="memo.id" class="card bg-white p-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
+                  <div v-if="isAdmin">
+                    <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Update memo"
+                      style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
+                    <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Delete memo"
+                      style="font-size: 16px; cursor: pointer;" @click="deleteMemo(memo.id, memo.memoId)"></i>
+                  </div>
+                </div>
+                <div>
+                  <p> {{ memo.message }} </p>
+                </div>
+                <div class="d-flex justify-content-end">
+                  <p class="mb-0"> {{ memo.time }} </p>
+                  <p class="memo-bold-font mb-0 ms-2"> {{ memo.date }} </p>
                 </div>
               </div>
-              <div>
-                <p> {{ memo.message }} </p>
-              </div>
-              <div class="d-flex justify-content-end">
-                <p class="mb-0"> {{ memo.time }} </p>
-                <p class="memo-bold-font mb-0 ms-2"> {{ memo.date }} </p>
-              </div>
+            </div>
+            <div v-else class="pt-5 d-flex justify-content-center align-items-center">
+              <img :src="emptyImage" alt="No Data" style="width: 60%">
             </div>
           </div>
         </div>
@@ -77,87 +82,92 @@
           </div>
           <div class="m-3" style="height: 627px; overflow-y: auto; padding-right: 10px"
             @contextmenu.prevent="openActivityFormModal('add')">
-            <table v-for="activity in activities" :key="activity.id" class="table align-middle" :style="{
-              borderRadius: '4px',
-              backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
-              overflow: 'hidden',
-              borderCollapse: 'separate',
-            }">
-              <tr>
-                <td style="text-align: center; width: 80px;">
-                  <div class="d-flex flex-column align-items-center activity-time" :style="{
-                    backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
-                    color: activity.is_priority === 1 ? 'white' : '',
-                  }">
-                    <p class="mb-0"> {{ activity.start_time.substr(11, 5) }} </p>
-                    <p class="mb-0">-</p>
-                    <p class="mb-0"> {{ activity.end_time.substr(11, 5) }} </p>
-                  </div>
-                </td>
-                <td style="width: 100%;">
-                  <p v-if="activity.group_id" class="activity-description mb-0" :style="{
-                    backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
-                    color: activity.is_priority === 1 ? 'white' : '',
-                    fontWeight: 'bold',
-                  }"> {{ activity.group.name }} </p>
-                  <p class="activity-description mb-0" :style="{
-                    backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
-                    color: activity.is_priority === 1 ? 'white' : '',
-                  }"> {{ activity.description }} </p>
-                </td>
-                <td style="text-align: center; width: 50px;">
-                  <input v-if="!groupId || isAdmin" class="form-check-input activity-check me-2" type="checkbox"
-                    :id="'flexCheckChecked-' + activity.id"
-                    @change="finishActivity(activity.id, $event.target.checked ? 1 : 0)"
-                    :checked="activity.is_finished === 1"
-                    :style="{ border: activity.is_priority === 1 ? '2px solid #EEEEEE' : '2px solid black' }">
-                </td>
-                <td style="text-align: center; width: 40px;">
-                  <div v-if="!groupId || isAdmin" class="d-flex justify-content-center align-items-center" :style="{
-                    backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
-                    color: activity.is_priority === 1 ? 'white' : '',
-                  }">
-                    <i class="bx bx-edit mt-1" @click="openActivityFormModal(activity)" v-b-tooltip.hover
-                      title="Update activity" style="font-size: 14px; cursor: pointer;"></i>
-                    <i class="bx bx-trash ms-1 mt-1" @click="deleteActivity(activity.id)" v-b-tooltip.hover
-                      title="Delete activity" style="font-size: 14px; cursor: pointer;"></i>
-                  </div>
-                </td>
-              </tr>
-            </table>
-            <table v-for="votingData in votings" :key="votingData.id" class="table align-middle bg-white" :style="{
-              borderRadius: '4px',
-              overflow: 'hidden',
-              borderCollapse: 'separate',
-            }">
-              <tr>
-                <td style="text-align: center; width: 80px;">
-                  <div class="d-flex flex-column align-items-center voting-time bg-white">
-                    <p class="mb-0"> Limit </p>
-                    <p class="mb-0">-</p>
-                    <p class="mb-0"> {{ votingData.limitTime.substr(11, 5) }} </p>
-                  </div>
-                </td>
-                <td style="width: 100%;">
-                  <p v-if="votingData.groupId" class="voting-description mb-0 bg-white" :style="{
-                    fontWeight: 'bold',
-                  }"> {{ votingData.group.name }} </p>
-                  <p class="voting-description mb-0 bg-white"> {{ votingData.description }} </p>
-                </td>
-                <td style="text-align: center; width: 50px;">
-                  <button class="btn votting-button align-items-center me-3"
-                    @click="openVotingModal(votingData)">Voting</button>
-                </td>
-                <td v-if="isAdmin" style="text-align: center; width: 40px;">
-                  <div class="d-flex justify-content-center align-items-center bg-white">
-                    <i class="bx bx-edit mt-1" @click="openVotingFormModal(votingData)" v-b-tooltip.hover
-                      title="Update voting" style="font-size: 14px; cursor: pointer;"></i>
-                    <i class="bx bx-trash ms-1 mt-1" @click="deleteVoting(votingData.id)" v-b-tooltip.hover
-                      title="Delete voting" style="font-size: 14px; cursor: pointer;"></i>
-                  </div>
-                </td>
-              </tr>
-            </table>
+            <div v-if="activities.length != 0 || votings.length != 0">
+              <table v-for="activity in activities" :key="activity.id" class="table align-middle" :style="{
+                borderRadius: '4px',
+                backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                overflow: 'hidden',
+                borderCollapse: 'separate',
+              }">
+                <tr>
+                  <td style="text-align: center; width: 80px;">
+                    <div class="d-flex flex-column align-items-center activity-time" :style="{
+                      backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                      color: activity.is_priority === 1 ? 'white' : '',
+                    }">
+                      <p class="mb-0"> {{ activity.start_time.substr(11, 5) }} </p>
+                      <p class="mb-0">-</p>
+                      <p class="mb-0"> {{ activity.end_time.substr(11, 5) }} </p>
+                    </div>
+                  </td>
+                  <td style="width: 100%;">
+                    <p v-if="activity.group_id" class="activity-description mb-0" :style="{
+                      backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                      color: activity.is_priority === 1 ? 'white' : '',
+                      fontWeight: 'bold',
+                    }"> {{ activity.group.name }} </p>
+                    <p class="activity-description mb-0" :style="{
+                      backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                      color: activity.is_priority === 1 ? 'white' : '',
+                    }"> {{ activity.description }} </p>
+                  </td>
+                  <td style="text-align: center; width: 50px;">
+                    <input v-if="!groupId || isAdmin" class="form-check-input activity-check me-2" type="checkbox"
+                      :id="'flexCheckChecked-' + activity.id"
+                      @change="finishActivity(activity.id, $event.target.checked ? 1 : 0)"
+                      :checked="activity.is_finished === 1"
+                      :style="{ border: activity.is_priority === 1 ? '2px solid #EEEEEE' : '2px solid black' }">
+                  </td>
+                  <td style="text-align: center; width: 40px;">
+                    <div v-if="!groupId || isAdmin" class="d-flex justify-content-center align-items-center" :style="{
+                      backgroundColor: activity.is_priority === 1 ? '#067e82' : 'white',
+                      color: activity.is_priority === 1 ? 'white' : '',
+                    }">
+                      <i class="bx bx-edit mt-1" @click="openActivityFormModal(activity)" v-b-tooltip.hover
+                        title="Update activity" style="font-size: 14px; cursor: pointer;"></i>
+                      <i class="bx bx-trash ms-1 mt-1" @click="deleteActivity(activity.id)" v-b-tooltip.hover
+                        title="Delete activity" style="font-size: 14px; cursor: pointer;"></i>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <table v-for="votingData in votings" :key="votingData.id" class="table align-middle bg-white" :style="{
+                borderRadius: '4px',
+                overflow: 'hidden',
+                borderCollapse: 'separate',
+              }">
+                <tr>
+                  <td style="text-align: center; width: 80px;">
+                    <div class="d-flex flex-column align-items-center voting-time bg-white">
+                      <p class="mb-0"> Limit </p>
+                      <p class="mb-0">-</p>
+                      <p class="mb-0"> {{ votingData.limitTime.substr(11, 5) }} </p>
+                    </div>
+                  </td>
+                  <td style="width: 100%;">
+                    <p v-if="votingData.groupId" class="voting-description mb-0 bg-white" :style="{
+                      fontWeight: 'bold',
+                    }"> {{ votingData.group.name }} </p>
+                    <p class="voting-description mb-0 bg-white"> {{ votingData.description }} </p>
+                  </td>
+                  <td style="text-align: center; width: 50px;">
+                    <button class="btn votting-button align-items-center me-3"
+                      @click="openVotingModal(votingData)">Voting</button>
+                  </td>
+                  <td v-if="isAdmin" style="text-align: center; width: 40px;">
+                    <div class="d-flex justify-content-center align-items-center bg-white">
+                      <i class="bx bx-edit mt-1" @click="openVotingFormModal(votingData)" v-b-tooltip.hover
+                        title="Update voting" style="font-size: 14px; cursor: pointer;"></i>
+                      <i class="bx bx-trash ms-1 mt-1" @click="deleteVoting(votingData.id)" v-b-tooltip.hover
+                        title="Delete voting" style="font-size: 14px; cursor: pointer;"></i>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div v-else class="pt-5 d-flex justify-content-center align-items-center">
+              <img :src="emptyImage" alt="No Data" style="width: 60%">
+            </div>
           </div>
         </div>
 
@@ -345,6 +355,7 @@ import {
 } from "@/helpers/alert.js";
 import { useRoute } from "vue-router";
 import Chart from 'primevue/chart';
+import emptyImage from "@/assets/images/empty-icon.svg";
 
 const route = useRoute();
 const groupId = ref(route.query.id);

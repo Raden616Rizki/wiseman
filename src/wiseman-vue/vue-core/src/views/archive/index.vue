@@ -15,7 +15,7 @@
                     <p class="archive-path mb-0" @click="changePath(path, index)"> {{ path.name }} </p>
                 </div>
             </div>
-            <div class="d-flex flex-wrap" style="padding-left: 13.3px;">
+            <div v-if="archives.length != 0" class="d-flex flex-wrap" style="padding-left: 13.3px;">
                 <div v-for="archiveData in archives" :key="archiveData.id">
                     <div v-if="archiveData.file" class="file me-4 my-1 d-flex flex-column align-items-center"
                         @contextmenu.prevent="showContextMenu($event, archiveData)">
@@ -31,6 +31,9 @@
                         <p class="folder-name" v-b-tooltip.hover :title="archiveData.name">{{ archiveData.name }}</p>
                     </div>
                 </div>
+            </div>
+            <div v-else class="pt-3 d-flex justify-content-center align-items-center" >
+                <img :src="emptyImage" alt="No Data">
             </div>
             <div v-if="isContextMenuVisible" class="context-menu" :style="contextMenuStyle">
                 <ul>
@@ -128,6 +131,7 @@ import { useArchiveStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import folderIcon from "@/assets/images/folder-icon.svg";
 import fileIcon from "@/assets/images/file-icon.svg";
+import emptyImage from "@/assets/images/empty-icon.svg";
 import {
     showSuccessToast,
     showErrorToast,
