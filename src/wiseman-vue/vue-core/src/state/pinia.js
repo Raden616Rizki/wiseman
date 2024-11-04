@@ -29,6 +29,9 @@ import {
     useEnrollmentStore
 } from "./pinia/enrollment";
 import {
+    useUserVotingStore
+} from "./pinia/userVoting";
+import {
     createPinia
 } from "pinia";
 
@@ -45,5 +48,6 @@ export {
     useVotingStore,
     useArchiveStore,
     useMemoStore,
-    useEnrollmentStore
+    useEnrollmentStore,
+    useUserVotingStore
 };

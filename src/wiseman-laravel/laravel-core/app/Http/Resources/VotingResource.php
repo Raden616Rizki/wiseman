@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 
 use App\Http\Resources\VotingOptionResource;
+use App\Http\Resources\UserVotingResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class VotingResource extends JsonResource
@@ -17,6 +18,7 @@ class VotingResource extends JsonResource
 			'groupId' => $this->group_id,
         	'votingOptions' => VotingOptionResource::collection($this->votingOptions),
             'group' => new GroupResource($this->group),
+			'userVotings' => UserVotingResource::collection($this->userVotings),
 		];
     }
 }

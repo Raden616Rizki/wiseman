@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\UserVotingController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\MemoController;
 use App\Http\Controllers\Api\ArchiveController;
@@ -25,6 +26,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
+	Route::get('/user_votings', [UserVotingController::class, 'index']);
+	Route::get('/user_votings/{id}', [UserVotingController::class, 'show']);
+	Route::post('/user_votings', [UserVotingController::class, 'store']);
+	Route::put('/user_votings/{id}', [UserVotingController::class, 'update']);
+	Route::delete('/user_votings/{id}', [UserVotingController::class, 'destroy']);
+
 	Route::get('/enrollments', [EnrollmentController::class, 'index']);
 	Route::get('/enrollments/{id}', [EnrollmentController::class, 'show']);
 	Route::post('/enrollments', [EnrollmentController::class, 'store']);

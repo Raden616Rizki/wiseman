@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class VotingModel extends Model implements CrudInterface
+class UserVotingModel extends Model implements CrudInterface
 {
     use HasFactory;
     use Uuid;
@@ -17,28 +17,24 @@ class VotingModel extends Model implements CrudInterface
     public $timestamps = true;
 
     protected $fillable = [
-        'description', 'limit_time', 'group_id'
+        'user_id', 'voting_id'
     ];
 
-    protected $table = 't_votings';
+    protected $table = 't_user_votings';
 
     public function getAll(array $filter, int $itemPerPage = 0, string $sort = '')
     {
         $query = $this->query();
 
-		if (!empty($filter['description'])) {
-			$query->where('description', 'LIKE', '%' . $filter['description'] . '%');
+		if (!empty($filter['user_id'])) {
+			$query->where('user_id', 'LIKE', '%' . $filter['user_id'] . '%');
 		}
 
-		if (!empty($filter['limit_time'])) {
-			$query->where('limit_time', 'LIKE', '%' . $filter['limit_time'] . '%');
+		if (!empty($filter['voting_id'])) {
+			$query->where('voting_id', 'LIKE', '%' . $filter['voting_id'] . '%');
 		}
 
-		if (!empty($filter['group_id'])) {
-			$query->where('group_id', 'LIKE', '%' . $filter['group_id'] . '%');
-		}
-
-        $sort = $sort ?: 'limit_time ASC';
+        $sort = $sort ?: 'id DESC';
         $query->orderByRaw($sort);
         $itemPerPage = ($itemPerPage > 0) ? $itemPerPage : false;
 
@@ -71,19 +67,14 @@ class VotingModel extends Model implements CrudInterface
         return $this->find($id)->delete();
     }
 
-	public function group()
+	public function user()
 	{
-		return $this->belongsTo(GroupModel::class, 'group_id', 'id');
+		return $this->belongsTo(UserModel::class, 'user_id', 'id');
 	}
 
-
-	public function votingOptions()
+	public function voting()
 	{
-		return $this->hasMany(VotingOptionModel::class, 'voting_id', 'id');
+		return $this->belongsTo(VotingModel::class, 'voting_id', 'id');
 	}
 
-	public function userVotings()
-	{
-		return $this->hasMany(UserVotingModel::class, 'voting_Id', 'id');
-	}
 }

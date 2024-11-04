@@ -304,7 +304,7 @@
 
                     <input v-if="isBeforeLimitTime" class="form-check-input ms-3 mt-0" type="radio"
                       :id="'option-' + index" :value="option.id" name="votingOptionsGroup"
-                      @change="chooseOption(option.id)" :disabled="hasVoted" />
+                      @change="chooseOption(option.id, option.votingId)" :disabled="hasVoted" />
                   </div>
                 </BRow>
               </BForm>
@@ -329,7 +329,14 @@
 import Layout from "../../layouts/main";
 import DatePicker from 'primevue/datepicker';
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from "vue";
-import { useActivityStore, useAuthStore, useGroupStore, useVotingStore, useMemoStore } from "@/state/pinia";
+import {
+  useActivityStore,
+  useAuthStore, 
+  useGroupStore, 
+  useVotingStore, 
+  useMemoStore, 
+  useUserVotingStore
+} from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import {
   showSuccessToast,
@@ -420,6 +427,8 @@ const voting = ref({});
 const votingStatusCode = computed(() => votingStore.response.status);
 const votingErrorList = computed(() => votingStore.response?.error || {});
 const votingErrorMessage = computed(() => votingStore.response?.message || "");
+
+const userVotingStore = useUserVotingStore();
 
 const memoStore = useMemoStore();
 
@@ -587,7 +596,7 @@ const openVotingFormModal = async (votingData) => {
 const openVotingModal = async (votingData) => {
   voting.value = votingData;
 
-  checkHasVoted();
+  checkHasVoted(votingData.userVotings);
 
   votingForm.id = votingData.id;
   votingForm.group_id = votingData.groupId;
@@ -837,29 +846,28 @@ const deleteVoting = async (votingId) => {
   }
 }
 
-const chooseOption = async (optionId) => {
+const chooseOption = async (optionId, votingId) => {
   selectedOption.value = optionId;
   try {
     await votingStore.chooseOption(optionId);
 
     hasVoted.value = true;
-    const votes = JSON.parse(localStorage.getItem('selectedOption')) || [];
-
-    votes.push({ userId, optionId });
-
-    localStorage.setItem('selectedOption', JSON.stringify(votes));
+    
+    const userVotingForm = {
+      user_id: userId,
+      voting_id: votingId
+    }
+    await userVotingStore.addUserVotings(userVotingForm);
   } catch (error) {
     console.error(error);
   }
 }
 
-const checkHasVoted = () => {
-  const storedData = JSON.parse(localStorage.getItem('selectedOption')) || [];
+const checkHasVoted = (userVotings) => {
 
-  const userVote = storedData.find(entry => entry.userId === userId);
+  const userVote = userVotings.some(vote => vote.userId === userId);
 
   if (userVote) {
-    voting.value.id = userVote.optionId;
     hasVoted.value = true;
   } else {
     hasVoted.value = false;
