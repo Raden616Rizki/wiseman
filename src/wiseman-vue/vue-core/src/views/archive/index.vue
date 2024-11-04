@@ -112,22 +112,17 @@
         <BModal v-model="isListFolderOpen" id="modal-standard" title="Daftar Folder" title-class="font-18" ok-title="ok"
             @ok="saveArchive" @hide.prevent @cancel="isListFolderOpen = false" @close="isListFolderOpen = false"
             hide-footer>
-            <BRow v-for="folder in listFolder" :key="folder.id" class="mt-0">
-                <div class="main-bg rounded w-100 text-white me-2 mt-2 p-2" style="cursor: pointer;"
-                    @click="moveArchive(folder.id)">
-                    <p class="mb-0">{{ folder.name }}</p>
-                </div>
-                <div v-for="subFolder in folder.subFolders" :key="subFolder.id" class="rounded w-100 text-white me-2 mt-2 p-2 ms-4" style="cursor: pointer;"
-                    @click="moveArchive(subFolder.id)">
-                    <p class="mb-0">{{ subFolder.name }}</p>
-                </div>
-            </BRow>
+            <div>
+                <FolderItem v-for="folder in listFolder" :key="folder.id" :folder="folder" :level="0"
+                    @move="moveArchive" />
+            </div>
         </BModal>
     </Layout>
 </template>
 
 <script setup>
 import Layout from "../../layouts/main";
+import FolderItem from "./folder-item.vue";
 import { ref, onMounted, reactive, computed, watch } from "vue";
 import { useArchiveStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
