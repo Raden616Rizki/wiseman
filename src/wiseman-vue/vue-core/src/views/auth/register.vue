@@ -1,14 +1,15 @@
 <template>
   <Layout>
-    <BRow class="justify-content-center">
-      <BCol md="8" lg="6" xl="5">
+    <BRow class="justify-content-center align-items-center">
+      <BCol xl="5">
         <BCard no-body class="overflow-hidden ws-form">
           <BCardBody class="pt-0">
             <BForm class="p-4">
               <div>
-                <BRow>
+                <div class="d-flex align-items-center justify-content-between">
                   <h5 class="form-title my-4">Register</h5>
-                </BRow>
+                  <img :src="wisemanIcon" alt="Wiseman Logo" style="width: 10%;">
+                </div>
               </div>
               <BFormGroup class="mb-3" id="input-group-1" label="Email" label-for="input-1">
                 <BFormInput id="input-1" v-model="formModel.email" type="text" placeholder="Enter email" required>
@@ -54,6 +55,7 @@ import { useProgress } from "@/helpers/progress"; // Import custom progress func
 const { startProgress, finishProgress, failProgress } = useProgress();
 
 import { showSuccessToast, showErrorToast } from "@/helpers/alert.js";
+import wisemanIcon from "@/assets/images/wiseman-icon.svg";
 
 const router = useRouter();
 const authStore = useAuthStore();
