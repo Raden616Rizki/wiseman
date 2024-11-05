@@ -1,6 +1,6 @@
 <template>
-    <BRow :style="{ marginLeft: level * 20 + 'px', width: 100 - level * 4 + '%' }" class="mt-0">
-        <div class="main-bg rounded text-white me-2 mt-2 p-2 d-flex justify-content-end" style="cursor: pointer;" @click="handleMove(folder.id)">
+    <BRow :style="{ opacity: 1 - level * 0.1 }" class="mt-0">
+        <div :style="{ marginLeft: level * 20 + 'px' }" class="main-bg rounded text-white me-2 mt-2 p-2 d-flex justify-content-start" style="cursor: pointer;" @click="handleMove(folder.id)">
             <p class="mb-0">{{ folder.name }}</p>
         </div>
 

@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </div>
-            <div v-else class="pt-3 d-flex justify-content-center align-items-center" >
+            <div v-else class="pt-3 d-flex justify-content-center align-items-center">
                 <img :src="emptyImage" alt="No Data">
             </div>
             <div v-if="isContextMenuVisible" class="context-menu" :style="contextMenuStyle">
@@ -47,7 +47,7 @@
                         Download
                         <i class="bx bx-download"></i>
                     </li>
-                    <li @click="openListFolderModal('null')" class="d-flex justify-content-between align-items-center">
+                    <li @click="openListFolderModal('home')" class="d-flex justify-content-between align-items-center">
                         Move
                         <i class="bx bx-move"></i>
                     </li>
@@ -115,7 +115,13 @@
         <BModal v-model="isListFolderOpen" id="modal-standard" title="Daftar Folder" title-class="font-18" ok-title="ok"
             @ok="saveArchive" @hide.prevent @cancel="isListFolderOpen = false" @close="isListFolderOpen = false"
             hide-footer>
-            <div>
+            <div v-if="isDone" class="px-2">
+                <BRow class="mt-0">
+                    <div class="palette-3 rounded text-white me-2 mt-2 p-2 d-flex justify-content-start"
+                        style="cursor: pointer;" @click="moveArchive('home')">
+                        <p class="mb-0">Home</p>
+                    </div>
+                </BRow>
                 <FolderItem v-for="folder in listFolder" :key="folder.id" :folder="folder" :level="0"
                     @move="moveArchive" />
             </div>
@@ -141,6 +147,7 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const groupId = ref(route.params.id);
+const isDone = ref(false);
 
 watch(() => route.params.id, async (newVal) => {
     groupId.value = newVal;
@@ -243,7 +250,7 @@ const openArchiveFormModal = async (method) => {
             archiveForm.file = null;
             archiveForm.name = "";
             archiveForm.group_id = groupId.value || "";
-            archiveForm.parent_id = archiveStore.parentId || "";
+            archiveForm.parent_id = archiveStore.parentId || "home";
 
             archiveFormTitle.value = 'Add';
         }
@@ -251,6 +258,7 @@ const openArchiveFormModal = async (method) => {
 }
 
 const openListFolderModal = async (id) => {
+    isDone.value = false;
     startProgress();
     isListFolderOpen.value = true;
     listFolder.value = await archiveStore.getListFolder(id);
@@ -258,6 +266,7 @@ const openListFolderModal = async (id) => {
     listFolder.value = await fetchSubFolders(listFolder.value);
 
     finishProgress();
+    isDone.value = true;
 }
 
 const fetchSubFolders = async (folders) => {
@@ -387,7 +396,7 @@ const changePath = async (folderData, index) => {
     // clicked.value = true;
 
     if (folderData === 'home') {
-        archiveStore.parentId = null;
+        archiveStore.parentId = 'home';
         await getArchives();
         pathArchive.value = [];
     } else if (index >= 0) {
@@ -402,7 +411,7 @@ const changePath = async (folderData, index) => {
 }
 
 onMounted(async () => {
-    archiveStore.parentId = null;
+    archiveStore.parentId = 'home';
     await getArchives();
 })
 
