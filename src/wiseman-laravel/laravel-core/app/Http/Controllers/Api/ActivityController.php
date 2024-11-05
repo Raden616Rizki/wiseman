@@ -12,19 +12,19 @@ use App\Http\Resources\ActivityResource;
 use App\Models\ActivityModel;
 use Spatie\GoogleCalendar\Event;
 use Carbon\Carbon;
-// use App\Helpers\Activity\GoogleCalendarHelper;
+use App\Services\GoogleCalendarTokenService;
 
 class ActivityController extends Controller
 {
     private $activity;
     private $event;
-    // private $googleCalendar;
+    private $googleCalendarService;
 
     public function __construct()
     {
         $this->activity = new ActivityHelper();
         $this->event = new Event();
-        // $this->googleCalendar = new GoogleCalendarHelper();
+        $this->googleCalendarService = new GoogleCalendarTokenService();
     }
 
     public function index(Request $request)
@@ -65,6 +65,15 @@ class ActivityController extends Controller
 
         $user = UserModel::find($payload['user_id']);
 
+        $googleClient = $this->googleCalendarService->getClient();
+
+        if (!$googleClient || empty($googleClient)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token Error: Google Client tidak tersedia atau tidak valid'
+            ], 500);
+        }
+
         $this->event->name = $payload['description'];
         $this->event->description = ($payload['is_priority'] == 1 ? "Aktivitas Diprioritaskan" : "Bukan Aktivitas Prioritas") .
             ($payload['is_finished'] == 1 ? " - Sudah Selesai" : " - Belum Selesai");
@@ -103,6 +112,16 @@ class ActivityController extends Controller
 
         $user = UserModel::find($payload['user_id']);
         $eventId = $payload['google_calendar_event_id'];
+
+        $googleClient = $this->googleCalendarService->getClient();
+
+        if (!$googleClient || empty($googleClient)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token Error: Google Client tidak tersedia atau tidak valid'
+            ], 500);
+        }
+
         $event = Event::find($eventId);
         $event->name = $payload['description'];
         $event->description = ($payload['is_priority'] == 1 ? "Aktivitas Diprioritaskan" : "Bukan Aktivitas Prioritas") .
@@ -133,8 +152,17 @@ class ActivityController extends Controller
     {
         $activity = ActivityModel::find($id);
         $activityEventId = $activity->google_calendar_event_id;
-        $event = Event::find($activityEventId);
 
+        $googleClient = $this->googleCalendarService->getClient();
+
+        if (!$googleClient || empty($googleClient)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token Error: Google Client tidak tersedia atau tidak valid'
+            ], 500);
+        }
+
+        $event = Event::find($activityEventId);
         $event->delete();
 
         $activity = $this->activity->delete($id);
