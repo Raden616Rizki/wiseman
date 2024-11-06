@@ -1,6 +1,6 @@
 <script>
 import simplebar from "simplebar-vue";
-import SideNav from "./side-nav";
+// import SideNav from "./side-nav";
 import { useAuthStore } from "@/state/pinia";
 import { useRouter, useRoute } from "vue-router";
 import ImageCropper from "@/components/widgets/cropper";
@@ -25,7 +25,11 @@ import { Date } from "core-js";
  * Sidebar component
  */
 export default {
-  components: { simplebar, SideNav, ImageCropper },
+  components: {
+    simplebar,
+    // SideNav, 
+    ImageCropper
+  },
   props: {
     isCondensed: {
       type: Boolean,
@@ -368,7 +372,7 @@ export default {
           is_admin: isAdmin
         }
         await this.groupUserStore.updateGroupUser(formGroupUser);
-        
+
         this.group = await this.groupStore.getGroupById(this.groupId);
         await this.getAuthUser();
         this.finishProgress();
@@ -761,8 +765,8 @@ export default {
               <BCol md="6">
                 <input class="form-control" :class="{
                   'is-invalid': !!(activityErrorList && activityErrorList.end_time),
-                }" id="form-end-activity-member" placeholder="Waktu selesai" v-model="formActivity.end_time" type="time"
-                  required />
+                }" id="form-end-activity-member" placeholder="Waktu selesai" v-model="formActivity.end_time"
+                  type="time" required />
                 <template v-if="!!(activityErrorList && activityErrorList.end_time)">
                   <div class="invalid-feedback" v-for="(err, index) in activityErrorList.end_time" :key="index">
                     <span>{{ err }}</span>
@@ -784,8 +788,8 @@ export default {
   </BModal>
 
   <!-- ========== Left Sidebar Start ========== -->
-  <div class="vertical-menu sidebar-bg ws-sidebar" style="box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.25);">
-    <simplebar v-if="!isCondensed" :settings="settings" class="h-100" ref="currentMenu" id="my-element">
+  <div class="vertical-menu sidebar-bg ws-sidebar mt-5 mt-md-0" style="box-shadow: 4px 0px 4px rgba(0, 0, 0, 0.25);">
+    <simplebar :settings="settings" class="h-100 mt-4 mt-md-0" ref="currentMenu" id="my-element">
       <div class="d-flex ms-3 align-items-center my-4 ws-menu" @click="openUserFormModal">
         <img :src="user.photo_url || defaultAvatar" alt="User Photo" class="user-photo" @error="onImageProfileError" />
         <h6 class="font-4 ms-2 mb-0">{{ user.name }}</h6>
@@ -862,9 +866,9 @@ export default {
       </div>
     </simplebar>
 
-    <simplebar v-else class="h-100">
+    <!-- <simplebar v-else class="h-100">
       <SideNav />
-    </simplebar>
+    </simplebar> -->
   </div>
   <!-- Left Sidebar End -->
 </template>

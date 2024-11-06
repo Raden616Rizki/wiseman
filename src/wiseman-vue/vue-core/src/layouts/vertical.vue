@@ -16,9 +16,14 @@ export default {
     HorizontalTopbar,
   },
   data() {
+    var isOpen = false;
+    if (window.screen.width >= 992) {
+      isOpen = true;
+    }
     return {
       type: layoutStore.leftSidebarType,
-      isMenuCondensed: false
+      isMenuCondensed: false,
+      isOpen: isOpen,
     };
   },
   computed: {
@@ -63,12 +68,14 @@ export default {
         document.body.classList.remove("vertical-collpsed");
       }
       this.isMenuCondensed = !this.isMenuCondensed;
+      this.isOpen = true;
     },
-    toggleRightSidebar() {
-      document.body.classList.toggle("right-bar-enabled");
-    },
-    hideRightSidebar() {
-      document.body.classList.remove("right-bar-enabled");
+    closeSideBar() {
+      if (window.screen.width >= 992) {
+        this.isOpen = true;
+      } else {
+        this.isOpen = false;
+      }
     }
   },
   mounted() {
@@ -105,13 +112,14 @@ export default {
     <div id="layout-wrapper">
       <HorizontalTopbar :type="topbar" :width="layoutWidth" :mode="mode"
         v-bind:class="{ 'd-block': true, 'd-md-none': true }" />
-      <SideBar :is-condensed="isMenuCondensed" :type="leftSidebarType" :width="layoutWidth" :mode="mode" />
+      <SideBar v-if="isOpen" :is-condensed="isMenuCondensed" :type="leftSidebarType" :width="layoutWidth"
+        :mode="mode" />
       <!-- ============================================================== -->
       <!-- Start Page Content here -->
       <!-- ============================================================== -->
 
       <div class="main-content">
-        <div class="page-content content-top-gap">
+        <div class="page-content content-top-gap" @click="closeSideBar">
           <!-- Start Content-->
           <BContainer fluid>
             <slot />
