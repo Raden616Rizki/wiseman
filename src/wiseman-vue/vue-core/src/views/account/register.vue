@@ -37,14 +37,14 @@ export default {
   validations: {
     user: {
       username: {
-        required: helpers.withMessage("Username is required", required),
+        required: helpers.withMessage("Username diperlukan", required),
       },
       email: {
-        required: helpers.withMessage("Email is required", required),
-        email: helpers.withMessage("Please enter valid email", email),
+        required: helpers.withMessage("Email diperlukan", required),
+        email: helpers.withMessage("Silahkan masukkan email yang sesuai", email),
       },
       password: {
-        required: helpers.withMessage("Password is required", required),
+        required: helpers.withMessage("Password diperlukan", required),
       },
     },
   },
@@ -111,12 +111,6 @@ export default {
         <BCard no-body class="overflow-hidden">
           <div class="bg-primary-subtle">
             <BRow>
-              <BCol cols="7">
-                <div class="text-primary p-4">
-                  <h5 class="text-primary">Free Register</h5>
-                  <p>Get your free Skote account now.</p>
-                </div>
-              </BCol>
               <BCol cols="5" class="align-self-end">
                 <img src="@/assets/images/profile-img.png" alt class="img-fluid" />
               </BCol>
@@ -133,7 +127,7 @@ export default {
               </router-link>
             </div>
 
-            <BAlert v-model="registerSuccess" class="mt-3" variant="success" dismissible>Registration successfull.
+            <BAlert v-model="registerSuccess" class="mt-3" variant="success" dismissible>Berhasil Mendaftar.
             </BAlert>
 
             <BAlert v-model="isRegisterError" class="mt-3" variant="danger" dismissible>{{ regError }}</BAlert>
@@ -144,7 +138,7 @@ export default {
 
             <BForm class="p-2" @submit.prevent="tryToRegisterIn">
               <BFormGroup class="mb-3" id="email-group" label="Username" label-for="username">
-                <BFormInput id="username" v-model="user.username" type="text" placeholder="Enter username" :class="{
+                <BFormInput id="username" v-model="user.username" type="text" placeholder="Masukkan username" :class="{
                   'is-invalid': submitted && v$.user.username.$error,
                 }"></BFormInput>
                 <div v-if="submitted && v$.user.username.$error" class="invalid-feedback">
@@ -155,7 +149,7 @@ export default {
               </BFormGroup>
 
               <BFormGroup class="mb-3" id="fullname-group" label="Email" label-for="email">
-                <BFormInput id="email" v-model="user.email" type="email" placeholder="Enter email" :class="{
+                <BFormInput id="email" v-model="user.email" type="email" placeholder="Masukkan email" :class="{
                   'is-invalid': submitted && v$.user.email.$error,
                 }"></BFormInput>
                 <div v-for="(item, index) in v$.user.email.$errors" :key="index" class="invalid-feedback">
@@ -164,7 +158,7 @@ export default {
               </BFormGroup>
 
               <BFormGroup class="mb-3" id="password-group" label="Password" label-for="password">
-                <BFormInput id="password" v-model="user.password" type="password" placeholder="Enter password" :class="{
+                <BFormInput id="password" v-model="user.password" type="password" placeholder="Masukkan password" :class="{
                   'is-invalid': submitted && v$.user.password.$error,
                 }"></BFormInput>
                 <div v-if="submitted && v$.user.password.$error" class="invalid-feedback">
@@ -175,11 +169,11 @@ export default {
               </BFormGroup>
 
               <div class="mt-4 d-grid">
-                <BButton type="submit" variant="primary" class="btn-block">Register</BButton>
+                <BButton type="submit" variant="primary" class="btn-block">Daftar</BButton>
               </div>
 
               <div class="mt-4 text-center">
-                <h5 class="font-size-14 mb-3">Sign up using</h5>
+                <h5 class="font-size-14 mb-3">Mendaftar dengan</h5>
 
                 <ul class="list-inline">
                   <li class="list-inline-item">
@@ -222,12 +216,8 @@ export default {
 
         <div class="mt-5 text-center">
           <p>
-            Already have an account ?
-            <router-link to="/login" class="fw-medium text-primary">Login</router-link>
-          </p>
-          <p>
-            © {{ new Date().getFullYear() }} Skote. Crafted with
-            <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+            Sudah punya akun ?
+            <router-link to="/login" class="fw-medium text-primary">Daftar</router-link>
           </p>
         </div>
       </BCol>

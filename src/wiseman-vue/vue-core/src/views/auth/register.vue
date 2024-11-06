@@ -7,33 +7,33 @@
             <BForm class="p-4">
               <div>
                 <div class="d-flex align-items-center justify-content-between">
-                  <h5 class="form-title my-4">Register</h5>
+                  <h5 class="form-title my-4">Daftar</h5>
                   <img :src="wisemanIcon" alt="Wiseman Logo" style="width: 10%;">
                 </div>
               </div>
               <BFormGroup class="mb-3" id="input-group-1" label="Email" label-for="input-1">
-                <BFormInput id="input-1" v-model="formModel.email" type="text" placeholder="Enter email" required>
+                <BFormInput id="input-1" v-model="formModel.email" type="text" placeholder="Masukkan email" required>
                 </BFormInput>
               </BFormGroup>
 
               <BFormGroup class="mb-3" id="input-group-1" label="Username" label-for="input-1">
-                <BFormInput id="input-1" v-model="formModel.name" type="text" placeholder="Enter username" required>
+                <BFormInput id="input-1" v-model="formModel.name" type="text" placeholder="Masukkan username" required>
                 </BFormInput>
               </BFormGroup>
 
               <BFormGroup class="mb-3" id="input-group-2" label="Password" label-for="input-2">
-                <BFormInput id="input-2" v-model="formModel.password" type="password" placeholder="Enter password"
+                <BFormInput id="input-2" v-model="formModel.password" type="password" placeholder="Masukkan password"
                   required>
                 </BFormInput>
               </BFormGroup>
               <div class="mt-4 d-grid">
                 <BButton type="submit" @click="register" variant="primary" class="submit-button"
-                  :disabled="!isFormValid">Register</BButton>
+                  :disabled="!isFormValid">Daftar</BButton>
               </div>
               <div class="mt-3 text-center">
                 <p>
-                  Already have an account?
-                  <router-link to="/login">Login</router-link>
+                  Sudah punya akun?
+                  <router-link to="/login">Masuk</router-link>
                 </p>
               </div>
             </BForm>
@@ -81,19 +81,19 @@ const register = async () => {
       failProgress()
 
       if (errorList.value.email) {
-        showErrorToast("Register failed", errorList.value.email);
+        showErrorToast("Gagal Mendaftar", errorList.value.email);
       } else if (errorList.value.password) {
-        showErrorToast("Register failed", errorList.value.password);
+        showErrorToast("Gagal Mendaftar", errorList.value.password);
       }
     } else {
       finishProgress();
-      showSuccessToast("User Registered in !");
+      showSuccessToast("Berhasil mendaftart");
       router.push("/");
     }
   } catch (error) {
     console.error(error);
     failProgress()
-    showErrorToast("Register failed", "Something went wrong!");
+    showErrorToast("Gagal Mendaftar", "Terjadi kesalahan!");
   }
 };
 </script>

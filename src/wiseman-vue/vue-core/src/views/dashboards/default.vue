@@ -3,7 +3,7 @@
     <div class="d-flex">
       <div class="m-3 left-card">
         <div class="card main-bg p-3">
-          <h6 class="font-4 mb-3">Calendar</h6>
+          <h6 class="font-4 mb-3">Kalender</h6>
           <DatePicker v-model="date" inline class="w-full sm:w-[30rem]" dateFormat="yy-mm-dd"
             @update:modelValue="changeDate" />
         </div>
@@ -46,9 +46,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
                   <div v-if="isAdmin">
-                    <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Update memo"
+                    <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Perbarui memo"
                       style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
-                    <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Delete memo"
+                    <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Hapus memo"
                       style="font-size: 16px; cursor: pointer;" @click="deleteMemo(memo.id, memo.memoId)"></i>
                   </div>
                 </div>
@@ -70,14 +70,14 @@
       <div class="m-3 right-card">
         <div class="card main-bg">
           <div class="d-flex justify-content-between align-items-center m-3">
-            <h6 class="font-4 mb-0">Activity</h6>
+            <h6 class="font-4 mb-0">Aktivitas</h6>
             <div>
               <i v-if="groupId && isAdmin" class="bx bxs-bar-chart-alt-2 memo-bold-font mt-1 me-4"
                 style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openVotingFormModal('add')"
-                v-b-tooltip.hover title="Create voting"></i>
+                v-b-tooltip.hover title="Tambah voting"></i>
               <i v-if="!groupId || isAdmin" class="bx bx-task memo-bold-font mt-1"
                 style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openActivityFormModal('add')"
-                v-b-tooltip.hover title="Create acitvity"></i>
+                v-b-tooltip.hover title="Tambah aktivitas"></i>
             </div>
           </div>
           <div class="m-3" style="height: 627px; overflow-y: auto; padding-right: 10px"
@@ -139,7 +139,7 @@
                 <tr>
                   <td style="text-align: center; width: 80px;">
                     <div class="d-flex flex-column align-items-center voting-time bg-white">
-                      <p class="mb-0"> Limit </p>
+                      <p class="mb-0"> Batas </p>
                       <p class="mb-0">-</p>
                       <p class="mb-0"> {{ votingData.limitTime.substr(11, 5) }} </p>
                     </div>
@@ -157,9 +157,9 @@
                   <td v-if="isAdmin" style="text-align: center; width: 40px;">
                     <div class="d-flex justify-content-center align-items-center bg-white">
                       <i class="bx bx-edit mt-1" @click="openVotingFormModal(votingData)" v-b-tooltip.hover
-                        title="Update voting" style="font-size: 14px; cursor: pointer;"></i>
+                        title="Perbarui voting" style="font-size: 14px; cursor: pointer;"></i>
                       <i class="bx bx-trash ms-1 mt-1" @click="deleteVoting(votingData.id)" v-b-tooltip.hover
-                        title="Delete voting" style="font-size: 14px; cursor: pointer;"></i>
+                        title="Hapus voting" style="font-size: 14px; cursor: pointer;"></i>
                     </div>
                   </td>
                 </tr>
@@ -172,7 +172,7 @@
         </div>
 
         <!-- ========== Activity Modal ========== -->
-        <BModal v-model="isActivityFormOpen" id="modal-standard" :title="activityFormTitle + ' Activity'"
+        <BModal v-model="isActivityFormOpen" id="modal-standard" :title="activityFormTitle + ' Aktivitas'"
           title-class="font-18" :ok-title="activityFormTitle" @ok="saveActivity" @hide.prevent
           @cancel="isActivityFormOpen = false" @close="isActivityFormOpen = false"
           :ok-disabled="!activityForm.description || !activityForm.start_time || !activityForm.end_time">
@@ -198,7 +198,7 @@
                     <BCol md="6">
                       <input class="form-control" :class="{
                         'is-invalid': !!(activityErrorList && activityErrorList.start_time),
-                      }" id="form-start-activity" placeholder="Start time" v-model="activityForm.start_time"
+                      }" id="form-start-activity" placeholder="Waktu mulai" v-model="activityForm.start_time"
                         type="time" step="300" required />
                       <template v-if="!!(activityErrorList && activityErrorList.start_time)">
                         <div class="invalid-feedback" v-for="(err, index) in activityErrorList.start_time" :key="index">
@@ -212,7 +212,7 @@
                     <BCol md="6">
                       <input class="form-control" :class="{
                         'is-invalid': !!(activityErrorList && activityErrorList.end_time),
-                      }" id="form-end-activity" placeholder="End ime" v-model="activityForm.end_time" type="time"
+                      }" id="form-end-activity" placeholder="Waktu selesai" v-model="activityForm.end_time" type="time"
                         required />
                       <template v-if="!!(activityErrorList && activityErrorList.end_time)">
                         <div class="invalid-feedback" v-for="(err, index) in activityErrorList.end_time" :key="index">
@@ -282,7 +282,7 @@
                 </BRow>
                 <BRow class="mb-3">
                   <BCol class="d-flex align-items-center">
-                    <label class="col-form-label" for="form-limit-time">Limit Time</label>
+                    <label class="col-form-label" for="form-limit-time">Batas Waktu</label>
                     <input class="form-control" :class="{
                       'is-invalid': !!(votingErrorList && votingErrorList.limit_time),
                     }" id="form-start-voting" placeholder="Limit time" v-model="votingForm.limit_time" type="time"
@@ -324,7 +324,7 @@
 
         <!-- ========== Voting Result Modal ========== -->
         <BModal v-model="isVotingResultOpen" id="modal-standard" :title="votingForm.description" title-class="font-18"
-          @hide.prevent @cancel="isVotingResultOpen = false" @close="isVotingResultOpen = false" ok-title="Back"
+          @hide.prevent @cancel="isVotingResultOpen = false" @close="isVotingResultOpen = false" ok-title="Kembali"
           @ok="openVotingModal(voting)">
           <BRow>
             <Chart type="bar" :data="chartData" :options="chartOptions" />
@@ -447,16 +447,16 @@ const memoStore = useMemoStore();
 const date = ref('');
 const choosedDate = ref('');
 const isActivityFormOpen = ref(false);
-const activityFormTitle = ref("New");
+const activityFormTitle = ref("Tambah");
 
 const isMemoFormOpen = ref(false);
-const memoFormTitle = ref("Create");
+const memoFormTitle = ref("Tambah");
 const choosedMemoId = ref("");
 
 const isVotingFormOpen = ref(false);
 const isVotingOpen = ref(false);
 const isVotingResultOpen = ref(false);
-const votingFormTitle = ref("Create");
+const votingFormTitle = ref("Tambah");
 const votingOptions = ref([
   {
     option: 'Opsi 1',
@@ -535,7 +535,7 @@ const openActivityFormModal = async (activity) => {
       activityForm.is_finished = activity.is_finished;
       activityForm.google_calendar_event_id = activity.google_calendar_event_id;
 
-      activityFormTitle.value = 'Update';
+      activityFormTitle.value = 'Perbarui';
     } else {
       activityForm.id = '';
 
@@ -553,7 +553,7 @@ const openActivityFormModal = async (activity) => {
       activityForm.is_finished = 0;
       activityForm.google_calendar_event_id = '';
 
-      activityFormTitle.value = 'New';
+      activityFormTitle.value = 'Tambah';
     }
   }
 }
@@ -567,14 +567,14 @@ const openMemoFormModal = async (memo) => {
       memoForm.group_name = memo.groupName;
       memoForm.message = memo.message;
       choosedMemoId.value = memo.id;
-      memoFormTitle.value = 'Update';
+      memoFormTitle.value = 'Perbarui';
     } else {
       memoForm.id = "";
       memoForm.group_id = groupId.value;
       memoForm.group_name = "";
       memoForm.message = "";
       choosedMemoId.value = "";
-      memoFormTitle.value = 'Create';
+      memoFormTitle.value = 'Tambah';
     }
   }
 }
@@ -591,7 +591,7 @@ const openVotingFormModal = async (votingData) => {
       ...option,
       is_updated: false
     }));
-    votingFormTitle.value = 'Update';
+    votingFormTitle.value = 'Perbarui';
   } else {
     if (groupId.value) {
       votingForm.group_id = groupId.value;
@@ -601,7 +601,7 @@ const openVotingFormModal = async (votingData) => {
     votingForm.description = "";
     votingForm.limit_time = "";
     votingForm.voting_options = votingOptions.value;
-    votingFormTitle.value = 'Create';
+    votingFormTitle.value = 'Tambah';
   }
 }
 
@@ -690,27 +690,27 @@ const saveActivity = async () => {
       await activityStore.updateActivity(activityForm);
       if (activityStatusCode.value != 200) {
         failProgress();
-        showErrorToast("Failed to update activity", activityErrorMessage);
+        showErrorToast("Gagal memperbarui aktivitas", activityErrorMessage);
       } else {
         isActivityFormOpen.value = false;
         finishProgress();
-        showSuccessToast("Activity updated successfully!");
+        showSuccessToast("Berhasil memperbarui aktivitas!");
       }
     } else {
       await activityStore.addActivities(activityForm);
       if (activityStatusCode.value != 200) {
         failProgress();
-        showErrorToast("Failed to add activity", activityErrorMessage);
+        showErrorToast("Gagal menambahkan aktivitas", activityErrorMessage);
       } else {
         isActivityFormOpen.value = false;
 
         finishProgress();
-        showSuccessToast("Activity added successfully!");
+        showSuccessToast("Berhasil menambahkan aktiviitas!");
       }
     }
   } catch (error) {
     console.error(error);
-    showErrorToast("Failed to saved activity", activityErrorMessage);
+    showErrorToast("Gagal menyimpan aktivitas", activityErrorMessage);
     failProgress();
   }
 
@@ -734,7 +734,7 @@ const finishActivity = async (activityId, isFinished) => {
     await saveActivity();
   } catch (error) {
     console.error(error);
-    showErrorToast("Failed to finish activity", activityErrorMessage);
+    showErrorToast("Gagal menyelesaikan aktivitas", activityErrorMessage);
   }
 }
 
@@ -748,11 +748,11 @@ const deleteActivity = async (activityId) => {
       await getActivities();
 
       finishProgress();
-      showSuccessToast("Delete activity successfully");
+      showSuccessToast("Berhasil menghapus aktivitas");
     } catch (error) {
       console.error(error);
       failProgress();
-      showErrorToast("Delete activity failed");
+      showErrorToast("Gagal menghapus aktivitas");
     }
   }
 }
@@ -797,7 +797,7 @@ const deleteOption = (id, index) => {
 }
 
 const markAsUpdated = (index) => {
-  if (votingFormTitle.value == 'Update') {
+  if (votingFormTitle.value == 'Perbarui') {
     if (!votingForm.voting_options[index].is_added) {
       votingForm.voting_options[index].is_updated = true;
     }
@@ -813,22 +813,22 @@ const saveVoting = async () => {
       await votingStore.updateVoting(votingForm);
       if (votingStatusCode.value != 200) {
         failProgress();
-        showErrorToast("Failed to update voting", votingErrorMessage);
+        showErrorToast("Gagal memperbarui voting", votingErrorMessage);
       } else {
         isVotingFormOpen.value = false;
         finishProgress();
-        showSuccessToast("Voting updated successfully!");
+        showSuccessToast("Berhasil memperbarui voting!");
       }
     } else {
       await votingStore.addVotings(votingForm);
       if (votingStatusCode.value != 200) {
         failProgress();
-        showErrorToast("Failed to add voting", votingErrorMessage);
+        showErrorToast("Gagal menambahkan voting", votingErrorMessage);
       } else {
         isVotingFormOpen.value = false;
 
         finishProgress();
-        showSuccessToast("Voting added successfully!");
+        showSuccessToast("Berhasil menambahkan voting!");
       }
     }
     await getVotings();
@@ -849,11 +849,11 @@ const deleteVoting = async (votingId) => {
       await getVotings();
 
       finishProgress();
-      showSuccessToast("Delete voting successfully");
+      showSuccessToast("Berhasil menghapus voting");
     } catch (error) {
       console.error(error);
       failProgress();
-      showErrorToast("Delete voting failed");
+      showErrorToast("Gagal menghapus voting");
     }
   }
 }
@@ -918,7 +918,7 @@ const saveMemo = async () => {
   const group = await groupStore.getGroupById(memoForm.group_id);
   memoForm.group_name = group.name;
 
-  if (memoFormTitle.value == 'Create') {
+  if (memoFormTitle.value == 'Tambah') {
     await addMemo();
   } else {
     await updateMemo(choosedMemoId.value);
@@ -1007,7 +1007,7 @@ const setChartData = (votingOptions) => {
     labels: votingOptions.map(option => option.option),
     datasets: [
       {
-        label: 'Voting Result',
+        label: 'Hasil Voting',
         data: votingOptions.map(option => option.total),
         backgroundColor: '#00ADB5',
         borderColor: '#067e82',

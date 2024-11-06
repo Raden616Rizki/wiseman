@@ -32,11 +32,11 @@ export default {
   },
   validations: {
     email: {
-      required: helpers.withMessage("Email is required", required),
-      email: helpers.withMessage("Please enter valid email", email),
+      required: helpers.withMessage("Email diperlukan", required),
+      email: helpers.withMessage("Silahkan masukkan email yang sesuai", email),
     },
     password: {
-      required: helpers.withMessage("Password is required", required),
+      required: helpers.withMessage("Password diperlukan", required),
     },
   },
   computed: {
@@ -103,8 +103,8 @@ export default {
             <BRow>
               <BCol cols="7">
                 <div class="text-primary p-4">
-                  <h5 class="text-primary">Welcome Back !</h5>
-                  <p>Sign in to continue to Skote.</p>
+                  <h5 class="text-primary">Selamat Datang !</h5>
+                  <p>Masuk untuk melanjutkan.</p>
                 </div>
               </BCol>
               <BCol cols="5" class="align-self-end">
@@ -129,7 +129,7 @@ export default {
 
             <BForm class="p-2" @submit.prevent="tryToLogIn">
               <BFormGroup class="mb-3" id="input-group-1" label="Email" label-for="input-1">
-                <BFormInput id="input-1" v-model="email" type="text" placeholder="Enter email" :class="{
+                <BFormInput id="input-1" v-model="email" type="text" placeholder="Masukkan email" :class="{
                   'is-invalid': submitted && v$.email.$error,
                 }"></BFormInput>
                 <div v-for="(item, index) in v$.email.$errors" :key="index" class="invalid-feedback">
@@ -138,7 +138,7 @@ export default {
               </BFormGroup>
 
               <BFormGroup class="mb-3" id="input-group-2" label="Password" label-for="input-2">
-                <BFormInput id="input-2" v-model="password" type="password" placeholder="Enter password" :class="{
+                <BFormInput id="input-2" v-model="password" type="password" placeholder="Masukkan password" :class="{
                   'is-invalid': submitted && v$.password.$error,
                 }"></BFormInput>
                 <div v-if="submitted && v$.password.$error" class="invalid-feedback">
@@ -149,13 +149,13 @@ export default {
               </BFormGroup>
               <BFormCheckboxGroup class="form-check me-2" id="customControlInline" name="checkbox-1" value="accepted"
                 unchecked-value="not_accepted">
-                Remember me
+                Ingat aku
               </BFormCheckboxGroup>
               <div class="mt-3 d-grid">
-                <BButton type="submit" variant="primary" class="btn-block">Log In</BButton>
+                <BButton type="submit" variant="primary" class="btn-block">Masuk</BButton>
               </div>
               <div class="mt-4 text-center">
-                <h5 class="font-size-14 mb-3">Sign in with</h5>
+                <h5 class="font-size-14 mb-3">Masuk dengan</h5>
 
                 <ul class="list-inline">
                   <li class="list-inline-item">
@@ -187,7 +187,7 @@ export default {
               </div>
               <div class="mt-4 text-center">
                 <router-link to="/forgot-password" class="text-muted">
-                  <i class="mdi mdi-lock me-1"></i> Forgot your password?
+                  <i class="mdi mdi-lock me-1"></i> Lupa password?
                 </router-link>
               </div>
             </BForm>
@@ -196,12 +196,8 @@ export default {
 
         <div class="mt-5 text-center">
           <p>
-            Don't have an account ?
-            <router-link to="/register" class="fw-medium text-primary">Signup now</router-link>
-          </p>
-          <p>
-            © {{ new Date().getFullYear() }} Skote. Crafted with
-            <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+            Belum punya akun ?
+            <router-link to="/register" class="fw-medium text-primary">Daftar sekarang</router-link>
           </p>
         </div>
       </BCol>

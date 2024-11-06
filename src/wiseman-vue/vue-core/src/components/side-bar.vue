@@ -52,7 +52,7 @@ export default {
     const croppedImageUrl = ref("");
     const isFormUserOpen = ref(false);
     const isFormGroupOpen = ref(false);
-    const formGroupTitle = ref("Create");
+    const formGroupTitle = ref("Tambah");
     const groupId = ref(route.query.id);
 
     const user = ref(null);
@@ -137,7 +137,7 @@ export default {
         authStore.saveUser(fetchedUser);
         user.value = authStore.getUser();
       } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error('Gagal memperoleh pengguna:', error);
       }
     };
 
@@ -281,23 +281,23 @@ export default {
         if (this.formUser.id) {
           await this.userStore.updateUser(this.formUser);
           if (this.userStatusCode != 200) {
-            showErrorToast("Failed to add user", this.userErrorMessage);
+            showErrorToast("Gagal menambahkan pengguna", this.userErrorMessage);
           } else {
             this.isFormUserOpen = false;
             await this.getAuthUser();
 
-            showSuccessToast("User Edited successfully!");
+            showSuccessToast("Berhasil menambahkan pengguna!");
           }
         }
       } catch (error) {
         console.error(error);
-        showErrorToast("Failed to add user", this.userErrorMessage);
+        showErrorToast("Gagal menambahkan pengguna", this.userErrorMessage);
       }
     },
     async openGroupFormModal(groupId) {
       this.isFormGroupOpen = true;
       if (groupId != 'add') {
-        this.formGroupTitle = 'Update';
+        this.formGroupTitle = 'Perbarui';
 
         const group = await this.groupStore.getGroupById(groupId)
 
@@ -305,7 +305,7 @@ export default {
         this.formGroup.name = group.name;
         this.formGroup.description = group.description;
       } else {
-        this.formGroupTitle = 'Create';
+        this.formGroupTitle = 'Tambah';
 
         this.formGroup.id = '';
         this.formGroup.name = '';
@@ -319,17 +319,17 @@ export default {
           await this.groupStore.updateGroup(this.formGroup);
           if (this.groupStatusCode != 200) {
             this.failProgress();
-            showErrorToast("Failed to update group", this.groupErrorMessage);
+            showErrorToast("Gagal memperbarui grup", this.groupErrorMessage);
           } else {
             this.isFormGroupOpen = false;
             this.finishProgress();
-            showSuccessToast("Group updated successfully!");
+            showSuccessToast("Berhasil memperbarui grup!");
           }
         } else {
           const group = await this.groupStore.addGroups(this.formGroup);
           if (this.groupStatusCode != 200) {
             this.failProgress();
-            showErrorToast("Failed to add group", this.groupErrorMessage);
+            showErrorToast("Gagal menambahkan grup", this.groupErrorMessage);
           } else {
             this.isFormGroupOpen = false;
 
@@ -341,13 +341,13 @@ export default {
               await this.saveGroupUser(groupId, userId, isAdmin);
               this.finishProgress();
 
-              showSuccessToast("Group added successfully!");
+              showSuccessToast("Berhasil menambahkan grup!");
             }
           }
         }
       } catch (error) {
         console.error(error);
-        showErrorToast("Failed to saved group", this.groupErrorMessage);
+        showErrorToast("Gagal menyimpan grup", this.groupErrorMessage);
         this.failProgress();
       }
 
@@ -372,10 +372,10 @@ export default {
         this.group = await this.groupStore.getGroupById(this.groupId);
         await this.getAuthUser();
         this.finishProgress();
-        showSuccessToast('Admin added successfully')
+        showSuccessToast('Berhasil menambahkan admin')
       } catch (error) {
         error.log(error);
-        showErrorToast('Failed to add as admin')
+        showErrorToast('Gagal menambahkan sebagai admin')
       }
     },
     async saveGroupUser(groupId, userId, isAdmin) {
@@ -387,11 +387,11 @@ export default {
         }
         await this.groupUserStore.addGroupUsers(formGroupUser);
         if (this.groupUserStatusCode != 200) {
-          showErrorToast("Failed to saved group user", this.groupUserErrorMessage);
+          showErrorToast("Berhasil menyimpan data pengguna grup", this.groupUserErrorMessage);
         }
       } catch (error) {
         console.error(error);
-        showErrorToast("Failed to saved group user", this.groupUserErrorMessage);
+        showErrorToast("Gagal menyimpan data pengguna grup", this.groupUserErrorMessage);
       }
     },
     async leaveGroup(groupUserId) {
@@ -404,11 +404,11 @@ export default {
           this.group = await this.groupStore.getGroupById(this.groupId);
           await this.getAuthUser();
           this.finishProgress();
-          showSuccessToast("Leave group successfully");
+          showSuccessToast("Berhasil keluar dari grup");
         } catch (error) {
           console.error(error);
           this.failProgress();
-          showSuccessToast("Leave group failed");
+          showSuccessToast("Gagal keluar dari grup");
         }
       }
     },
@@ -593,8 +593,8 @@ export default {
 
 <template>
   <!-- ========== User Profile Modal ========== -->
-  <BModal v-model="isFormUserOpen" id="modal-standard" title="Update Profile" title-class="font-18"
-    ok-title="Update Profile" @ok="saveUser" @hide.prevent @cancel="isFormUserOpen = false"
+  <BModal v-model="isFormUserOpen" id="modal-standard" title="Perbarui Profil" title-class="font-18"
+    ok-title="Perbarui Profil" @ok="saveUser" @hide.prevent @cancel="isFormUserOpen = false"
     @close="isFormUserOpen = false">
     <BRow>
       <!-- <BCol v-if="imageUrl" cols="12">
@@ -615,7 +615,7 @@ export default {
       <BCol cols="12" class="mt-4">
         <BForm class="form-horizontal" role="form">
           <BRow class="mb-3">
-            <label class="col-md-2 col-form-label" for="form-name-user">Name</label>
+            <label class="col-md-2 col-form-label" for="form-name-user">Nama</label>
             <BCol md="10">
               <input class="form-control" :class="{
                 'is-invalid': !!(userErrorList && userErrorList.name),
@@ -660,11 +660,11 @@ export default {
             </BCol>
           </BRow>
           <BRow class="mb-3">
-            <label for="form-phone" class="col-md-2 col-form-label">Phone</label>
+            <label for="form-phone" class="col-md-2 col-form-label">Telepon</label>
             <BCol md="10">
               <input class="form-control" :class="{
                 'is-invalid': !!(userErrorList && userErrorList.phone_number),
-              }" id="form-phone" type="phone" placeholder="Masukkan phone" v-model="formUser.phone_number" />
+              }" id="form-phone" type="phone" placeholder="Masukkan nomor telepon" v-model="formUser.phone_number" />
 
               <template v-if="!!(userErrorList && userErrorList.phone_number)">
                 <div class="invalid-feedback" v-for="(err, index) in userErrorList.phone_number" :key="index">
@@ -679,18 +679,18 @@ export default {
   </BModal>
 
   <!-- ========== Group Modal ========== -->
-  <BModal v-model="isFormGroupOpen" id="modal-standard" :title="formGroupTitle + ' Group'" title-class="font-18"
+  <BModal v-model="isFormGroupOpen" id="modal-standard" :title="formGroupTitle + ' Grup'" title-class="font-18"
     :ok-title="formGroupTitle" @ok="saveGroup" @hide.prevent @cancel="isFormGroupOpen = false"
     @close="isFormGroupOpen = false">
     <BRow>
       <BCol cols="12" class="mt-2">
         <BForm class="form-horizontal" role="form">
           <BRow class="mb-3">
-            <label for="form-name-group">Name</label>
+            <label for="form-name-group">Nama</label>
             <BCol>
               <input class="form-control" :class="{
                 'is-invalid': !!(groupErrorList && groupErrorList.name),
-              }" id="form-name-group" placeholder="Masukkan nama group" v-model="formGroup.name" />
+              }" id="form-name-group" placeholder="Masukkan nama grup" v-model="formGroup.name" />
               <template v-if="!!(groupErrorList && groupErrorList.name)">
                 <div class="invalid-feedback" v-for="(err, index) in groupErrorList.name" :key="index">
                   <span>{{ err }}</span>
@@ -702,7 +702,7 @@ export default {
             <BCol>
               <textarea class="form-control" :class="{
                 'is-invalid': !!(groupErrorList && groupErrorList.description),
-              }" id="form-description" type="text" placeholder="Masukkan deskripsi group ..."
+              }" id="form-description" type="text" placeholder="Masukkan deskripsi grup ..."
                 v-model="formGroup.description" />
 
               <template v-if="!!(groupErrorList && groupErrorList.description)">
@@ -718,8 +718,8 @@ export default {
   </BModal>
 
   <!-- ========== Activity Modal ========== -->
-  <BModal v-model="isActivityFormOpen" id="modal-standard" title="Create Member Activity" title-class="font-18"
-    ok-title="Create" @ok="saveActivityMember" @hide.prevent @cancel="isActivityFormOpen = false"
+  <BModal v-model="isActivityFormOpen" id="modal-standard" title="Tambah aktivitas anggota" title-class="font-18"
+    ok-title="Tambah" @ok="saveActivityMember" @hide.prevent @cancel="isActivityFormOpen = false"
     @close="isActivityFormOpen = false"
     :ok-disabled="!formActivity.description || !date || !formActivity.start_time || !formActivity.end_time">
     <BRow>
@@ -747,7 +747,7 @@ export default {
               <BCol md="6">
                 <input class="form-control" :class="{
                   'is-invalid': !!(activityErrorList && activityErrorList.start_time),
-                }" id="form-start-activity-member" placeholder="Start time" v-model="formActivity.start_time"
+                }" id="form-start-activity-member" placeholder="Waktu mulai" v-model="formActivity.start_time"
                   type="time" required />
                 <template v-if="!!(activityErrorList && activityErrorList.start_time)">
                   <div class="invalid-feedback" v-for="(err, index) in activityErrorList.start_time" :key="index">
@@ -761,7 +761,7 @@ export default {
               <BCol md="6">
                 <input class="form-control" :class="{
                   'is-invalid': !!(activityErrorList && activityErrorList.end_time),
-                }" id="form-end-activity-member" placeholder="End ime" v-model="formActivity.end_time" type="time"
+                }" id="form-end-activity-member" placeholder="Waktu selesai" v-model="formActivity.end_time" type="time"
                   required />
                 <template v-if="!!(activityErrorList && activityErrorList.end_time)">
                   <div class="invalid-feedback" v-for="(err, index) in activityErrorList.end_time" :key="index">
@@ -792,7 +792,7 @@ export default {
       </div>
       <hr>
       <div class="p-2 palette-3 my-4 ws-menu ws-main-menu shadow-sm" @click="goToDashboard">
-        <p class="font-4 ms-2 mb-0 sidebar-title">My Activities</p>
+        <p class="font-4 ms-2 mb-0 sidebar-title">Aktivitasku</p>
       </div>
       <div v-if="groupId" class="p-2 mb-2 mt-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
         <p class="font-4 ms-2 mb-0 sidebar-title"> {{ group.name }} </p>
@@ -804,10 +804,10 @@ export default {
             {{ member.user.name }}
           </h6>
           <div v-if="userId != member.user.id && isAdmin" class="d-flex justify-content-center align-items-center">
-            <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Delete Member"
+            <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Hapus anggota"
               @click="leaveGroup(member.id)"></i>
             <i v-if="member.isAdmin == 0" class='bx bx-user ws-menu me-1' ws-menu me-2 style="color: #EEEEEE;"
-              v-b-tooltip.hover title="Add as Admin" @click="addAsAdmin(member)"></i>
+              v-b-tooltip.hover title="Tambahkan sebagai admin" @click="addAsAdmin(member)"></i>
             <i class="bx bx-plus ws-menu" style="color: #EEEEEE;" v-b-tooltip.hover title="Add task"
               @click="openActivityFormModal(member.user.id)"></i>
           </div>
@@ -815,7 +815,7 @@ export default {
       </div>
       <div v-if="groupId && enrollments.length > 0 && isAdmin"
         class="p-2 mb-2 mt-4 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
-        <p class="font-4 ms-2 mb-0 sidebar-title"> Request </p>
+        <p class="font-4 ms-2 mb-0 sidebar-title"> Permintaan </p>
       </div>
       <div v-if="groupId && enrollments && isAdmin">
         <div v-for="enrollment in enrollments" :key="enrollment.id"
@@ -824,13 +824,13 @@ export default {
             {{ enrollment.user.name }}
           </h6>
           <button class="btn btn-success btn-sm" @click="acceptRequest(enrollment)">
-            accept
+            terima
           </button>
         </div>
       </div>
       <router-link to="/group" v-if="!groupId">
         <div class="p-2 mb-2 mt-3 palette-3 d-flex justify-content-between align-items-center ws-main-menu shadow-sm">
-          <p class="font-4 ms-2 mb-0 sidebar-title">Group</p>
+          <p class="font-4 ms-2 mb-0 sidebar-title">Grup</p>
           <i class="bx bx-search ws-menu mt-1 me-2" style="color: #EEEEEE; font-size: medium"></i>
         </div>
       </router-link>
@@ -841,9 +841,9 @@ export default {
           </h6>
           <div class="d-flex justify-content-center align-items-center">
             <i class="bx bx-log-out ws-menu me-2" style="color: #EEEEEE;" @click="leaveGroup(group.groupUserId)"
-              v-b-tooltip.hover title="Leave group"></i>
+              v-b-tooltip.hover title="Keluar grup"></i>
             <i v-if="isAdminStatus[index]" class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;"
-              @click="openGroupFormModal(group.group.id)" v-b-tooltip.hover title="Edit group"></i>
+              @click="openGroupFormModal(group.group.id)" v-b-tooltip.hover title="Perbarui grup"></i>
             <router-link :to="`/archive/${group.group.id}`">
               <i class="bx bx-folder ws-menu mt-1" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
             </router-link>
@@ -853,12 +853,12 @@ export default {
       <div v-if="!groupId" class="p-2 ms-1 noti-icon d-flex align-items-center ws-menu"
         @click="openGroupFormModal('add')">
         <i class="bx bx-plus" style="color: #EEEEEE;"></i>
-        <h6 class="font-4 ms-2 mb-0">Create</h6>
+        <h6 class="font-4 ms-2 mb-0">Tambah</h6>
       </div>
       <hr class="mt-4">
       <div class="noti-icon d-flex align-items-center ws-menu my-4 logout-button" @click="logout">
         <i class="bx bx-log-out-circle" style="color: #EEEEEE;"></i>
-        <h6 class="font-4 ms-2 mb-0">Logout</h6>
+        <h6 class="font-4 ms-2 mb-0">Keluar</h6>
       </div>
     </simplebar>
 

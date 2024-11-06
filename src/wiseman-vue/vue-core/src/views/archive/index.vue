@@ -39,25 +39,25 @@
                 <ul>
                     <li v-if="archive.file" @click="copyFile()"
                         class="d-flex justify-content-between align-items-center">
-                        Copy
+                        Salin
                         <i class="bx bx-copy"></i>
                     </li>
                     <li v-if="archive.file" @click="downloadFile(archive.file)"
                         class="d-flex justify-content-between align-items-center">
-                        Download
+                        Unduh
                         <i class="bx bx-download"></i>
                     </li>
                     <li @click="openListFolderModal('home')" class="d-flex justify-content-between align-items-center">
-                        Move
+                        Pindah
                         <i class="bx bx-move"></i>
                     </li>
                     <li @click="openArchiveFormModal('update')"
                         class="d-flex justify-content-between align-items-center">
-                        Rename
+                        Ganti Nama
                         <i class="bx bx-edit"></i>
                     </li>
                     <li @click="deleteArchive()" class="d-flex justify-content-between align-items-center">
-                        Delete
+                        Hapus
                         <i class="bx bx-trash"></i>
                     </li>
                 </ul>
@@ -92,7 +92,7 @@
                             </BCol>
                         </BRow>
                         <BRow class="mb-1">
-                            <label class="col-md-2 col-form-label" for="form-name-archive">Name</label>
+                            <label class="col-md-2 col-form-label" for="form-name-archive">Nama</label>
                             <BCol md="10">
                                 <input class="form-control" :class="{
                                     'is-invalid': !!(archiveErrorList && archiveErrorList.name),
@@ -174,7 +174,7 @@ const archiveErrorMessage = computed(() => archiveStore.response?.message || "")
 
 const isArchiveFormOpen = ref(false);
 const isListFolderOpen = ref(false);
-const archiveFormTitle = ref('Add');
+const archiveFormTitle = ref('Tambah');
 const listFolder = ref([]);
 // const clicked = ref(false);
 
@@ -232,6 +232,10 @@ const hideContextMenu = () => {
 }
 
 const openArchiveFormModal = async (method) => {
+    if (method == 'update') {
+        isContextMenuVisible.value = false;
+    }
+    
     if (!isContextMenuVisible.value) {
         isArchiveFormOpen.value = true;
         if (method == 'update') {
@@ -242,7 +246,7 @@ const openArchiveFormModal = async (method) => {
             archiveForm.group_id = archive.value.group_id;
             archiveForm.parent_id = archive.value.parent_id;
 
-            archiveFormTitle.value = 'Update';
+            archiveFormTitle.value = 'Perbarui';
         } else {
             uploadType.value = 'File';
 
@@ -252,7 +256,7 @@ const openArchiveFormModal = async (method) => {
             archiveForm.group_id = groupId.value || "";
             archiveForm.parent_id = archiveStore.parentId || "home";
 
-            archiveFormTitle.value = 'Add';
+            archiveFormTitle.value = 'Tambah';
         }
     }
 }
@@ -288,27 +292,27 @@ const saveArchive = async () => {
             await archiveStore.updateArchive(archiveForm);
             if (archiveStatusCode.value != 200) {
                 failProgress();
-                showErrorToast("Failed to update archive", archiveErrorMessage);
+                showErrorToast("Gagal memperbarui arsip", archiveErrorMessage);
             } else {
                 isArchiveFormOpen.value = false;
                 finishProgress();
-                showSuccessToast("Archive updated successfully!");
+                showSuccessToast("Berhasil memperbarui arsip!");
             }
         } else {
             await archiveStore.addArchives(archiveForm);
             if (archiveStatusCode.value != 200) {
                 failProgress();
-                showErrorToast("Failed to add archive", archiveErrorMessage);
+                showErrorToast("Gagal menambahkan arsip", archiveErrorMessage);
             } else {
                 isArchiveFormOpen.value = false;
 
                 finishProgress();
-                showSuccessToast("Archive added successfully!");
+                showSuccessToast("Berhasil menambahkan arsip!");
             }
         }
     } catch (error) {
         console.error(error);
-        showErrorToast("Failed to saved archive", archiveErrorMessage);
+        showErrorToast("Gagal menyimpan arsip", archiveErrorMessage);
         failProgress();
     }
 
@@ -323,10 +327,10 @@ const deleteArchive = async () => {
             await archiveStore.deleteArchive(archive.value.id);
             await getArchives();
 
-            showSuccessToast("Delete archive successfully");
+            showSuccessToast("berhasil menghapus arsip");
         } catch (error) {
             console.error(error);
-            showErrorToast("Delete archive failed");
+            showErrorToast("Gagal menghapus arsip");
         }
     }
 }
@@ -384,7 +388,7 @@ const handleFileChange = (event) => {
         };
 
         reader.onerror = (error) => {
-            console.error("Error converting file to Base64:", error);
+            console.error("Gagal merubah file ke base64:", error);
             archiveForm.file = null;
         };
     } else {

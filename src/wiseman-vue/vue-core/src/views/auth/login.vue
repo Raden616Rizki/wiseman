@@ -7,28 +7,28 @@
             <BForm class="p-4">
               <div>
                 <div class="d-flex align-items-center justify-content-between">
-                  <h5 class="form-title my-4">Login</h5>
+                  <h5 class="form-title my-4">Masuk</h5>
                   <img :src="wisemanIcon" alt="Wiseman Logo" style="width: 10%;">
                 </div>
               </div>
               <BFormGroup class="mb-3" id="input-group-1" label="Email" label-for="input-1">
-                <BFormInput id="input-1" v-model="formModel.email" type="text" placeholder="Enter email" required
+                <BFormInput id="input-1" v-model="formModel.email" type="text" placeholder="Masukkan email" required
                   autocomplete="current-email"></BFormInput>
               </BFormGroup>
 
               <BFormGroup class="mb-3" id="input-group-2" label="Password" label-for="input-2">
-                <BFormInput id="input-2" v-model="formModel.password" type="password" placeholder="Enter password"
+                <BFormInput id="input-2" v-model="formModel.password" type="password" placeholder="Masukkan password"
                   required autocomplete="current-password">
                 </BFormInput>
               </BFormGroup>
               <div class="mt-4 d-grid">
                 <BButton type="submit" @click="login" variant="primary" class="submit-button" :disabled="!isFormValid">
-                  Login</BButton>
+                  Masuk</BButton>
               </div>
               <div class="mt-4 text-center">
                 <p>
-                  Don't have an account?
-                  <router-link to="/register">Register</router-link>
+                  Belum punya akun?
+                  <router-link to="/register">Daftar</router-link>
                 </p>
               </div>
             </BForm>
@@ -74,17 +74,17 @@ const login = async () => {
     if (statusCode.value != 200) {
       failProgress()
       // showErrorToast("Login failed", errorMessage.value);
-      showErrorToast("Login failed", "Email or password is incorrect");
+      showErrorToast("Gagal Masuk", "Email atau Password tidak dikenali");
     } else {
       finishProgress();
-      showSuccessToast("User Logged in !");
+      showSuccessToast("Berhasil Login!");
       router.push("/");
     }
   } catch (error) {
     console.error(error);
     failProgress()
     // showErrorToast("Login failed", errorMessage.value);
-    showErrorToast("Login failed", "Something went wrong!");
+    showErrorToast("Gagal Masuk", "Terjadi kesalahan!");
   }
 };
 </script>

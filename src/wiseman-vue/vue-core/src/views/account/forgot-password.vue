@@ -18,8 +18,8 @@ export default {
   },
   validations: {
     email: {
-      required: helpers.withMessage("Email is required", required),
-      email: helpers.withMessage("Please enter valid email", email),
+      required: helpers.withMessage("Email diperlukan", required),
+      email: helpers.withMessage("Silahkan masukkan email yang sesuai", email),
     },
   },
   components: {
@@ -86,7 +86,7 @@ export default {
               <BCol cols="7">
                 <div class="text-primary p-4">
                   <h5 class="text-primary">Reset Password</h5>
-                  <p>Re-Password with Skote.</p>
+                  <p>Reset Password dengan Skote.</p>
                 </div>
               </BCol>
               <BCol cols="5" class="align-self-end">
@@ -110,7 +110,7 @@ export default {
               <BForm @submit.prevent="tryToReset">
                 <div class="mb-3">
                   <label for="useremail">Email</label>
-                  <input type="email" v-model="email" class="form-control" id="useremail" placeholder="Enter email"
+                  <input type="email" v-model="email" class="form-control" id="useremail" placeholder="Masukkan email"
                     :class="{ 'is-invalid': submitted && v$.email.$errors }" />
                   <div v-for="(item, index) in v$.email.$errors" :key="index" class="invalid-feedback">
                     <span v-if="item.$message">{{ item.$message }}</span>
@@ -130,12 +130,8 @@ export default {
 
         <div class="mt-5 text-center">
           <p>
-            Remember It ?
-            <router-link to="/login" class="fw-medium text-primary">Sign In here</router-link>
-          </p>
-          <p>
-            © {{ new Date().getFullYear() }} Skote. Crafted with
-            <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+            Ingat password ?
+            <router-link to="/login" class="fw-medium text-primary">Masuk</router-link>
           </p>
         </div>
       </BCol>

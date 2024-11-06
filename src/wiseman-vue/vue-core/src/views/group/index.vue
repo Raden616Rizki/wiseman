@@ -11,7 +11,7 @@
                         <p class="mb-0 ms-2"> {{ group.description }} </p>
                     </div>
                     <button class="btn btn-sm palette-3 text-white join-button " @click="joinGroup(group)" >
-                        Join
+                        Masuk
                     </button>
                 </div>
             </div>
