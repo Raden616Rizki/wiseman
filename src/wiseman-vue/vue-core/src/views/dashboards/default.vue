@@ -1,7 +1,7 @@
 <template>
   <Layout>
     <div class="d-flex">
-      <div class="m-3 left-card">
+      <div class="m-3 left-card d-none d-md-block">
         <div class="card main-bg p-3">
           <h6 class="font-4 mb-3">Kalender</h6>
           <DatePicker v-model="date" inline class="w-full sm:w-[30rem]" dateFormat="yy-mm-dd"
@@ -67,10 +67,15 @@
           </div>
         </div>
       </div>
-      <div class="m-3 right-card">
+      <div class="m-0 m-md-3 right-card">
         <div class="card main-bg">
           <div class="d-flex justify-content-between align-items-center m-3">
-            <h6 class="font-4 mb-0">Aktivitas</h6>
+            <div class="d-block d-md-none" style="width: 40%">
+              <DatePicker v-model="date" placeholder="Masukkan tanggal" dateFormat="yy-mm-dd"
+                :inputStyle="{ color: 'white', backgroundColor: '#067e82' }"
+                @focus="disableKeyboard" @update:modelValue="changeDate" />
+            </div>
+            <h6 class="font-4 mb-0 d-none d-md-block">Aktivitas</h6>
             <div>
               <i v-if="groupId && isAdmin" class="bx bxs-bar-chart-alt-2 memo-bold-font mt-1 me-4"
                 style="color: #EEEEEE; font-size: 16px; cursor: pointer" @click="openVotingFormModal('add')"
@@ -80,8 +85,7 @@
                 v-b-tooltip.hover title="Tambah aktivitas"></i>
             </div>
           </div>
-          <div class="m-3" style="height: 627px; overflow-y: auto; padding-right: 10px"
-            @contextmenu.prevent="openActivityFormModal('add')">
+          <div class="m-3 activity-card" @contextmenu.prevent="openActivityFormModal('add')">
             <div v-if="activities.length != 0 || votings.length != 0">
               <table v-for="activity in activities" :key="activity.id" class="table align-middle" :style="{
                 borderRadius: '4px',
@@ -151,15 +155,18 @@
                     <p class="voting-description mb-0 bg-white"> {{ votingData.description }} </p>
                   </td>
                   <td style="text-align: center; width: 50px;">
-                    <button class="btn votting-button align-items-center me-3"
+                    <button class="btn votting-button align-items-center me-3 d-none d-md-block"
                       @click="openVotingModal(votingData)">Voting</button>
                   </td>
-                  <td v-if="isAdmin" style="text-align: center; width: 40px;">
+                  <td style="text-align: center; width: 40px;">
                     <div class="d-flex justify-content-center align-items-center bg-white">
-                      <i class="bx bx-edit mt-1" @click="openVotingFormModal(votingData)" v-b-tooltip.hover
-                        title="Perbarui voting" style="font-size: 14px; cursor: pointer;"></i>
-                      <i class="bx bx-trash ms-1 mt-1" @click="deleteVoting(votingData.id)" v-b-tooltip.hover
-                        title="Hapus voting" style="font-size: 14px; cursor: pointer;"></i>
+                      <i class="bx bx-up-arrow-circle mt-1 d-block d-md-none" @click="openVotingModal(votingData)"
+                        v-b-tooltip.hover title="Buka voting"
+                        style="font-size: 14px; cursor: pointer; font-weight: bold;"></i>
+                      <i v-if="isAdmin" class="bx bx-edit ms-1 mt-1" @click="openVotingFormModal(votingData)"
+                        v-b-tooltip.hover title="Perbarui voting" style="font-size: 14px; cursor: pointer;"></i>
+                      <i v-if="isAdmin" class="bx bx-trash ms-1 mt-1" @click="deleteVoting(votingData.id)"
+                        v-b-tooltip.hover title="Hapus voting" style="font-size: 14px; cursor: pointer;"></i>
                     </div>
                   </td>
                 </tr>
@@ -1090,12 +1097,22 @@ onMounted(async () => {
   }
 });
 
+const disableKeyboard = (event) => {
+  event.target.type = 'button';
+};
+
 </script>
 
 <style scoped>
 .activity-check {
   width: 24px;
   height: 24px;
+}
+
+.activity-card {
+  height: 627px;
+  overflow-y: auto;
+  padding-right: 10px
 }
 
 .activity-check-form {
@@ -1138,6 +1155,18 @@ onMounted(async () => {
 
 .right-card {
   width: 55%;
+}
+
+@media (max-width: 768px) {
+  .right-card {
+    width: 100%;
+  }
+
+  .activity-card {
+    height: 480px;
+    overflow-y: auto;
+    padding-right: 10px
+  }
 }
 
 .selected-option {

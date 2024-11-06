@@ -1,23 +1,30 @@
 <template>
     <Layout>
         <div>
-            <input v-model="searchByName" type="text" class="form-control input-group ms-0 mb-4" placeholder="Cari group..." @keydown.enter="handleFilterByName" style="margin-left: 100px;">
+            <input v-model="searchByName" type="text" class="form-control input-group ms-0 mb-4 w-100 w-30"
+                placeholder="Cari group..." @keydown.enter="handleFilterByName" style="margin-left: 100px;">
         </div>
-        <div v-if="groups.length != 0" class="card main-bg py-4 px-4" style="min-height: 440px;">
+        <div v-if="groups.length != 0" class="card main-bg py-4 px-4" style="min-height: 440px; height: 500px; overflow-y: auto; padding-right: 10px">
             <div v-for="group in groups" :key="group.id">
                 <div class="p-2 bg-white d-flex justify-content-between mb-3 align-items-center card-group">
                     <div>
                         <p class="mb-0 ms-2 group-text"> {{ group.name }} </p>
                         <p class="mb-0 ms-2"> {{ group.description }} </p>
                     </div>
-                    <button class="btn btn-sm palette-3 text-white join-button " @click="joinGroup(group)" >
+                    <button class="btn btn-sm palette-3 text-white join-button d-none d-md-block"
+                        @click="joinGroup(group)">
                         Masuk
                     </button>
+                    <div>
+                        <i class="bx bx-right-arrow-circle mt-1 ms-3 me-2 d-block d-md-none" @click="joinGroup(group)"
+                            v-b-tooltip.hover :title="'Bergabung ke ' + group.name"
+                            style="font-size: 20px; cursor: pointer; font-weight: bold;"></i>
+                    </div>
                 </div>
             </div>
         </div>
         <div v-else class="card main-bg py-4 px-4" style="min-height: 440px;">
-            <div class="pt-5 d-flex justify-content-center align-items-center" >
+            <div class="pt-5 d-flex justify-content-center align-items-center">
                 <img :src="emptyImage" alt="No Data">
             </div>
         </div>
@@ -30,8 +37,8 @@ import { ref, onMounted } from "vue";
 import { useGroupStore, useEnrollmentStore, useAuthStore } from "@/state/pinia";
 import { useProgress } from "@/helpers/progress";
 import {
-  showSuccessToast,
-  showErrorToast,
+    showSuccessToast,
+    showErrorToast,
 } from "@/helpers/alert.js";
 import emptyImage from "@/assets/images/empty-icon.svg";
 
@@ -77,7 +84,7 @@ const joinGroup = async (group) => {
         finishProgress();
     } catch (error) {
         error.log(error);
-        showErrorToast('Gagal mendaftar ke Group ' + group.name, 'Tunggu beberapa saat lagi' );
+        showErrorToast('Gagal mendaftar ke Group ' + group.name, 'Tunggu beberapa saat lagi');
         failProgress();
     }
 }
@@ -89,6 +96,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@media (min-width: 992px) {
+    .w-30 {
+        width: 30% !important;
+    }
+}
+
 .card-group {
     border-radius: 4px;
 }
@@ -113,12 +126,11 @@ onMounted(async () => {
 }
 
 .main-bg {
-  background-color: #3A4750;
-  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+    background-color: #3A4750;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .palette-3 {
-  background-color: #00ADB5;
+    background-color: #00ADB5;
 }
-
 </style>

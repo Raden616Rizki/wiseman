@@ -1,6 +1,6 @@
 <script>
 import Vertical from "./vertical";
-import Horizontal from "./horizontal";
+// import Horizontal from "./horizontal";
 
 import { useLayoutStore } from "@/state/pinia";
 const layoutStore = useLayoutStore();
@@ -8,7 +8,7 @@ const layoutStore = useLayoutStore();
 export default {
   components: {
     Vertical,
-    Horizontal
+    // Horizontal
   },
   setup() {
     layoutStore.changeLayoutType('vertical');
@@ -28,8 +28,8 @@ export default {
       <slot />
     </Vertical>
 
-    <Horizontal v-if="layoutType === 'horizontal'" :layout="layoutType">
+    <!-- <Horizontal v-if="layoutType === 'horizontal'" :layout="layoutType">
       <slot />
-    </Horizontal>
+    </Horizontal> -->
   </div>
 </template>

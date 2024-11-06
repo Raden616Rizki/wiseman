@@ -2,6 +2,7 @@
 import router from "@/router";
 
 import SideBar from "@/components/side-bar";
+import HorizontalTopbar from "@/components/horizontal-topbar";
 
 import { useLayoutStore } from "@/state/pinia";
 const layoutStore = useLayoutStore();
@@ -10,7 +11,10 @@ const layoutStore = useLayoutStore();
  * Vertical layout
  */
 export default {
-  components: { SideBar },
+  components: {
+    SideBar,
+    HorizontalTopbar,
+  },
   data() {
     return {
       type: layoutStore.leftSidebarType,
@@ -23,6 +27,9 @@ export default {
     },
     leftSidebarType() {
       return layoutStore.leftSidebarType;
+    },
+    topbar() {
+      return layoutStore.topbar;
     },
     loader() {
       return layoutStore.loader;
@@ -96,18 +103,15 @@ export default {
       </div>
     </div>
     <div id="layout-wrapper">
-      <SideBar
-        :is-condensed="isMenuCondensed"
-        :type="leftSidebarType"
-        :width="layoutWidth"
-        :mode="mode"
-      />
+      <HorizontalTopbar :type="topbar" :width="layoutWidth" :mode="mode"
+        v-bind:class="{ 'd-block': true, 'd-md-none': true }" />
+      <SideBar :is-condensed="isMenuCondensed" :type="leftSidebarType" :width="layoutWidth" :mode="mode" />
       <!-- ============================================================== -->
       <!-- Start Page Content here -->
       <!-- ============================================================== -->
 
       <div class="main-content">
-        <div class="page-content" style="margin-top: -70px;">
+        <div class="page-content content-top-gap">
           <!-- Start Content-->
           <BContainer fluid>
             <slot />
@@ -117,3 +121,15 @@ export default {
     </div>
   </div>
 </template>
+
+<style scoped>
+.content-top-gap {
+  margin-top: -70px;
+}
+
+@media (max-width: 768px) {
+  .content-top-gap {
+    margin-top: 0;
+  }
+}
+</style>
