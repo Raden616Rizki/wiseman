@@ -2,7 +2,7 @@
   <Layout>
     <BRow class="justify-content-center align-items-center">
       <BCol xl="5">
-        <BCard no-body class="overflow-hidden ws-form">
+        <BCard no-body class="overflow-hidden ws-form mt-3 mt-md-0">
           <BCardBody class="pt-0">
             <BForm class="p-4">
               <div>
