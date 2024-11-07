@@ -87,7 +87,7 @@ const register = async () => {
       }
     } else {
       finishProgress();
-      showSuccessToast("Berhasil mendaftart");
+      showSuccessToast("Berhasil mendaftar");
       router.push("/");
     }
   } catch (error) {

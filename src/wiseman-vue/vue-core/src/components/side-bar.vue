@@ -871,7 +871,7 @@ export default {
       </div>
       <hr class="mt-4">
       <div class="noti-icon d-flex align-items-center ws-menu my-4 logout-button" @click="logout">
-        <i class="bx bx-log-out-circle" style="color: #EEEEEE;"></i>
+        <i class="bx bx-log-out-circle ms-3" style="color: #EEEEEE;"></i>
         <h6 class="font-4 ms-2 mb-0">Keluar</h6>
       </div>
     </simplebar>

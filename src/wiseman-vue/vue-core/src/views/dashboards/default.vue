@@ -105,8 +105,8 @@
           <div class="d-flex justify-content-between align-items-center m-3">
             <div class="d-block d-md-none" style="width: 40%">
               <DatePicker v-model="date" placeholder="Masukkan tanggal" dateFormat="yy-mm-dd"
-                :inputStyle="{ color: 'white', backgroundColor: '#067e82' }"
-                @focus="disableKeyboard" @update:modelValue="changeDate" />
+                :inputStyle="{ color: 'white', backgroundColor: '#067e82' }" @focus="disableKeyboard"
+                @update:modelValue="changeDate" />
             </div>
             <h6 class="font-4 mb-0 d-none d-md-block">Aktivitas</h6>
             <div>
@@ -215,7 +215,7 @@
         <BModal v-model="isActivityFormOpen" id="modal-standard" :title="activityFormTitle + ' Aktivitas'"
           title-class="font-18" :ok-title="activityFormTitle" @ok="saveActivity" @hide.prevent
           @cancel="isActivityFormOpen = false" @close="isActivityFormOpen = false"
-          :ok-disabled="!activityForm.description || !activityForm.start_time || !activityForm.end_time">
+          :ok-disabled="!activityForm.description || !activityForm.start_time || !activityForm.end_time || endTimeError">
           <BRow>
             <BCol cols="12" class="mt-2">
               <BForm class="form-horizontal" role="form">
@@ -251,7 +251,7 @@
                     </BCol>
                     <BCol md="6">
                       <input class="form-control" :class="{
-                        'is-invalid': !!(activityErrorList && activityErrorList.end_time),
+                        'is-invalid': !!(activityErrorList && activityErrorList.end_time) || endTimeError,
                       }" id="form-end-activity" placeholder="Waktu selesai" v-model="activityForm.end_time" type="time"
                         required />
                       <template v-if="!!(activityErrorList && activityErrorList.end_time)">
@@ -259,11 +259,6 @@
                           <span>{{ err }}</span>
                         </div>
                       </template>
-                      <!-- <template v-if="endTimeError">
-                        <div class="invalid-feedback">
-                          <span>End time cannot be earlier than start time.</span>
-                        </div>
-                      </template> -->
                     </BCol>
                   </div>
                   <BCol md="2 d-flex">
@@ -273,6 +268,9 @@
                       Prioritas
                     </label>
                   </BCol>
+                </div>
+                <div v-if="endTimeError" class="mt-3">
+                  <span class="text-danger">Waktu selesai kurang dari waktu mulai</span>
                 </div>
               </BForm>
             </BCol>
@@ -401,7 +399,7 @@ const route = useRoute();
 const groupId = ref(route.query.id);
 const isAdmin = ref(false);
 const hasVoted = ref(false);
-// const endTimeError = ref(false);
+const endTimeError = ref(false);
 
 watch(() => route.query.id, async (newVal) => {
   groupId.value = newVal;
@@ -544,19 +542,19 @@ const votingForm = reactive({
   voting_options_deleted: [],
 });
 
-// const validateEndTime = () => {
-//   if (activityForm.start_time && activityForm.end_time) {
-//     endTimeError.value =
-//       activityForm.end_time < activityForm.start_time;
-//   } else {
-//     endTimeError.value = false;
-//   }
-// };
+const validateEndTime = () => {
+  if (activityForm.start_time && activityForm.end_time) {
+    endTimeError.value =
+      activityForm.end_time < activityForm.start_time;
+  } else {
+    endTimeError.value = false;
+  }
+};
 
-// watch(
-//   () => activityForm.end_time,
-//   validateEndTime
-// );
+watch(
+  () => activityForm.end_time,
+  validateEndTime
+);
 
 // Open Modal
 
