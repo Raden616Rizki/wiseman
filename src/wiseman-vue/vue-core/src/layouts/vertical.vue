@@ -24,6 +24,7 @@ export default {
       type: layoutStore.leftSidebarType,
       isMenuCondensed: false,
       isOpen: isOpen,
+      isMemoOpen: false,
     };
   },
   computed: {
@@ -76,6 +77,9 @@ export default {
       } else {
         this.isOpen = false;
       }
+    },
+    handleMemo() {
+      this.isMemoOpen = !this.isMemoOpen;
     }
   },
   mounted() {
@@ -110,7 +114,7 @@ export default {
       </div>
     </div>
     <div id="layout-wrapper">
-      <HorizontalTopbar :type="topbar" :width="layoutWidth" :mode="mode"
+      <HorizontalTopbar :type="topbar" :width="layoutWidth" :mode="mode" :isMemoOpen="isMemoOpen"
         v-bind:class="{ 'd-block': true, 'd-md-none': true }" />
       <SideBar v-if="isOpen" :is-condensed="isMenuCondensed" :type="leftSidebarType" :width="layoutWidth"
         :mode="mode" />

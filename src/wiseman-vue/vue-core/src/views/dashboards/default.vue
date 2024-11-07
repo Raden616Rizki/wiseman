@@ -68,6 +68,39 @@
         </div>
       </div>
       <div class="m-0 m-md-3 right-card">
+        <div v-if="groupId" class="card main-bg p-3 d-block d-md-none">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="font-4 mb-0">Memo</h6>
+            <i v-if="isAdmin" class="bx bx-plus memo-bold-font"
+              style="color: #EEEEEE; font-size: 16px; cursor: pointer;" @click="openMemoFormModal('add')"></i>
+          </div>
+          <div style="height: 250px; overflow-y: auto; padding-right: 10px"
+            @contextmenu.prevent="openMemoFormModal('add')">
+            <div v-if="memos.length != 0">
+              <div v-for="memo in memos" :key="memo.id" class="card bg-white p-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <p class="mb-0 memo-bold-font"> {{ memo.groupName }} </p>
+                  <div v-if="isAdmin">
+                    <i class="bx bx-edit mt-1" v-b-tooltip.hover title="Perbarui memo"
+                      style="font-size: 16px; cursor: pointer;" @click="openMemoFormModal(memo)"></i>
+                    <i class="bx bx-trash ms-1 mt-1" v-b-tooltip.hover title="Hapus memo"
+                      style="font-size: 16px; cursor: pointer;" @click="deleteMemo(memo.id, memo.memoId)"></i>
+                  </div>
+                </div>
+                <div>
+                  <p> {{ memo.message }} </p>
+                </div>
+                <div class="d-flex justify-content-end">
+                  <p class="mb-0"> {{ memo.time }} </p>
+                  <p class="memo-bold-font mb-0 ms-2"> {{ memo.date }} </p>
+                </div>
+              </div>
+            </div>
+            <div v-else class="pt-5 d-flex justify-content-center align-items-center">
+              <img :src="emptyImage" alt="No Data" style="width: 60%">
+            </div>
+          </div>
+        </div>
         <div class="card main-bg">
           <div class="d-flex justify-content-between align-items-center m-3">
             <div class="d-block d-md-none" style="width: 40%">

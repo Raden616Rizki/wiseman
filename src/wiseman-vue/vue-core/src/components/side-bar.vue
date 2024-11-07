@@ -800,6 +800,13 @@ export default {
       </div>
       <div v-if="groupId" class="p-2 mb-2 mt-2 palette-3 d-flex justify-content-between ws-main-menu shadow-sm">
         <p class="font-4 ms-2 mb-0 sidebar-title"> {{ group.name }} </p>
+        <div class="d-flex justify-content-center align-items-center">
+          <i v-if="isAdmin" class="bx bx-edit ws-menu me-2" style="color: #EEEEEE;"
+            @click="openGroupFormModal(group.id)" v-b-tooltip.hover title="Perbarui grup"></i>
+          <router-link :to="`/archive/${group.id}`">
+            <i class="bx bx-folder ws-menu mt-1 me-2" style="color: #EEEEEE;" v-b-tooltip.hover title="Arsip group"></i>
+          </router-link>
+        </div>
       </div>
       <div v-if="groupId">
         <div v-for="member in group.groupDetails" :key="member.id"

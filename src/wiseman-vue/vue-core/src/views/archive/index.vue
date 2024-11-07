@@ -6,9 +6,8 @@
             <i class="bx bx-plus memo-bold-font" style="font-size: 24px; cursor: pointer;"
                 @click="openArchiveFormModal('create')"></i>
         </div>
-        <div class="card main-bg py-3 px-4" style="min-height: 440px;"
-            @contextmenu.prevent="openArchiveFormModal('create')">
-            <div class="palette-3 py-1 px-3 rounded mb-4 d-flex flex-wrap">
+        <div class="card main-bg py-3 px-4" @contextmenu.prevent="openArchiveFormModal('create')">
+            <div class="palette-3 py-1 px-3 rounded mb-md-4 mb-3 d-flex flex-wrap">
                 <p class="archive-path mb-0" @click="changePath('home')">Home</p>
                 <div v-for="(path, index) in pathArchive" :key="index" class="d-flex">
                     <p class="text-white mb-0 mx-2">></p>
@@ -17,7 +16,7 @@
             </div>
             <div v-if="archives.length != 0" class="d-flex flex-wrap" style="padding-left: 13.3px;">
                 <div v-for="archiveData in archives" :key="archiveData.id">
-                    <div v-if="archiveData.file" class="file me-4 my-1 d-flex flex-column align-items-center"
+                    <div v-if="archiveData.file" class="file me-md-4 mx-1 my-1 d-flex flex-column align-items-center"
                         @contextmenu.prevent="showContextMenu($event, archiveData)">
                         <img :src="archiveData.file || fileIcon" class="file-icon" alt="file-icon"
                             @error="onImageError">
@@ -25,7 +24,7 @@
                             :title="archiveData.name + '.' + archiveData.file.split('.').pop()">{{ archiveData.name
                             }}.{{ archiveData.file.split('.').pop() }}</p>
                     </div>
-                    <div v-else class="folder me-4 my-1 flex-column align-items-center"
+                    <div v-else class="folder me-md-4 mx-1 my-1 flex-column align-items-center"
                         @contextmenu.prevent="showContextMenu($event, archiveData)" @click="changePath(archiveData)">
                         <img :src="folderIcon" class="folder-icon" alt="folder-icon">
                         <p class="folder-name" v-b-tooltip.hover :title="archiveData.name">{{ archiveData.name }}</p>
@@ -33,7 +32,7 @@
                 </div>
             </div>
             <div v-else class="pt-3 d-flex justify-content-center align-items-center">
-                <img :src="emptyImage" alt="No Data">
+                <img :src="emptyImage" alt="No Data" style="width: 50%;">
             </div>
             <div v-if="isContextMenuVisible" class="context-menu" :style="contextMenuStyle">
                 <ul>
@@ -218,10 +217,17 @@ const getArchives = async () => {
 }
 
 const showContextMenu = (event, archiveData) => {
-    contextMenuStyle.value = {
-        top: `${event.clientY - 90}px`,
-        left: `${event.clientX - 280}px`
-    };
+    if (window.screen.width >= 992) {
+        contextMenuStyle.value = {
+            top: `${event.clientY - 85}px`,
+            left: `${event.clientX - 270}px`
+        };
+    } else {
+        contextMenuStyle.value = {
+            top: `${event.clientY - 150}px`,
+            left: `${event.clientX - 20}px`
+        };
+    }
 
     archive.value = archiveData;
     isContextMenuVisible.value = true;
@@ -235,7 +241,7 @@ const openArchiveFormModal = async (method) => {
     if (method == 'update') {
         isContextMenuVisible.value = false;
     }
-    
+
     if (!isContextMenuVisible.value) {
         isArchiveFormOpen.value = true;
         if (method == 'update') {
@@ -508,10 +514,60 @@ document.addEventListener('click', hideContextMenu);
 .main-bg {
     background-color: #3A4750;
     box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+    min-height: 440px;
 }
 
 .palette-3 {
     /* background-color: #00ADB5; */
     background-color: #067e82;
+}
+
+@media (max-width: 768px) {
+    .context-menu {
+        width: 80px;
+    }
+
+    .context-menu i {
+        font-size: 8px;
+        cursor: pointer;
+        color: #067e82;
+        font-weight: bold;
+    }
+
+    .context-menu li {
+        font-size: 8px;
+        cursor: pointer;
+    }
+
+    .file {
+        width: 28px;
+    }
+
+    .file-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .file-name {
+        font-size: 8px;
+    }
+
+    .folder {
+        width: 32px;
+    }
+
+    .folder-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .folder-name {
+        margin-top: 5px;
+        font-size: 8px;
+    }
+
+    .main-bg {
+        min-height: 500px;
+    }
 }
 </style>

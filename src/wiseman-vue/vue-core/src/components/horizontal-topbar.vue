@@ -16,6 +16,10 @@ export default {
       type: String,
       required: true,
     },
+    isMemoOpen: {
+      type: Boolean,
+      required: true,
+    }
   },
   components: {},
   data() {
@@ -25,6 +29,9 @@ export default {
   methods: {
     toggleMenu() {
       this.$parent.toggleMenu();
+    },
+    handleMemo() {
+      this.$parent.handleMemo();
     },
     initFullScreen() {
       document.body.classList.toggle("fullscreen-enable");
@@ -142,7 +149,8 @@ export default {
       </div>
       <div class="d-flex">
         <BButton variant="white" id="toggle" type="button" class="btn btn-sm me-2 font-size-16 d-lg-none header-item">
-          <i class="fas fa-bell text-white mb-0 mt-1" v-b-tooltip.hover title="Buka memo"></i>
+          <i v-if="!isMemoOpen" class="fas fa-bell text-white mb-0 mt-1" v-b-tooltip.hover title="Buka memo" @click="handleMemo" ></i>
+          <i v-else class="far fa-bell text-white mb-0 mt-1" v-b-tooltip.hover title="Tutup memo" @click="handleMemo" ></i>
         </BButton>
       </div>
     </div>
