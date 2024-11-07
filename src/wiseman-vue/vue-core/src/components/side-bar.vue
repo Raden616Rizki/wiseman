@@ -53,6 +53,7 @@ export default {
     const router = useRouter();
     const route = useRoute();
     const imageUrl = ref("");
+    const imageEdit = ref("");
     const croppedImageUrl = ref("");
     const isFormUserOpen = ref(false);
     const isFormGroupOpen = ref(false);
@@ -200,6 +201,7 @@ export default {
       group: group,
       formUser: formUser,
       imageUrl: imageUrl,
+      imageEdit: imageEdit,
       croppedImageUrl: croppedImageUrl,
       isFormUserOpen: isFormUserOpen,
       userStore: userStore,
@@ -277,7 +279,7 @@ export default {
         this.formUser.email = this.user.email;
         this.formUser.password = "";
         this.formUser.phone_number = this.user.phone_number;
-        this.imageUrl = this.user.photo_url;
+        this.imageEdit = this.user.photo_url;
       }
     },
     async saveUser() {
@@ -463,7 +465,8 @@ export default {
       await this.getAuthUser();
     },
     clearEditImage() {
-      this.imageUrl = null;
+      this.imageEdit = '';
+      this.formUser.photo = '';
     },
     openActivityFormModal(userId) {
       this.isActivityFormOpen = true;
@@ -601,15 +604,15 @@ export default {
     ok-title="Perbarui Profil" @ok="saveUser" @hide.prevent @cancel="isFormUserOpen = false"
     @close="isFormUserOpen = false">
     <BRow>
-      <!-- <BCol v-if="imageUrl" cols="12">
+      <BCol v-if="imageEdit" cols="12">
         <div class="preview d-flex">
           <div class="delete-button" @click="clearEditImage">
             <BButton class="btn btn-sm btn-danger"><i class="mdi mdi-delete-outline"></i></BButton>
           </div>
-          <img :src="imageUrl" alt="Cropped Image" class="mx-auto" />
+          <img :src="imageEdit" alt="Cropped Image" class="mx-auto" />
         </div>
-      </BCol> -->
-      <BCol cols="12">
+      </BCol>
+      <BCol v-else cols="12">
         <ImageCropper :aspectRatio="1 / 1" :uploadText="'Letakkan foto disini atau klik untuk mengunggah'"
           @update:imageUrl="imageUrl = $event" @update:croppedImageUrl="
             croppedImageUrl = $event;
