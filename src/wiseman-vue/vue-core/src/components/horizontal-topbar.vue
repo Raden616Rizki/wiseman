@@ -1,4 +1,10 @@
 <script>
+import { useRoute } from "vue-router";
+import { ref, onMounted, watch } from "vue";
+import {
+  useGroupStore,
+} from "@/state/pinia";
+
 /**
  * Horizontal-topbar component
  */
@@ -23,7 +29,38 @@ export default {
   },
   components: {},
   data() {
-    return {};
+    const route = useRoute();
+    const groupStore = useGroupStore();
+
+    const groupId = ref(route.query.id);
+    const group = ref('');
+
+    onMounted( async () => {
+      if (groupId.value) {
+        group.value = await groupStore.getGroupById(groupId.value);
+      } else {
+        groupId.value = null;
+        group.value = null;
+      }
+    });
+
+    watch(
+      () => route.query.id,
+      async (newId) => {
+        groupId.value = newId;
+        if (newId) {
+          group.value = await groupStore.getGroupById(groupId.value);
+        } else {
+          groupId.value = null;
+          group.value = null;
+        }
+      }
+    );
+
+    return {
+      groupId: groupId,
+      group: group,
+    };
   },
   mounted() { },
   methods: {
@@ -144,13 +181,17 @@ export default {
           <i class="fa fa-fw fa-bars text-white ms-2"></i>
         </BButton>
       </div>
-      <div>
-        <h2 class="mb-0 text-white">Aktivitasku</h2>
+      <div class="d-flex align-items-center">
+        <h2 v-if="group" class="mb-0 text-white">{{ group.name }}</h2>
+        <h2 v-else class="mb-0 text-white">Aktivitasku</h2>
+        <h2 v-if="!group" class="mx-1"></h2>
       </div>
-      <div class="d-flex">
+      <div v-if="groupId" class="d-flex">
         <BButton variant="white" id="toggle" type="button" class="btn btn-sm me-2 font-size-16 d-lg-none header-item">
-          <i v-if="!isMemoOpen" class="fas fa-bell text-white mb-0 mt-1" v-b-tooltip.hover title="Buka memo" @click="handleMemo" ></i>
-          <i v-else class="far fa-bell text-white mb-0 mt-1" v-b-tooltip.hover title="Tutup memo" @click="handleMemo" ></i>
+          <i v-if="!isMemoOpen" class="fas fa-bell text-white mb-0 mt-1" v-b-tooltip.hover title="Buka memo"
+            @click="handleMemo"></i>
+          <i v-else class="far fa-bell text-white mb-0 mt-1" v-b-tooltip.hover title="Tutup memo"
+            @click="handleMemo"></i>
         </BButton>
       </div>
     </div>

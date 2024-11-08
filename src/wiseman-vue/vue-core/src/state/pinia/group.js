@@ -22,6 +22,7 @@ export const useGroupStore = defineStore('group', {
         current: 1,
         perPage: 5,
         searchQuery: '',
+        groupId: ''
     }),
     actions: {
         openForm(newAction, group) {

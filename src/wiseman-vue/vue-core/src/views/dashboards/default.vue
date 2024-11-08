@@ -68,7 +68,7 @@
         </div>
       </div>
       <div class="m-0 m-md-3 right-card">
-        <div v-if="groupId" class="card main-bg p-3 d-block d-md-none">
+        <div v-if="groupId && layoutStore.isMemoOpen" class="card main-bg p-3 d-block d-md-none">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-4 mb-0">Memo</h6>
             <i v-if="isAdmin" class="bx bx-plus memo-bold-font"
@@ -394,6 +394,9 @@ import {
 import { useRoute } from "vue-router";
 import Chart from 'primevue/chart';
 import emptyImage from "@/assets/images/empty-icon.svg";
+import { useLayoutStore } from "@/state/pinia";
+
+const layoutStore = useLayoutStore();
 
 const route = useRoute();
 const groupId = ref(route.query.id);

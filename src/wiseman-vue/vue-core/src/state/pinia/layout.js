@@ -7,7 +7,8 @@
       layoutWidth: "fluid",
       topbar: "light",
       loader: true,
-      mode: "light"
+      mode: "light",
+      isMemoOpen: false,
     }),
     actions: {
       changeLayoutType(layoutType) {
@@ -27,6 +28,9 @@
       },
       changeMode(mode) {
         this.mode = mode
+      },
+      handleMemo() {
+        this.isMemoOpen = !this.isMemoOpen;
       }
     }
   });

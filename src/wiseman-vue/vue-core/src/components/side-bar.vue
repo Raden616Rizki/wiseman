@@ -141,6 +141,8 @@ export default {
         const fetchedUser = await userStore.getUserById(userId);
         authStore.saveUser(fetchedUser);
         user.value = authStore.getUser();
+
+        await checkListAdmin(groups.value);
       } catch (error) {
         console.error('Gagal memperoleh pengguna:', error);
       }
@@ -169,13 +171,15 @@ export default {
       return isAdminValue;
     }
 
-    onMounted(async () => {
-      await getAuthUser();
-
-      for (var i = 0; i < groups.value.length; i++) {
-        const isAdmin = await checkIsAdminById(groups.value[i].group.id);
+    const checkListAdmin = async (groupData) => {
+      for (var i = 0; i < groupData.length; i++) {
+        const isAdmin = await checkIsAdminById(groupData[i].group.id);
         isAdminStatus.value.push(isAdmin);
       }
+    }
+
+    onMounted(async () => {
+      await getAuthUser();
 
       if (groupId.value) {
         group.value = await groupStore.getGroupById(groupId.value);
@@ -195,6 +199,7 @@ export default {
       getAuthUser: getAuthUser,
       getFormattedDate: getFormattedDate,
       checkIsAdmin: checkIsAdmin,
+      checkListAdmin: checkListAdmin,
       user: user,
       router: router,
       groups: groups,
@@ -427,6 +432,7 @@ export default {
       this.router.push({ name: 'default', query: { id: groupId } });
 
       this.startProgress();
+      this.groupStore.groupId = groupId;
       this.group = await this.groupStore.getGroupById(this.groupId);
 
       this.isAdmin = this.checkIsAdmin(this.group);

@@ -24,7 +24,7 @@ export default {
       type: layoutStore.leftSidebarType,
       isMenuCondensed: false,
       isOpen: isOpen,
-      isMemoOpen: false,
+      isMemoOpen: layoutStore.isMemoOpen,
     };
   },
   computed: {
@@ -79,6 +79,7 @@ export default {
       }
     },
     handleMemo() {
+      layoutStore.handleMemo();
       this.isMemoOpen = !this.isMemoOpen;
     }
   },
