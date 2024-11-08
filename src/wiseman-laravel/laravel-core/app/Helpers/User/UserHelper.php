@@ -121,4 +121,23 @@ class UserHelper extends Venturo
 
 		return $payload;
 	}
+
+    public function updatePassword($payload)
+    {
+        $user = UserModel::find($payload->id);
+
+        if (!Hash::check($payload->current_password, $user->password)) {
+            return [
+                'status' => false,
+                'error' => 'Current password is incorrect'
+            ];
+        }
+        $user->password = Hash::make($payload->new_password);
+        $user->save();
+        return [
+            'status' => true,
+            'data' => $user['data']
+        ];
+    }
+
 }

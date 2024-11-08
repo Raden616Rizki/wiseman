@@ -89,4 +89,13 @@ class UserController extends Controller
 
         return response()->success($user, 'Data berhasil dihapus');
     }
+    public function updatePassword(Request $request)
+    {
+        $user = $this->user->updatePassword($request);
+        if (!$user['status']) {
+            return response()->failed($user['error']);
+        }
+        return response()->success($user, "Password berhasil di perbaharui");
+    }
+
 }

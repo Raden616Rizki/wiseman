@@ -27,7 +27,7 @@
                 </BFormInput>
               </BFormGroup>
               <div class="mt-4 d-grid">
-                <BButton type="submit" @click="register" variant="primary" class="submit-button"
+                <BButton type="submit" @click="register" variant="info" class="submit-button"
                   :disabled="!isFormValid">Daftar</BButton>
               </div>
               <div class="mt-3 text-center">
@@ -107,7 +107,7 @@ const register = async () => {
 }
 
 .submit-button {
-  background-color: #00ADB5;
+  /* background-color: #00ADB5; */
   font-weight: bold;
 }
 

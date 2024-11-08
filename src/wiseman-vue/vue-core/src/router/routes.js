@@ -73,6 +73,23 @@ export default [
     }
   },
   {
+    path: "/forgot-password/form",
+    name: "FormForgotPassword",
+    component: () => import("../views/auth/form-forgot-password.vue"),
+    meta: {
+      title: "Form password",
+      beforeResolve(routeTo, routeFrom, next) {
+        const auth = useAuthStore();
+        if (auth.getToken) {
+          next({ name: "default" });
+        } else {
+          next();
+        }
+      }
+    }
+  },
+
+  {
     path: "/logout",
     name: "logout",
     component: () => import("../views/auth/logout"),

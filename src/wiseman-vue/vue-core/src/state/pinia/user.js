@@ -114,6 +114,46 @@ export const useUserStore = defineStore('user', {
                     message: error.message,
                 };
             }
+        },
+        async updatePassword(payload) {
+            try {
+                const res = await axios.post(`/v1/user/update-password`, payload)
+                if (res.status != 200) {
+                    console.log(res);
+
+                    this.response = {
+                        status: res.status,
+                        message: res.error
+                    };
+                } else {
+                    this.response = {
+                        status: res.status,
+                        message: res.data.message
+                    };
+                    console.log(res.errors);
+                }
+            } catch (error) {
+                this.response = {
+                    message: error.response.data.errors
+                };
+                console.log(error.response.data.errors);
+            }
+        },
+        async forgotPassword({ email, link }) {
+            try {
+                const url = `/v1/forgot-password`;
+                const res = await axios.post(url, { email, link });
+
+                this.response = {
+                    status: res.status,
+                    message: res.data.message,
+                };
+            } catch (error) {
+                this.response = {
+                    status: error.response?.status,
+                    message: error.response?.data?.message,
+                };
+            }
         }
     },
     getters: {

@@ -22,8 +22,13 @@
                 </BFormInput>
               </BFormGroup>
               <div class="mt-4 d-grid">
-                <BButton type="submit" @click="login" variant="primary" class="submit-button" :disabled="!isFormValid">
+                <BButton type="submit" @click="login" variant="info" class="submit-button" :disabled="!isFormValid">
                   Masuk</BButton>
+              </div>
+              <div class="mt-4 text-center">
+                <p>
+                  <router-link to="/forgot-password">Lupa Password?</router-link>
+                </p>
               </div>
               <div class="mt-4 text-center">
                 <p>
@@ -98,7 +103,7 @@ const login = async () => {
 }
 
 .submit-button {
-  background-color: #00ADB5;
+  /* background-color: #00ADB5; */
   font-weight: bold;
 }
 
