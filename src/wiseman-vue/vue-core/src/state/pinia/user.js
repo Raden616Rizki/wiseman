@@ -117,7 +117,7 @@ export const useUserStore = defineStore('user', {
         },
         async updatePassword(payload) {
             try {
-                const res = await axios.post(`/v1/user/update-password`, payload)
+                const res = await axios.post(`${this.apiUrl}/v1/user/update-password`, payload)
                 if (res.status != 200) {
                     console.log(res);
 
@@ -141,8 +141,9 @@ export const useUserStore = defineStore('user', {
         },
         async forgotPassword({ email, link }) {
             try {
-                const url = `/v1/forgot-password`;
+                const url = `${this.apiUrl}/v1/forgot-password`;
                 const res = await axios.post(url, { email, link });
+                console.log(url);
 
                 this.response = {
                     status: res.status,

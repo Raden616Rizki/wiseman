@@ -2,9 +2,11 @@
 import { ref, computed } from 'vue';
 import { useUserStore } from "../../state/pinia";
 import Layout from "../../layouts/auth";
-import { showErrorToast, showAlertDialog, showLoadingToast } from "@/helpers/alert.js";
+import { showErrorToast, showAlertDialog } from "@/helpers/alert.js";
 import Swal from 'sweetalert2';
 import wisemanIcon from "@/assets/images/wiseman-icon.svg";
+import { useProgress } from "@/helpers/progress"; // Import custom progress function
+const { startProgress, finishProgress, failProgress } = useProgress();
 
 const userStore = useUserStore();
 const email = ref('');
@@ -39,22 +41,21 @@ const tryToReset = async () => {
     return;
   }
 
-  const loadingToast = await showLoadingToast();
+  startProgress();
   try {
     await userStore.forgotPassword({
       email: email.value,
       link: link
     });
     if (statusCode.value === 200) {
-      loadingToast.close()
       showAlertDialog();
       isResetError.value = false;
+      finishProgress();
     } else if (statusCode.value === 404) {
-      loadingToast.close()
       showErrorToast("Gagal mengirim permintaan reset password", "Email Anda Tidak Terdaftar.");
       isResetError.value = true;
+      failProgress();
     } else {
-      loadingToast.close()
       let customMessage = "";
       if (userStore.response && typeof userStore.response === 'object') {
         const errorMessage = userStore.response.message || userStore.response.errors[Object.keys(userStore.response.errors)[0]][0];
@@ -73,6 +74,7 @@ const tryToReset = async () => {
       }
       showErrorToast("Gagal mengirim permintaan reset password", customMessage);
       isResetError.value = true;
+      failProgress();
     }
   } catch (error) {
     if (error.response) {
@@ -88,6 +90,7 @@ const tryToReset = async () => {
         showErrorToast("Terjadi kesalahan", "Terjadi kesalahan yang tidak terduga.");
       }
     }
+    failProgress();
   } finally {
     tryingToReset.value = false;
   }

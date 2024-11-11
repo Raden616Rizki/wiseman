@@ -6,11 +6,13 @@ use App\Models\UserModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\UserEmailNotification;
+use Illuminate\Support\Facades\Mail;
 
 class ForgotPasswordController extends Controller
 {
     public function forgotPassword(Request $request)
     {
+
         $request->validate([
             'email' => 'required|email',
             'link' => 'required|url'
@@ -24,7 +26,8 @@ class ForgotPasswordController extends Controller
         if ($user) {
             $linkWithId = $link . '?id=' . $user->id;
 
-            \Mail::to($email)
+
+            Mail::to($email)
                 ->send(new UserEmailNotification([
                     'id' => $user->id,
                     'name' => $user->name,
