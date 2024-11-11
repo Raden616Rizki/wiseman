@@ -2,7 +2,7 @@
 import Layout from "../../layouts/auth";
 import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from "../../state/pinia";
-import { showSuccessToast, showErrorToast, showLoadingToast } from "@/helpers/alert.js";
+import { showSuccessToast, showErrorToast } from "@/helpers/alert.js";
 import { useRouter } from "vue-router";
 import wisemanIcon from "@/assets/images/wiseman-icon.svg";
 
@@ -80,15 +80,13 @@ export default {
             }
 
             try {
-                const loadingToast = await showLoadingToast();
                 await userStore.updateUser({
                     id: userId,
                     email: userEmail.value,
                     password: password.value,
                 });
 
-                if (statusCode.value === 200) {
-                    loadingToast.close()
+                if (statusCode.value == 200) {
                     showSuccessToast('Password Berhasil Diubah');
                     password.value = "";
                     confirmPassword.value = "";
@@ -99,6 +97,7 @@ export default {
                     passwordError.value = 'Terjadi kesalahan saat memperbarui pengguna';
                 }
             } catch (err) {
+                console.log(err);
                 showErrorToast('Terjadi kesalahan saat mengubah password');
             } finally {
                 tryingToReset.value = false;

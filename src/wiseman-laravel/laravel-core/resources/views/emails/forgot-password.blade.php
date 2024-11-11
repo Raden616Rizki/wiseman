@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Send Email</title>
+    <title>Wiseman Send Email</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
         body,
@@ -80,7 +80,7 @@
         }
 
         .email-footer {
-            background-color: #426FAF;
+            background-color: #067e82;
             padding: 20px;
             font-size: 12px;
             color: #ffffff;
@@ -91,7 +91,7 @@
         }
 
         .btn {
-            background-color: #426FAF;
+            background-color: #067e82;
             color: #ffffff;
             padding: 10px 20px;
             text-align: center;
@@ -128,11 +128,11 @@
         <tr>
             <td>
                 <div>
-                    <div class="email-header" style="background-color: #ffffff;">
-                        <img src="{{ url('/images/logo/Jobfit.id_biru.png') }}" alt="logo perusahaan">
-                    </div>
+                    {{-- <div class="email-header" style="background-color: #ffffff;">
+                        <img src="https://drive.google.com/file/d/1JGiv_yovcYW4PW2hAx00-PO7w1i64VHJ/view?usp=drive_link" alt="logo perusahaan">
+                    </div> --}}
                     <div
-                        style="background-color: #426FAF; padding: 20px; display: flex; align-items: center; margin: 0;">
+                        style="background-color: #067e82; padding: 20px; display: flex; align-items: center; margin: 0;">
                         <div>
                             <h1 style="color: white; margin: 0; font-size: 16px;">Permintaan Ganti Password</h1>
                         </div>
@@ -143,17 +143,17 @@
                             {{ $name }}, Kami menerima permintaan untuk mereset kata sandi akun Anda. Jika Anda yang meminta reset ini,
                             silakan klik tombol di bawah untuk melanjutkan proses penggantian kata sandi.
                         </p>
-                        <a class="button" href={{ $link }} style="display: block; padding: 10px 20px; background-color: #426FAF; color: white; text-decoration: none; text-align: center; width: fit-content; margin: 20px auto; border-radius: 5px;">
+                        <a class="button" href={{ $link }} style="display: block; padding: 10px 20px; background-color: #067e82; color: white; text-decoration: none; text-align: center; width: fit-content; margin: 20px auto; border-radius: 5px;">
                             Klik Disini</a>
                         <p>Jika tombol tidak berfungsi, Anda dapat menyalin link berikut dan membukanya di browser: <br>{{ $link }}</p>
-                        <p style="font-size: 12px;">Hormat kami,<br><br><br>Tim Jobfit</p>
+                        <p style="font-size: 12px;">Hormat kami,<br><br><br>Wiseman Society</p>
                     </div>
-                    <div style="background-color: #426FAF; padding: 20px;">
+                    <div style="background-color: #067e82; padding: 20px;">
                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                             <tr>
                                 <td style="padding-right: 10px;" align="left">
-                                    <img src="{{ asset('images/logo/Jobfit.id.png') }}"  alt="company logo"
-                                        style="max-width: 114px;">
+                                    {{-- <img src="https://drive.google.com/file/d/1JGiv_yovcYW4PW2hAx00-PO7w1i64VHJ/view?usp=drive_link"  alt="company logo"
+                                        style="max-width: 114px;"> --}}
                                 </td>
                                 <td style="padding-left: 10px;" align="right">
                                     {{-- <p style="color: white; font-size: 10px; margin: 0;">

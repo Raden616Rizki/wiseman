@@ -143,7 +143,6 @@ export const useUserStore = defineStore('user', {
             try {
                 const url = `${this.apiUrl}/v1/forgot-password`;
                 const res = await axios.post(url, { email, link });
-                console.log(url);
 
                 this.response = {
                     status: res.status,

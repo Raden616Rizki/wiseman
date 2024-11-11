@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { useUserStore } from "../../state/pinia";
 import Layout from "../../layouts/auth";
-import { showErrorToast, showAlertDialog } from "@/helpers/alert.js";
+import { showErrorToast, showSuccessToast } from "@/helpers/alert.js";
 import Swal from 'sweetalert2';
 import wisemanIcon from "@/assets/images/wiseman-icon.svg";
 import { useProgress } from "@/helpers/progress"; // Import custom progress function
@@ -48,7 +48,7 @@ const tryToReset = async () => {
       link: link
     });
     if (statusCode.value === 200) {
-      showAlertDialog();
+      showSuccessToast('Email berhasil dikirim', 'Silahkan cek pesan masuk ke email Anda');
       isResetError.value = false;
       finishProgress();
     } else if (statusCode.value === 404) {
@@ -72,11 +72,13 @@ const tryToReset = async () => {
       } else {
         customMessage = "Terjadi kesalahan yang tidak terduga.";
       }
+      console.log(customMessage);
       showErrorToast("Gagal mengirim permintaan reset password", customMessage);
       isResetError.value = true;
       failProgress();
     }
   } catch (error) {
+    console.error(error)
     if (error.response) {
       const apiErrorResponse = error.response.data;
       if (apiErrorResponse.errors) {

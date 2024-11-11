@@ -84,9 +84,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/auth/profile', [AuthController::class, 'profile'])->middleware(['auth.api']);
 
     Route::get('/users', [UserController::class, 'index'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:user.view'])->middleware(['auth.api']);
-    Route::get('/users/{id}', [UserController::class, 'show'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:user.view'])->middleware(['auth.api']);
+    Route::get('/users/{id}', [UserController::class, 'show']); //->middleware(['auth.api', 'role:user.view'])->middleware(['auth.api']);
     Route::post('/users', [UserController::class, 'store']); //->middleware(['auth.api', 'role:user.create|roles.view'])->middleware(['auth.api']);
-    Route::put('/users/{id}', [UserController::class, 'update'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:user.update||roles.view'])->middleware(['auth.api']);
+    Route::put('/users/{id}', [UserController::class, 'update']); //->middleware(['auth.api', 'role:user.update||roles.view'])->middleware(['auth.api']);
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:user.delete'])->middleware(['auth.api']);
     Route::post('/user/update-password', [UserController::class, 'updatePassword']);
 

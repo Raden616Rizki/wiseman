@@ -26,7 +26,6 @@ class ForgotPasswordController extends Controller
         if ($user) {
             $linkWithId = $link . '?id=' . $user->id;
 
-
             Mail::to($email)
                 ->send(new UserEmailNotification([
                     'id' => $user->id,

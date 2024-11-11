@@ -19,7 +19,7 @@ class UserEmailNotification extends Mailable
 
     public function build()
     {
-        return $this->view('emails.ForgotPassword')
+        return $this->view('emails.forgot-password')
             ->subject('Notifikasi Mengganti Password')
             ->with([
                 'id' => $this->data['id'],
