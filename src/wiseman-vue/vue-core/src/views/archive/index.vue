@@ -6,7 +6,7 @@
             <i class="bx bx-plus memo-bold-font" style="font-size: 24px; cursor: pointer;"
                 @click="openArchiveFormModal('create')"></i>
         </div>
-        <div class="card main-bg py-3 px-4" @contextmenu.prevent="openArchiveFormModal('create')">
+        <div class="card main-bg py-3 px-3" @contextmenu.prevent="openArchiveFormModal('create')">
             <div class="palette-3 py-1 px-3 rounded mb-md-4 mb-3 d-flex flex-wrap">
                 <p class="archive-path mb-0" @click="changePath('home')">Home</p>
                 <div v-for="(path, index) in pathArchive" :key="index" class="d-flex">
@@ -14,7 +14,7 @@
                     <p class="archive-path mb-0" @click="changePath(path, index)"> {{ path.name }} </p>
                 </div>
             </div>
-            <div v-if="archives.length != 0" class="d-flex flex-wrap" style="padding-left: 13.3px;">
+            <div v-if="archives.length != 0" class="d-flex flex-wrap" style="padding-left: 4px;">
                 <div v-for="archiveData in archives" :key="archiveData.id">
                     <div v-if="archiveData.file" class="file me-md-4 mx-1 my-1 d-flex flex-column align-items-center"
                         @contextmenu.prevent="showContextMenu($event, archiveData)">
@@ -292,6 +292,15 @@ const fetchSubFolders = async (folders) => {
 };
 
 const saveArchive = async () => {
+    if (archiveForm.file) {
+        const fileSizeInMB = (archiveForm.file.length * (3 / 4)) / (1024 * 1024);
+
+        if (fileSizeInMB > 2) {
+            showErrorToast("Ukuran file melebihi 2 MB");
+            return;
+        }
+    }
+    
     startProgress();
     try {
         if (archiveForm.id) {

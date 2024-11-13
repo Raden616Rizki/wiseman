@@ -92,11 +92,11 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 
-    // Route::get('/roles', [RoleController::class, 'index'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.view'])->middleware(['auth.api']);
-    // Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.view'])->middleware(['auth.api']);
-    // Route::post('/roles', [RoleController::class, 'store'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.create'])->middleware(['auth.api']);
-    // Route::put('/roles', [RoleController::class, 'update'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.update'])->middleware(['auth.api']);
-    // Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.delete']);
+    Route::get('/roles', [RoleController::class, 'index'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.view'])->middleware(['auth.api']);
+    Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.view'])->middleware(['auth.api']);
+    Route::post('/roles', [RoleController::class, 'store'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.create'])->middleware(['auth.api']);
+    Route::put('/roles', [RoleController::class, 'update'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.update'])->middleware(['auth.api']);
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->middleware(['auth.api']); //->middleware(['auth.api', 'role:roles.delete']);
 });
 
 Route::get('/', function () {

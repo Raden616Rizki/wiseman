@@ -15,8 +15,8 @@
                         @click="joinGroup(group)">
                         Masuk
                     </button>
-                    <div>
-                        <i class="bx bx-right-arrow-circle mt-1 ms-3 me-2 d-block d-md-none" @click="joinGroup(group)"
+                    <div class="d-block d-md-none" >
+                        <i class="bx bx-right-arrow-circle mt-1 ms-3 me-2" @click="joinGroup(group)"
                             v-b-tooltip.hover :title="'Bergabung ke ' + group.name"
                             style="font-size: 20px; cursor: pointer; font-weight: bold;"></i>
                     </div>

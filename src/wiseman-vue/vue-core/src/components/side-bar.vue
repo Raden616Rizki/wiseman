@@ -289,6 +289,15 @@ export default {
     },
     async saveUser() {
       try {
+        if (this.formUser.photo) {
+          const photoSizeInMB = (this.formUser.photo.length * (3 / 4)) / (1024 * 1024);
+
+          if (photoSizeInMB > 2) {
+            showErrorToast("Ukuran file melebihi 2 MB");
+            return;
+          }
+        }
+
         if (this.formUser.id) {
           await this.userStore.updateUser(this.formUser);
           if (this.userStatusCode != 200) {
@@ -625,6 +634,7 @@ export default {
           formUser.photo = $event;
           " />
       </BCol>
+      <p class="text-danger">* Maksimal ukuran file: 2 MB</p>
       <BCol cols="12" class="mt-4">
         <BForm class="form-horizontal" role="form">
           <BRow class="mb-3">
